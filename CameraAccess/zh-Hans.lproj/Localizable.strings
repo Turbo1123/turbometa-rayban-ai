@@ -1,0 +1,123 @@
+/*
+ * 中文本地化字符串
+ * Simplified Chinese Localization
+ */
+
+// MARK: - App General
+"app.name" = "TurboMeta";
+"app.subtitle" = "RayBan Meta助手";
+"ok" = "确定";
+"cancel" = "取消";
+"close" = "关闭";
+"done" = "完成";
+"error" = "错误";
+"loading" = "加载中...";
+
+// MARK: - Home Screen
+"home.title" = "首页";
+"home.liveai.title" = "Live AI";
+"home.liveai.subtitle" = "实时对话";
+"home.translate.title" = "实时翻译";
+"home.translate.subtitle" = "即时翻译";
+"home.leaneat.title" = "LeanEat";
+"home.leaneat.subtitle" = "卡路里识别";
+"home.wordlearn.title" = "WordLearn";
+"home.wordlearn.subtitle" = "单词学习";
+"home.livestream.title" = "直播";
+"home.livestream.subtitle" = "抖音 · 快手 · 小红书";
+"home.comingsoon" = "敬请期待";
+
+// MARK: - Live AI
+"liveai.title" = "Live AI";
+"liveai.connected" = "已连接";
+"liveai.connecting" = "连接中...";
+"liveai.speaking" = "AI 说话中";
+"liveai.listening" = "正在听...";
+"liveai.stop" = "停止";
+"liveai.device.notconnected.title" = "未连接RayBan Meta眼镜";
+"liveai.device.notconnected.message" = "请先在首页连接你的智能眼镜，\n然后再使用Live AI功能";
+"liveai.device.backtohome" = "返回首页";
+
+// MARK: - Stream View (Camera)
+"stream.title" = "拍照";
+"stream.stop" = "Stop streaming";
+"stream.photo" = "拍照";
+"stream.timer" = "定时器";
+"stream.ending" = "Streaming ending in %@";
+"stream.device.notconnected.title" = "未连接RayBan Meta眼镜";
+"stream.device.notconnected.message" = "请先在首页连接你的智能眼镜，\n然后再使用直播功能";
+"stream.device.backtohome" = "返回首页";
+
+// MARK: - Photo Preview
+"photo.share" = "分享";
+"photo.ai" = "AI 识别";
+"photo.nutrition" = "营养分析";
+
+// MARK: - LeanEat (Nutrition Analysis)
+"leaneat.title" = "营养分析";
+"leaneat.analyzing" = "分析中...";
+"leaneat.healthscore" = "健康评分";
+"leaneat.totalnutrition" = "总营养";
+"leaneat.calories" = "热量";
+"leaneat.protein" = "蛋白质";
+"leaneat.fat" = "脂肪";
+"leaneat.carbs" = "碳水";
+"leaneat.fiber" = "膳食纤维";
+"leaneat.sugar" = "糖分";
+"leaneat.foods" = "食物详情";
+"leaneat.suggestions" = "营养建议";
+"leaneat.portion" = "份量";
+"leaneat.rating.excellent" = "优秀";
+"leaneat.rating.good" = "良好";
+"leaneat.rating.fair" = "一般";
+"leaneat.rating.poor" = "较差";
+"leaneat.healthscore.excellent" = "非常健康";
+"leaneat.healthscore.good" = "比较健康";
+"leaneat.healthscore.fair" = "还不错";
+"leaneat.healthscore.poor" = "需要改善";
+"leaneat.error.title" = "分析失败";
+"leaneat.retry" = "重试";
+
+// MARK: - Vision Recognition
+"vision.title" = "AI 图像识别";
+"vision.analyzing" = "AI 分析中...";
+"vision.result" = "识别结果";
+
+// MARK: - Records
+"records.title" = "记录";
+"records.empty" = "暂无记录";
+"records.conversation" = "对话记录";
+"records.date" = "日期";
+
+// MARK: - Gallery
+"gallery.title" = "图库";
+"gallery.empty" = "暂无照片";
+
+// MARK: - Settings
+"settings.title" = "我的";
+"settings.account" = "账号设置";
+"settings.api" = "API 设置";
+"settings.model" = "模型设置";
+"settings.about" = "关于";
+"settings.version" = "版本";
+"settings.logout" = "退出登录";
+
+// MARK: - Tabs
+"tab.home" = "首页";
+"tab.records" = "记录";
+"tab.gallery" = "图库";
+"tab.settings" = "我的";
+
+// MARK: - Errors
+"error.network" = "网络错误，请检查网络连接";
+"error.api" = "API 错误";
+"error.permission.denied" = "相机权限被拒绝，请在设置中开启";
+"error.device.notfound" = "未找到设备";
+"error.device.notconnected" = "设备未连接";
+"error.timeout" = "操作超时，请重试";
+"error.unknown" = "未知错误";
+
+// MARK: - Units
+"unit.kcal" = "千卡";
+"unit.gram" = "克";
+"unit.g" = "g";

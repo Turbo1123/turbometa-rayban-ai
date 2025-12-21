@@ -1,0 +1,123 @@
+/*
+ * English Localization Strings
+ * English Localization
+ */
+
+// MARK: - App General
+"app.name" = "TurboMeta";
+"app.subtitle" = "RayBan Meta Assistant";
+"ok" = "OK";
+"cancel" = "Cancel";
+"close" = "Close";
+"done" = "Done";
+"error" = "Error";
+"loading" = "Loading...";
+
+// MARK: - Home Screen
+"home.title" = "Home";
+"home.liveai.title" = "Live AI";
+"home.liveai.subtitle" = "Real-time Chat";
+"home.translate.title" = "Live Translate";
+"home.translate.subtitle" = "Instant Translation";
+"home.leaneat.title" = "LeanEat";
+"home.leaneat.subtitle" = "Calorie Recognition";
+"home.wordlearn.title" = "WordLearn";
+"home.wordlearn.subtitle" = "Vocabulary Learning";
+"home.livestream.title" = "Live Stream";
+"home.livestream.subtitle" = "Douyin · Kuaishou · Xiaohongshu";
+"home.comingsoon" = "Coming Soon";
+
+// MARK: - Live AI
+"liveai.title" = "Live AI";
+"liveai.connected" = "Connected";
+"liveai.connecting" = "Connecting...";
+"liveai.speaking" = "AI Speaking";
+"liveai.listening" = "Listening...";
+"liveai.stop" = "Stop";
+"liveai.device.notconnected.title" = "RayBan Meta Glasses Not Connected";
+"liveai.device.notconnected.message" = "Please connect your smart glasses on the home screen first,\\nthen use the Live AI feature";
+"liveai.device.backtohome" = "Back to Home";
+
+// MARK: - Stream View (Camera)
+"stream.title" = "Camera";
+"stream.stop" = "Stop streaming";
+"stream.photo" = "Take Photo";
+"stream.timer" = "Timer";
+"stream.ending" = "Streaming ending in %@";
+"stream.device.notconnected.title" = "RayBan Meta Glasses Not Connected";
+"stream.device.notconnected.message" = "Please connect your smart glasses on the home screen first,\\nthen use the streaming feature";
+"stream.device.backtohome" = "Back to Home";
+
+// MARK: - Photo Preview
+"photo.share" = "Share";
+"photo.ai" = "AI Recognition";
+"photo.nutrition" = "Nutrition Analysis";
+
+// MARK: - LeanEat (Nutrition Analysis)
+"leaneat.title" = "Nutrition Analysis";
+"leaneat.analyzing" = "Analyzing...";
+"leaneat.healthscore" = "Health Score";
+"leaneat.totalnutrition" = "Total Nutrition";
+"leaneat.calories" = "Calories";
+"leaneat.protein" = "Protein";
+"leaneat.fat" = "Fat";
+"leaneat.carbs" = "Carbs";
+"leaneat.fiber" = "Fiber";
+"leaneat.sugar" = "Sugar";
+"leaneat.foods" = "Food Details";
+"leaneat.suggestions" = "Nutrition Advice";
+"leaneat.portion" = "Portion";
+"leaneat.rating.excellent" = "Excellent";
+"leaneat.rating.good" = "Good";
+"leaneat.rating.fair" = "Fair";
+"leaneat.rating.poor" = "Poor";
+"leaneat.healthscore.excellent" = "Very Healthy";
+"leaneat.healthscore.good" = "Quite Healthy";
+"leaneat.healthscore.fair" = "Not Bad";
+"leaneat.healthscore.poor" = "Needs Improvement";
+"leaneat.error.title" = "Analysis Failed";
+"leaneat.retry" = "Retry";
+
+// MARK: - Vision Recognition
+"vision.title" = "AI Image Recognition";
+"vision.analyzing" = "AI Analyzing...";
+"vision.result" = "Recognition Result";
+
+// MARK: - Records
+"records.title" = "Records";
+"records.empty" = "No Records";
+"records.conversation" = "Conversation History";
+"records.date" = "Date";
+
+// MARK: - Gallery
+"gallery.title" = "Gallery";
+"gallery.empty" = "No Photos";
+
+// MARK: - Settings
+"settings.title" = "Settings";
+"settings.account" = "Account Settings";
+"settings.api" = "API Settings";
+"settings.model" = "Model Settings";
+"settings.about" = "About";
+"settings.version" = "Version";
+"settings.logout" = "Logout";
+
+// MARK: - Tabs
+"tab.home" = "Home";
+"tab.records" = "Records";
+"tab.gallery" = "Gallery";
+"tab.settings" = "Settings";
+
+// MARK: - Errors
+"error.network" = "Network error, please check your connection";
+"error.api" = "API Error";
+"error.permission.denied" = "Camera permission denied, please enable in Settings";
+"error.device.notfound" = "Device not found";
+"error.device.notconnected" = "Device not connected";
+"error.timeout" = "Operation timeout, please retry";
+"error.unknown" = "Unknown error";
+
+// MARK: - Units
+"unit.kcal" = "kcal";
+"unit.gram" = "gram";
+"unit.g" = "g";
