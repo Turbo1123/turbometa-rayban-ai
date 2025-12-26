@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![TurboMeta Logo](./rayban.png)
+<img src="./rayban.png" width="120" alt="TurboMeta Logo"/>
 
 **🌏 World's First Full-Chinese AI Multimodal RayBan Meta Assistant**
 
@@ -16,6 +16,23 @@
 [English](./README.md) | [简体中文](./README_CN.md)
 
 </div>
+
+## 🎨 Interface Preview
+
+<table>
+  <tr>
+    <td align="center"><b>首页</b><br/>Home</td>
+    <td align="center"><b>对话记录</b><br/>Live AI</td>
+    <td align="center"><b>拍摄页面</b><br/>Camera</td>
+    <td align="center"><b>设置页面</b><br/>Settings</td>
+  </tr>
+  <tr>
+    <td><img src="./首页.jpg" width="180"/></td>
+    <td><img src="./对话记录.jpg" width="180"/></td>
+    <td><img src="./拍摄页面.jpg" width="180"/></td>
+    <td><img src="./设置页面.jpg" width="180"/></td>
+  </tr>
+</table>
 
 ## 📥 Download
 
@@ -246,21 +263,6 @@ ios-deploy --bundle YourApp.app
 3. Create your streaming content
 4. Tap stop button to end the stream
 
-## 🎨 Interface Preview
-
-<table>
-  <tr>
-    <td><b>Home</b></td>
-    <td><b>Live AI</b></td>
-    <td><b>Nutrition Analysis</b></td>
-  </tr>
-  <tr>
-    <td><img src="./screenshots/home.png" width="200"/></td>
-    <td><img src="./screenshots/liveai.png" width="200"/></td>
-    <td><img src="./screenshots/nutrition.png" width="200"/></td>
-  </tr>
-</table>
-
 ## ⚙️ Configuration Options
 
 ### API Configuration
@@ -472,7 +474,7 @@ This project is based on Meta DAT SDK sample code and follows the original proje
 If this project helps you, consider buying me a coffee!
 
 <div align="center">
-<img src="./微信图片_20251226235019_69_908.png" width="200" alt="WeChat Pay"/>
+<img src="./请我喝咖啡.png" width="200" alt="WeChat Pay"/>
 
 **WeChat Pay / 微信支付**
 </div>
