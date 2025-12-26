@@ -29,15 +29,26 @@
 |------|----------|-------------|
 | [](https:///) | macOS/Windows | Free, requires Apple ID |
 | [](https:///) | macOS/Windows | Free, easy to use |
-| [](https://www.i4.cn/) | Windows | Chinese users recommended |
+| [ ()](https://www.i4.cn/) | Windows | Chinese users recommended |
 | Xcode | macOS | Build from source code |
 
-### Quick Install Steps
-1. Download `` from above
-2. Open your preferred signing tool
-3. Connect iPhone and sign/install the IPA
-4. Trust developer in **Settings → General → VPN & Device Management**
-5. Open TurboMeta and configure your API Key
+###  Installation Guide (Recommended for Windows)
+
+**Step 1**: Open , go to "Toolbox" → "IPA Signature"
+
+![Step 1](.//.png)
+
+**Step 2**: Add IPA file and sign with your Apple ID
+
+![Step 2](.//.png)
+
+**Step 3**: After signing, go to "Apps" → "Import & Install", select the signed IPA
+
+![Step 3](.//回到应用管理添加应用安装.png)
+
+**Step 4**: On iPhone, go to **Settings → General → VPN & Device Management**, trust the developer certificate
+
+**Step 5**: Open TurboMeta and configure your Alibaba Cloud API Key in Settings
 
 ## 📖 Introduction
 
