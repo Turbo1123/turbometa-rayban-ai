@@ -42,7 +42,7 @@
 
 | Version | Download | Size |
 |---------|----------|------|
-| v1.0.0 | [**TurboMeta-v1.0.0.apk**](https://github.com/Turbo1123/turbometa-rayban-ai/releases/tag/v1.0.0-android/TurboMeta-v1.0.0-debug.apk) | 77 MB |
+| v1.0.0 | [**TurboMeta-v1.0.0.apk**](https://github.com/Turbo1123/turbometa-rayban-ai/releases/tag/v1.0.0) | 77 MB |
 
 **Android Installation:**
 1. Download APK file
@@ -57,7 +57,7 @@
 
 | Version | Download | Size |
 |---------|----------|------|
-| v1.0.0 | [****](https://github.com/Turbo1123/turbometa-rayban-ai/releases/tag/v1.0.0/) | 6.0 MB |
+| v1.0.0 | [****](https://github.com/Turbo1123/turbometa-rayban-ai/releases/tag/v1.0.0) | 6.0 MB |
 
 **iOS Installation Methods:**
 
