@@ -8,11 +8,36 @@
 
 [![Platform](https://img.shields.io/badge/Platform-iOS%2017.0%2B-blue.svg)](https://www.apple.com/ios/)
 [![Swift](https://img.shields.io/badge/Swift-5.0-orange.svg)](https://swift.org)
-[![License](https://img.shields.io/badge/License-Meta-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/Turbo1123/turbometa-rayban-ai)](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 
 [English](./README.md) | 简体中文
 
 </div>
+
+## 📥 下载安装
+
+> **** -  后使用
+
+| 版本 | 下载链接 | 大小 |
+|------|----------|------|
+| v1.0.0 | [****](https://github.com/Turbo1123/turbometa-rayban-ai/releases/tag/v1.0.0/) | 6.0 MB |
+
+### 安装工具推荐
+
+| 工具 | 平台 | 说明 |
+|------|------|------|
+| [](https://www.i4.cn/) | Windows | 国内用户首选，简单易用 |
+| [](https:///) | macOS/Windows | 免费，需要 Apple ID |
+| [](https:///) | macOS/Windows | 免费，操作简单 |
+| Xcode | macOS | 从源码编译安装 |
+
+### 快速安装步骤
+1. 从上方链接下载 ``
+2. 打开
+3. 连接 iPhone，导入 IPA 进行
+4. 在 **设置 → 通用 → VPN与设备管理** 中信任开发者
+5. 打开 TurboMeta，在设置中配置你的 API Key
 
 ## 📖 简介
 
