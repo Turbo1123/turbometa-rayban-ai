@@ -44,7 +44,7 @@
 
 **Step 3**: After signing, go to "Apps" → "Import & Install", select the signed IPA
 
-![Step 3](.//回到应用管理添加应用安装.png)
+![Step 3](.//.png)
 
 **Step 4**: On iPhone, go to **Settings → General → VPN & Device Management**, trust the developer certificate
 
