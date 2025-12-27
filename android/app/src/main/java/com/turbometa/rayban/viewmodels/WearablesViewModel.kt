@@ -17,6 +17,7 @@ import com.meta.wearable.dat.camera.types.VideoFrame
 import com.meta.wearable.dat.camera.types.VideoQuality
 import com.meta.wearable.dat.core.Wearables
 import com.meta.wearable.dat.core.selectors.AutoDeviceSelector
+import com.turbometa.rayban.utils.APIKeyManager
 import com.meta.wearable.dat.core.selectors.DeviceSelector
 import com.meta.wearable.dat.core.types.DeviceIdentifier
 import com.meta.wearable.dat.core.types.Permission
@@ -243,10 +244,20 @@ class WearablesViewModel(application: Application) : AndroidViewModel(applicatio
         videoJob?.cancel()
         stateJob?.cancel()
 
+        // Get saved video quality setting
+        val apiKeyManager = APIKeyManager.getInstance(getApplication())
+        val savedQuality = apiKeyManager.getVideoQuality()
+        val videoQuality = when (savedQuality) {
+            "LOW" -> VideoQuality.LOW
+            "HIGH" -> VideoQuality.HIGH
+            else -> VideoQuality.MEDIUM
+        }
+        Log.d(TAG, "Using video quality: $savedQuality")
+
         val session = Wearables.startStreamSession(
             getApplication(),
             deviceSelector,
-            StreamConfiguration(videoQuality = VideoQuality.MEDIUM, 24)
+            StreamConfiguration(videoQuality = videoQuality, 24)
         ).also { streamSession = it }
 
         _streamState.value = StreamState.Starting

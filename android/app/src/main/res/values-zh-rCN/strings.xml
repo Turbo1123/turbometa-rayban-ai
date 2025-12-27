@@ -221,4 +221,8 @@
     <string name="permission_bluetooth">连接眼镜需要蓝牙权限</string>
     <string name="permission_grant">授予权限</string>
     <string name="camera_permission_denied">相机权限被拒绝。请在 Meta AI 应用中授予相机权限以使用此功能。</string>
+
+    <!-- Video Quality -->
+    <string name="video_quality">视频画质</string>
+    <string name="select_quality">选择画质</string>
 </resources>
