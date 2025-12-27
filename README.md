@@ -43,6 +43,8 @@
 
 👉 <a href="https://www.bilibili.com/video/BV1aTqSBHEqN" target="_blank">Watch on Bilibili</a>
 
+> 💡 If you find this project helpful, consider [buying me a coffee](#-buy-me-a-coffee) ☕
+
 ## 📥 Download
 
 > **No App Store / Google Play** - Install directly using methods below

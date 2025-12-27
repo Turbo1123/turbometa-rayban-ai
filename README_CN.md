@@ -43,6 +43,8 @@
 
 👉 <a href="https://www.bilibili.com/video/BV1aTqSBHEqN" target="_blank">在 Bilibili 观看</a>
 
+> 💡 如果这个项目对你有帮助，欢迎[请我喝杯咖啡](#-请我喝杯咖啡) ☕
+
 ## 📥 下载安装
 
 > **** - 
