@@ -3,7 +3,18 @@
 # proguardFiles setting in build.gradle.kts.
 
 # Keep Meta DAT SDK classes
--keep class com.meta.dat.** { *; }
+-keep class com.meta.** { *; }
+-keep class com.facebook.** { *; }
+-dontwarn com.meta.**
+-dontwarn com.facebook.**
+
+# Keep Protobuf
+-keep class com.google.protobuf.** { *; }
+-dontwarn com.google.protobuf.**
+
+# Keep Tink crypto
+-keep class com.google.crypto.tink.** { *; }
+-dontwarn com.google.crypto.tink.**
 
 # Keep Gson serialization
 -keepattributes Signature

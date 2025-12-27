@@ -27,10 +27,10 @@
     <td align="center"><b>设置页面</b><br/>Settings</td>
   </tr>
   <tr>
-    <td><img src="./首页.jpg" width="180"/></td>
-    <td><img src="./对话记录.jpg" width="180"/></td>
-    <td><img src="./拍摄页面.jpg" width="180"/></td>
-    <td><img src="./设置页面.jpg" width="180"/></td>
+    <td><img src="./screenshots/首页.jpg" width="180"/></td>
+    <td><img src="./screenshots/对话记录.jpg" width="180"/></td>
+    <td><img src="./screenshots/拍摄页面.jpg" width="180"/></td>
+    <td><img src="./screenshots/设置页面.jpg" width="180"/></td>
   </tr>
 </table>
 
@@ -496,7 +496,7 @@ This project is based on Meta DAT SDK sample code and follows the original proje
 If this project helps you, consider buying me a coffee!
 
 <div align="center">
-<img src="./请我喝咖啡.png" width="200" alt="WeChat Pay"/>
+<img src="./screenshots/请我喝咖啡.png" width="200" alt="WeChat Pay"/>
 
 **WeChat Pay / 微信支付**
 </div>
