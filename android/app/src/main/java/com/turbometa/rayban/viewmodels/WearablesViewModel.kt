@@ -241,8 +241,18 @@ class WearablesViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun startStream() {
         Log.d(TAG, "Starting stream")
+
+        // IMPORTANT: Clean up any existing session first to prevent resource leaks
         videoJob?.cancel()
+        videoJob = null
         stateJob?.cancel()
+        stateJob = null
+        streamSession?.let { oldSession ->
+            Log.d(TAG, "Closing previous session before starting new one")
+            oldSession.close()
+        }
+        streamSession = null
+        _currentFrame.value = null
 
         // Get saved video quality setting
         val apiKeyManager = APIKeyManager.getInstance(getApplication())
