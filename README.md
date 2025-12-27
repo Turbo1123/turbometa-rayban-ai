@@ -48,11 +48,12 @@
 
 Before using TurboMeta, you **MUST** enable developer mode in Meta AI App:
 
-1. Open **Meta AI App** on your phone
-2. Go to **Settings** → **App Info**
-3. Find **Version Number**
-4. **Tap the version number 5 times rapidly**
-5. You'll see "Developer mode enabled" message
+1. **Update Meta AI App to version 20+** (required for DAT SDK support)
+2. Open **Meta AI App** on your phone
+3. Go to **Settings** → **App Info**
+4. Find **Version Number**
+5. **Tap the version number 5 times rapidly**
+6. You'll see "Developer mode enabled" message
 
 > Without developer mode, the app will show an error when redirecting to Meta AI App!
 
