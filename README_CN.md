@@ -27,10 +27,10 @@
     <td align="center"><b>设置页面</b></td>
   </tr>
   <tr>
-    <td><img src="./首页.jpg" width="180"/></td>
-    <td><img src="./对话记录.jpg" width="180"/></td>
-    <td><img src="./拍摄页面.jpg" width="180"/></td>
-    <td><img src="./设置页面.jpg" width="180"/></td>
+    <td><img src="./screenshots/首页.jpg" width="180"/></td>
+    <td><img src="./screenshots/对话记录.jpg" width="180"/></td>
+    <td><img src="./screenshots/拍摄页面.jpg" width="180"/></td>
+    <td><img src="./screenshots/设置页面.jpg" width="180"/></td>
   </tr>
 </table>
 
@@ -493,7 +493,7 @@ DerivedData/
 如果这个项目对你有帮助，欢迎请我喝杯咖啡！
 
 <div align="center">
-<img src="./请我喝咖啡.png" width="200" alt="微信支付"/>
+<img src="./screenshots/请我喝咖啡.png" width="200" alt="微信支付"/>
 
 **微信支付**
 </div>

@@ -31,3 +31,11 @@ Carthage/Build/
 
 # macOS
 .DS_Store
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/.kotlin/
+android/local.properties
+*.apk
