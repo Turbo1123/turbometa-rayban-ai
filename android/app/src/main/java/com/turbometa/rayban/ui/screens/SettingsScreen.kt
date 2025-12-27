@@ -27,6 +27,7 @@ import com.turbometa.rayban.ui.components.*
 import com.turbometa.rayban.ui.theme.*
 import com.turbometa.rayban.utils.AIModel
 import com.turbometa.rayban.utils.OutputLanguage
+import com.turbometa.rayban.utils.StreamQuality
 import com.turbometa.rayban.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,11 +41,13 @@ fun SettingsScreen(
     val apiKeyMasked by viewModel.apiKeyMasked.collectAsState()
     val selectedModel by viewModel.selectedModel.collectAsState()
     val selectedLanguage by viewModel.selectedLanguage.collectAsState()
+    val selectedQuality by viewModel.selectedQuality.collectAsState()
     val conversationCount by viewModel.conversationCount.collectAsState()
     val message by viewModel.message.collectAsState()
     val showApiKeyDialog by viewModel.showApiKeyDialog.collectAsState()
     val showModelDialog by viewModel.showModelDialog.collectAsState()
     val showLanguageDialog by viewModel.showLanguageDialog.collectAsState()
+    val showQualityDialog by viewModel.showQualityDialog.collectAsState()
     val showDeleteConfirmDialog by viewModel.showDeleteConfirmDialog.collectAsState()
 
     Scaffold(
@@ -104,6 +107,15 @@ fun SettingsScreen(
                     title = stringResource(R.string.output_language),
                     subtitle = viewModel.getSelectedLanguageDisplayName(),
                     onClick = { viewModel.showLanguageDialog() }
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = AppSpacing.medium))
+
+                SettingsItem(
+                    icon = Icons.Default.HighQuality,
+                    title = stringResource(R.string.video_quality),
+                    subtitle = viewModel.getSelectedQualityDisplayName(),
+                    onClick = { viewModel.showQualityDialog() }
                 )
             }
 
@@ -168,6 +180,16 @@ fun SettingsScreen(
             languages = viewModel.getAvailableLanguages(),
             onSelect = { viewModel.selectLanguage(it) },
             onDismiss = { viewModel.hideLanguageDialog() }
+        )
+    }
+
+    // Video Quality Selection Dialog
+    if (showQualityDialog) {
+        QualitySelectionDialog(
+            selectedQuality = selectedQuality,
+            qualities = viewModel.getAvailableQualities(),
+            onSelect = { viewModel.selectQuality(it) },
+            onDismiss = { viewModel.hideQualityDialog() }
         )
     }
 
@@ -435,6 +457,63 @@ private fun LanguageSelectionDialog(
                             )
                             Text(
                                 text = language.displayName,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun QualitySelectionDialog(
+    selectedQuality: String,
+    qualities: List<StreamQuality>,
+    onSelect: (StreamQuality) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.select_quality),
+                fontWeight = FontWeight.SemiBold
+            )
+        },
+        text = {
+            Column {
+                qualities.forEach { quality ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { onSelect(quality) }
+                            )
+                            .padding(vertical = AppSpacing.small),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = quality.id == selectedQuality,
+                            onClick = { onSelect(quality) }
+                        )
+                        Spacer(modifier = Modifier.width(AppSpacing.small))
+                        Column {
+                            Text(
+                                text = quality.displayName,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = quality.description,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )

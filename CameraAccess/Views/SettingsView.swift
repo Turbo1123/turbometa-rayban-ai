@@ -13,8 +13,10 @@ struct SettingsView: View {
     @State private var showAPIKeySettings = false
     @State private var showModelSettings = false
     @State private var showLanguageSettings = false
+    @State private var showQualitySettings = false
     @State private var selectedModel = "qwen3-omni-flash-realtime"
     @State private var selectedLanguage = "zh-CN" // 默认中文
+    @State private var selectedQuality = UserDefaults.standard.string(forKey: "video_quality") ?? "medium"
     @State private var hasAPIKey = false // 改为 State 变量
 
     init(streamViewModel: StreamSessionViewModel, apiKey: String) {
@@ -129,6 +131,24 @@ struct SettingsView: View {
                                 .foregroundColor(AppColors.textTertiary)
                         }
                     }
+
+                    Button {
+                        showQualitySettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "video.fill")
+                                .foregroundColor(AppColors.liveStream)
+                            Text("视频画质")
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Text(qualityDisplayName(selectedQuality))
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
                 } header: {
                     Text("AI 设置")
                 }
@@ -157,6 +177,9 @@ struct SettingsView: View {
             .sheet(isPresented: $showLanguageSettings) {
                 LanguageSettingsView(selectedLanguage: $selectedLanguage)
             }
+            .sheet(isPresented: $showQualitySettings) {
+                VideoQualitySettingsView(selectedQuality: $selectedQuality)
+            }
             .onAppear {
                 // 视图出现时刷新 API Key 状态
                 refreshAPIKeyStatus()
@@ -173,6 +196,15 @@ struct SettingsView: View {
         case "es-ES": return "Español"
         case "fr-FR": return "Français"
         default: return "中文"
+        }
+    }
+
+    private func qualityDisplayName(_ code: String) -> String {
+        switch code {
+        case "low": return "低画质"
+        case "medium": return "中画质"
+        case "high": return "高画质"
+        default: return "中画质"
         }
     }
 }
@@ -383,6 +415,62 @@ struct LanguageSettingsView: View {
                 }
             }
             .navigationTitle("输出语言")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("完成") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Video Quality Settings
+
+struct VideoQualitySettingsView: View {
+    @Binding var selectedQuality: String
+    @Environment(\.dismiss) private var dismiss
+
+    let qualities = [
+        ("low", "低画质", "省电模式，适合长时间使用"),
+        ("medium", "中画质", "平衡模式（推荐）"),
+        ("high", "高画质", "最佳画质，耗电较快")
+    ]
+
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    ForEach(qualities, id: \.0) { quality in
+                        Button {
+                            selectedQuality = quality.0
+                            UserDefaults.standard.set(quality.0, forKey: "video_quality")
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(quality.1)
+                                        .foregroundColor(.primary)
+                                    Text(quality.2)
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(AppColors.textSecondary)
+                                }
+                                Spacer()
+                                if selectedQuality == quality.0 {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text("选择视频画质")
+                } footer: {
+                    Text("更高的画质会消耗更多电量")
+                }
+            }
+            .navigationTitle("视频画质")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

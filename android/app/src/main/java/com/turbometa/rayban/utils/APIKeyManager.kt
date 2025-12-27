@@ -21,6 +21,7 @@ class APIKeyManager(context: Context) {
         private const val KEY_API_KEY = "qwen_api_key"
         private const val KEY_AI_MODEL = "ai_model"
         private const val KEY_OUTPUT_LANGUAGE = "output_language"
+        private const val KEY_VIDEO_QUALITY = "video_quality"
 
         @Volatile
         private var instance: APIKeyManager? = null
@@ -83,6 +84,15 @@ class APIKeyManager(context: Context) {
     fun getOutputLanguage(): String {
         return sharedPreferences.getString(KEY_OUTPUT_LANGUAGE, "zh-CN") ?: "zh-CN"
     }
+
+    // Video Quality
+    fun saveVideoQuality(quality: String) {
+        sharedPreferences.edit().putString(KEY_VIDEO_QUALITY, quality).apply()
+    }
+
+    fun getVideoQuality(): String {
+        return sharedPreferences.getString(KEY_VIDEO_QUALITY, "MEDIUM") ?: "MEDIUM"
+    }
 }
 
 // Available AI models
@@ -99,4 +109,11 @@ enum class OutputLanguage(val code: String, val displayName: String, val nativeN
     KOREAN("ko-KR", "Korean", "한국어"),
     SPANISH("es-ES", "Spanish", "Español"),
     FRENCH("fr-FR", "French", "Français")
+}
+
+// Video quality options
+enum class StreamQuality(val id: String, val displayName: String, val description: String) {
+    LOW("LOW", "低画质", "省电模式，适合长时间使用"),
+    MEDIUM("MEDIUM", "中画质", "平衡模式（推荐）"),
+    HIGH("HIGH", "高画质", "最佳画质，耗电较快")
 }

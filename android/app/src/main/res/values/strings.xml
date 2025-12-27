@@ -221,4 +221,8 @@
     <string name="permission_bluetooth">Bluetooth permission is required to connect to glasses</string>
     <string name="permission_grant">Grant Permission</string>
     <string name="camera_permission_denied">Camera permission was denied. Please grant camera permission in the Meta AI app to use this feature.</string>
+
+    <!-- Video Quality -->
+    <string name="video_quality">Video Quality</string>
+    <string name="select_quality">Select Quality</string>
 </resources>

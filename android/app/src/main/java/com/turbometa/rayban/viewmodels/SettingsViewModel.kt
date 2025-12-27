@@ -7,6 +7,7 @@ import com.turbometa.rayban.data.ConversationStorage
 import com.turbometa.rayban.utils.AIModel
 import com.turbometa.rayban.utils.APIKeyManager
 import com.turbometa.rayban.utils.OutputLanguage
+import com.turbometa.rayban.utils.StreamQuality
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +33,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _selectedLanguage = MutableStateFlow(apiKeyManager.getOutputLanguage())
     val selectedLanguage: StateFlow<String> = _selectedLanguage.asStateFlow()
 
+    // Video Quality
+    private val _selectedQuality = MutableStateFlow(apiKeyManager.getVideoQuality())
+    val selectedQuality: StateFlow<String> = _selectedQuality.asStateFlow()
+
     // Conversation count
     private val _conversationCount = MutableStateFlow(conversationStorage.getConversationCount())
     val conversationCount: StateFlow<Int> = _conversationCount.asStateFlow()
@@ -48,6 +53,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val _showLanguageDialog = MutableStateFlow(false)
     val showLanguageDialog: StateFlow<Boolean> = _showLanguageDialog.asStateFlow()
+
+    private val _showQualityDialog = MutableStateFlow(false)
+    val showQualityDialog: StateFlow<Boolean> = _showQualityDialog.asStateFlow()
 
     private val _showDeleteConfirmDialog = MutableStateFlow(false)
     val showDeleteConfirmDialog: StateFlow<Boolean> = _showDeleteConfirmDialog.asStateFlow()
@@ -144,6 +152,29 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         return OutputLanguage.entries.find { it.code == langCode }?.let {
             "${it.nativeName} (${it.displayName})"
         } ?: langCode
+    }
+
+    // Video Quality Management
+    fun getAvailableQualities(): List<StreamQuality> = StreamQuality.entries
+
+    fun showQualityDialog() {
+        _showQualityDialog.value = true
+    }
+
+    fun hideQualityDialog() {
+        _showQualityDialog.value = false
+    }
+
+    fun selectQuality(quality: StreamQuality) {
+        apiKeyManager.saveVideoQuality(quality.id)
+        _selectedQuality.value = quality.id
+        _showQualityDialog.value = false
+        _message.value = "画质已切换为${quality.displayName}"
+    }
+
+    fun getSelectedQualityDisplayName(): String {
+        val qualityId = _selectedQuality.value
+        return StreamQuality.entries.find { it.id == qualityId }?.displayName ?: qualityId
     }
 
     // Conversation Management
