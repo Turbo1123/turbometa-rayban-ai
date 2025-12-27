@@ -12,6 +12,7 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9-purple.svg)](https://kotlinlang.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Turbo1123/turbometa-rayban-ai)](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
+[![请我喝咖啡](https://img.shields.io/badge/请我喝咖啡-☕-yellow?style=flat-square)](#-请我喝杯咖啡)
 
 [English](./README.md) | 简体中文
 
