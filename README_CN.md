@@ -36,9 +36,11 @@
 
 ## 🎬 视频演示
 
-[![视频演示](https://img.shields.io/badge/Bilibili-演示视频-00A1D6?style=for-the-badge&logo=bilibili)](https://www.bilibili.com/video/BV1aTqSBHEqN)
+<a href="https://www.bilibili.com/video/BV1aTqSBHEqN" target="_blank">
+  <img src="https://img.shields.io/badge/Bilibili-演示视频-00A1D6?style=for-the-badge&logo=bilibili" alt="视频演示"/>
+</a>
 
-👉 [在 Bilibili 观看](https://www.bilibili.com/video/BV1aTqSBHEqN)
+👉 <a href="https://www.bilibili.com/video/BV1aTqSBHEqN" target="_blank">在 Bilibili 观看</a>
 
 ## 📥 下载安装
 

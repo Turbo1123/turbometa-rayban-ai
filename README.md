@@ -36,9 +36,11 @@
 
 ## 🎬 Video Demo
 
-[![Video Demo](https://img.shields.io/badge/Bilibili-Demo-00A1D6?style=for-the-badge&logo=bilibili)](https://www.bilibili.com/video/BV1aTqSBHEqN)
+<a href="https://www.bilibili.com/video/BV1aTqSBHEqN" target="_blank">
+  <img src="https://img.shields.io/badge/Bilibili-Demo-00A1D6?style=for-the-badge&logo=bilibili" alt="Video Demo"/>
+</a>
 
-👉 [Watch on Bilibili](https://www.bilibili.com/video/BV1aTqSBHEqN)
+👉 <a href="https://www.bilibili.com/video/BV1aTqSBHEqN" target="_blank">Watch on Bilibili</a>
 
 ## 📥 Download
 
