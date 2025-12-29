@@ -76,7 +76,7 @@ Before using TurboMeta, you **MUST** enable developer mode in Meta AI App:
 2. Enable "Install from unknown sources" in Settings
 3. Open APK to install
 4. Grant permissions (Bluetooth, Microphone)
-5. Configure API Key in Settings
+5. Configure API Key in Settings 👉 [See Configuration Guide](#api-key-config)
 
 ---
 
@@ -111,7 +111,7 @@ Before using TurboMeta, you **MUST** enable developer mode in Meta AI App:
 
 **Step 4**: On iPhone, go to **Settings → General → VPN & Device Management**, trust the developer certificate
 
-**Step 5**: Open TurboMeta and configure your Alibaba Cloud API Key in Settings
+**Step 5**: Open TurboMeta and configure your Alibaba Cloud API Key in Settings 👉 [See Configuration Guide](#api-key-config)
 
 ## 📖 Introduction
 
@@ -188,7 +188,7 @@ You need to apply for the following Alibaba Cloud APIs:
 1. **Qwen Omni-Realtime API**: For real-time conversations
 2. **Qwen VL-Plus API**: For image recognition and nutrition analysis
 
-👉 [Apply for APIs at Alibaba Cloud](https://dashscope.aliyun.com/)
+👉 [Apply for APIs at Alibaba Cloud Bailian](https://www.aliyun.com/product/bailian) | [Bailian Console](https://bailian.console.aliyun.com/)
 
 ## 🚀 Installation Guide
 
@@ -204,16 +204,12 @@ You need to apply for the following Alibaba Cloud APIs:
 
 ### Step 2: Configure API Key
 
-1. Go to [Alibaba Cloud DashScope](https://dashscope.aliyun.com/)
-2. Log in and create an API Key
-3. Open `VisionAPIConfig.swift` in the project
-4. Replace with your API Key:
+For detailed configuration guide, see 👉 [API Key Configuration](#api-key-config)
 
-```swift
-struct VisionAPIConfig {
-    static let apiKey = "sk-YOUR-API-KEY-HERE"
-}
-```
+Quick steps:
+1. Visit [Alibaba Cloud Bailian](https://www.aliyun.com/product/bailian) to register
+2. Login to [Bailian Console](https://bailian.console.aliyun.com/) → API-KEY Management → Create API Key
+3. Enter your API Key in App "Settings" → "API Key Management"
 
 ### Step 3: Build the Project
 
@@ -479,13 +475,26 @@ This project is based on Meta DAT SDK sample code and follows the original proje
 - Choose MIT, Apache 2.0, or other permissive licenses for your code
 - Acknowledge the original source code in the LICENSE file
 
+<a id="api-key-config"></a>
 ### 5. User Configuration Instructions
 
-⚠️ **Important Notice**: Users of this project need to:
+⚠️ **Important Notice**: Users need to configure Alibaba Cloud API Key:
 
-1. **Apply for API Key**: Visit [Alibaba Cloud DashScope](https://dashscope.aliyun.com/)
-2. **Configure API Key**: Enter in App Settings → API Key Management
-3. **API Key Security**: Stored securely in iOS Keychain, never exposed
+#### Step 1: Register Alibaba Cloud Account
+Visit [Alibaba Cloud Bailian](https://www.aliyun.com/product/bailian) to register
+
+#### Step 2: Get API Key
+1. Login to [Bailian Console](https://bailian.console.aliyun.com/)
+2. Find "**API-KEY Management**" in the left menu
+3. Click "**Create API Key**" to generate a key
+4. Copy the generated API Key
+
+#### Step 3: Configure in App
+1. Open TurboMeta App
+2. Go to "**Settings**" → "**API Key Management**"
+3. Paste your API Key and save
+
+> 🔒 **Security Note**: API Key is stored in iOS Keychain and Android EncryptedSharedPreferences, never exposed
 
 ## 🌟 If This Project Helps You
 
