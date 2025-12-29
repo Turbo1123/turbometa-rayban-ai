@@ -17,9 +17,10 @@ class APIKeyManager {
     // MARK: - Save API Key
 
     func saveAPIKey(_ key: String) -> Bool {
-        guard !key.isEmpty else { return false }
+        let trimmedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedKey.isEmpty else { return false }
 
-        let data = key.data(using: .utf8)!
+        let data = trimmedKey.data(using: .utf8)!
 
         // Delete existing key first
         deleteAPIKey()
