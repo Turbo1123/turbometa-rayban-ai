@@ -10,9 +10,6 @@ struct LiveAIView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var showConversation = true // 控制对话内容显示/隐藏
-    @State private var frameTimer: Timer?
-    @State private var startRecordingTask: Task<Void, Never>?
-    @State private var didStartStreaming = false
 
     init(streamViewModel: StreamSessionViewModel, apiKey: String) {
         self.streamViewModel = streamViewModel
@@ -99,34 +96,24 @@ struct LiveAIView: View {
                 return
             }
 
-            frameTimer?.invalidate()
-            frameTimer = nil
-            startRecordingTask?.cancel()
-            startRecordingTask = nil
-
             // 启动视频流
-            if streamViewModel.streamingStatus == .stopped {
-                didStartStreaming = true
-                Task {
-                    print("🎥 LiveAIView: 启动视频流")
-                    await streamViewModel.handleStartStreaming()
-                }
+            Task {
+                print("🎥 LiveAIView: 启动视频流")
+                await streamViewModel.handleStartStreaming()
             }
 
             // 自动连接并开始录音
             viewModel.connect()
 
             // 更新视频帧
-            frameTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
                 if let frame = streamViewModel.currentVideoFrame {
                     viewModel.updateVideoFrame(frame)
                 }
             }
 
             // 延迟启动录音，等待连接完成
-            startRecordingTask = Task { @MainActor in
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                guard !Task.isCancelled else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 if viewModel.isConnected {
                     viewModel.startRecording()
                 }
@@ -135,13 +122,9 @@ struct LiveAIView: View {
         .onDisappear {
             // 停止 AI 对话和视频流
             print("🎥 LiveAIView: 停止 AI 对话和视频流")
-            startRecordingTask?.cancel()
-            startRecordingTask = nil
-            frameTimer?.invalidate()
-            frameTimer = nil
             viewModel.disconnect()
             Task {
-                if didStartStreaming, streamViewModel.streamingStatus != .stopped {
+                if streamViewModel.streamingStatus != .stopped {
                     await streamViewModel.stopSession()
                 }
             }

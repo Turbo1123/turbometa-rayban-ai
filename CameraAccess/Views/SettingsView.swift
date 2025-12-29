@@ -300,15 +300,13 @@ struct APIKeySettingsView: View {
     }
 
     private func saveAPIKey() {
-        let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        apiKey = trimmedKey
-        guard !trimmedKey.isEmpty else {
+        guard !apiKey.isEmpty else {
             errorMessage = "API Key 不能为空"
             showError = true
             return
         }
 
-        if APIKeyManager.shared.saveAPIKey(trimmedKey) {
+        if APIKeyManager.shared.saveAPIKey(apiKey) {
             showSaveSuccess = true
         } else {
             errorMessage = "保存失败，请重试"

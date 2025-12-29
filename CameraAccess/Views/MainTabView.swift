@@ -13,7 +13,7 @@ struct MainTabView: View {
 
     // Read API Key from secure storage
     private var apiKey: String {
-        (APIKeyManager.shared.getAPIKey() ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        APIKeyManager.shared.getAPIKey() ?? ""
     }
 
     var body: some View {

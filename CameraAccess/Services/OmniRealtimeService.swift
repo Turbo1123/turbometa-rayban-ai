@@ -53,7 +53,7 @@ class OmniRealtimeService: NSObject {
     // Audio Playback Engine (separate engine for playback)
     private var playbackEngine: AVAudioEngine?
     private var playerNode: AVAudioPlayerNode?
-    private let playbackFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 24000, channels: 1, interleaved: false)
+    private let audioFormat = AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: 24000, channels: 1, interleaved: true)
 
     // Audio buffer management
     private var audioBuffer = Data()
@@ -62,8 +62,6 @@ class OmniRealtimeService: NSObject {
     private let minChunksBeforePlay = 2 // 首次收到2个片段后开始播放
     private var hasStartedPlaying = false
     private var isPlaybackEngineRunning = false
-    private var isPlaybackGraphConnected = false
-    private let audioProcessingQueue = DispatchQueue(label: "com.turbometa.omni.audio")
 
     // Callbacks
     var onTranscriptDelta: ((String) -> Void)?
@@ -83,7 +81,7 @@ class OmniRealtimeService: NSObject {
     private var eventIdCounter = 0
 
     init(apiKey: String) {
-        self.apiKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.apiKey = apiKey
         super.init()
         setupAudioEngine()
     }
@@ -104,28 +102,24 @@ class OmniRealtimeService: NSObject {
 
         guard let playbackEngine = playbackEngine,
               let playerNode = playerNode,
-              playbackFormat != nil else {
+              let audioFormat = audioFormat else {
             print("❌ [Omni] 无法初始化播放引擎")
             return
         }
 
         // Attach player node
         playbackEngine.attach(playerNode)
-        isPlaybackGraphConnected = false
 
-        print("✅ [Omni] 播放引擎初始化完成: Float32 @ 24kHz")
+        // Connect player node to output
+        playbackEngine.connect(playerNode, to: playbackEngine.mainMixerNode, format: audioFormat)
+
+        print("✅ [Omni] 播放引擎初始化完成: PCM16 @ 24kHz")
     }
 
     private func startPlaybackEngine() {
-        guard let playbackEngine = playbackEngine,
-              let playerNode = playerNode,
-              !isPlaybackEngineRunning else { return }
+        guard let playbackEngine = playbackEngine, !isPlaybackEngineRunning else { return }
 
         do {
-            if !isPlaybackGraphConnected {
-                playbackEngine.connect(playerNode, to: playbackEngine.mainMixerNode, format: playbackFormat)
-                isPlaybackGraphConnected = true
-            }
             try playbackEngine.start()
             isPlaybackEngineRunning = true
             print("▶️ [Omni] 播放引擎已启动")
@@ -142,18 +136,12 @@ class OmniRealtimeService: NSObject {
         playerNode?.reset()  // 清除队列中的所有 buffer
         playbackEngine.stop()
         isPlaybackEngineRunning = false
-        isPlaybackGraphConnected = false
         print("⏹️ [Omni] 播放引擎已停止并清除队列")
     }
 
     // MARK: - WebSocket Connection
 
     func connect() {
-        guard !apiKey.isEmpty else {
-            onError?("API Key 为空，请先在设置中配置")
-            return
-        }
-
         let urlString = "\(baseURL)?model=\(model)"
         print("🔌 [Omni] 准备连接 WebSocket: \(urlString)")
 
@@ -200,7 +188,7 @@ class OmniRealtimeService: NSObject {
                 "modalities": ["text", "audio"],
                 "voice": "Cherry",
                 "input_audio_format": "pcm16",
-                "output_audio_format": "pcm16",
+                "output_audio_format": "pcm24",
                 "smooth_output": true,
                 "instructions": "你是RayBan Meta智能眼镜AI助手。\n\n【重要】必须始终用中文回答，无论用户说什么语言。\n\n回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。",
                 "turn_detection": [
@@ -233,12 +221,7 @@ class OmniRealtimeService: NSObject {
             let audioSession = AVAudioSession.sharedInstance()
 
             // Allow Bluetooth to use the glasses' microphone
-            do {
-                try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth])
-            } catch {
-                try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [])
-            }
-            try? audioSession.setPreferredSampleRate(24000)
+            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth, .allowBluetoothA2DP])
             try audioSession.setActive(true)
 
             guard let engine = audioEngine else {
@@ -434,50 +417,54 @@ class OmniRealtimeService: NSObject {
                    let audioData = Data(base64Encoded: base64Audio) {
                     self.onAudioDelta?(audioData)
 
-                    self.audioProcessingQueue.async { [weak self] in
-                        guard let self else { return }
+                    // Buffer audio chunks
+                    if !self.isCollectingAudio {
+                        self.isCollectingAudio = true
+                        self.audioBuffer = Data()
+                        self.audioChunkCount = 0
+                        self.hasStartedPlaying = false
 
-                        if !self.isCollectingAudio {
-                            self.isCollectingAudio = true
+                        // 清除 playerNode 队列中可能残留的旧 buffer
+                        if self.isPlaybackEngineRunning {
+                            // 重要：reset 会断开 playerNode，需要完全重新初始化
+                            self.stopPlaybackEngine()
+                            self.setupPlaybackEngine()
+                            self.startPlaybackEngine()
+                            self.playerNode?.play()
+                            print("🔄 [Omni] 重新初始化播放引擎")
+                        }
+                    }
+
+                    self.audioChunkCount += 1
+
+                    // 流式播放策略：收集少量片段后开始流式调度
+                    if !self.hasStartedPlaying {
+                        // 首次播放前：先收集
+                        self.audioBuffer.append(audioData)
+
+                        if self.audioChunkCount >= self.minChunksBeforePlay {
+                            // 已收集足够片段，开始播放
+                            self.hasStartedPlaying = true
+                            self.playAudio(self.audioBuffer)
                             self.audioBuffer = Data()
-                            self.audioChunkCount = 0
-                            self.hasStartedPlaying = false
-
-                            if self.isPlaybackEngineRunning {
-                                self.stopPlaybackEngine()
-                                self.setupPlaybackEngine()
-                            }
                         }
-
-                        self.audioChunkCount += 1
-
-                        if !self.hasStartedPlaying {
-                            self.audioBuffer.append(audioData)
-
-                            if self.audioChunkCount >= self.minChunksBeforePlay {
-                                self.hasStartedPlaying = true
-                                self.playAudio(self.audioBuffer)
-                                self.audioBuffer = Data()
-                            }
-                        } else {
-                            self.playAudio(audioData)
-                        }
+                    } else {
+                        // 已开始播放：直接调度每个片段，AVAudioPlayerNode 会自动排队
+                        self.playAudio(audioData)
                     }
                 }
 
             case OmniServerEvent.responseAudioDone.rawValue:
-                self.audioProcessingQueue.async { [weak self] in
-                    guard let self else { return }
-                    self.isCollectingAudio = false
+                self.isCollectingAudio = false
 
-                    if !self.audioBuffer.isEmpty {
-                        self.playAudio(self.audioBuffer)
-                        self.audioBuffer = Data()
-                    }
-
-                    self.audioChunkCount = 0
-                    self.hasStartedPlaying = false
+                // Play remaining buffered audio (if any)
+                if !self.audioBuffer.isEmpty {
+                    self.playAudio(self.audioBuffer)
+                    self.audioBuffer = Data()
                 }
+
+                self.audioChunkCount = 0
+                self.hasStartedPlaying = false
                 self.onAudioDone?()
 
             case OmniServerEvent.conversationItemInputAudioTranscriptionCompleted.rawValue:
@@ -508,7 +495,7 @@ class OmniRealtimeService: NSObject {
 
     private func playAudio(_ audioData: Data) {
         guard let playerNode = playerNode,
-              let playbackFormat = playbackFormat else {
+              let audioFormat = audioFormat else {
             return
         }
 
@@ -523,7 +510,8 @@ class OmniRealtimeService: NSObject {
             }
         }
 
-        guard let pcmBuffer = createPCMBuffer(fromPCM16: audioData, format: playbackFormat) else {
+        // Convert PCM16 Data to AVAudioPCMBuffer
+        guard let pcmBuffer = createPCMBuffer(from: audioData, format: audioFormat) else {
             return
         }
 
@@ -531,24 +519,22 @@ class OmniRealtimeService: NSObject {
         playerNode.scheduleBuffer(pcmBuffer)
     }
 
-    private func createPCMBuffer(fromPCM16 data: Data, format: AVAudioFormat) -> AVAudioPCMBuffer? {
+    private func createPCMBuffer(from data: Data, format: AVAudioFormat) -> AVAudioPCMBuffer? {
+        // Calculate frame count (each frame is 2 bytes for PCM16 mono)
         let frameCount = data.count / 2
-        guard frameCount > 0 else { return nil }
 
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frameCount)),
-              let channelData = buffer.floatChannelData else {
+              let channelData = buffer.int16ChannelData else {
             return nil
         }
 
         buffer.frameLength = AVAudioFrameCount(frameCount)
 
+        // Copy PCM16 data directly to buffer
         data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
             guard let baseAddress = bytes.baseAddress else { return }
             let int16Pointer = baseAddress.assumingMemoryBound(to: Int16.self)
-            let dst = channelData[0]
-            for i in 0..<frameCount {
-                dst[i] = Float(int16Pointer[i]) / 32768.0
-            }
+            channelData[0].update(from: int16Pointer, count: frameCount)
         }
 
         return buffer
