@@ -131,6 +131,15 @@ Many friends in China purchased Ray-Ban Meta smart glasses through overseas shop
 ✅ **Professional Repair Service** - Fix various hardware issues, bring your glasses back to life
 ✅ **Local Support in China** - Never worry about repairs again
 
+#### 📊 Battery Comparison: Why Upgrade?
+
+| | Gen1 Original Battery | Gen2 Upgraded Battery |
+|--|----------------------|----------------------|
+| **Glasses Single Charge** | ~4 hours | **~8 hours** ⚡ |
+| **With Charging Case** | ~32 hours | **~48 hours** ⚡ |
+
+> 💡 Simply put: **Gen1 with Gen2 battery = Double the battery life**, same glasses, twice the experience!
+
 <table>
   <tr>
     <td><img src="./ad/电池更换计划.jpg" width="220"/></td>
