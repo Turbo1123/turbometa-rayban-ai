@@ -136,7 +136,6 @@ Many friends in China purchased Ray-Ban Meta smart glasses through overseas shop
 | | Gen1 Original Battery | Gen2 Upgraded Battery |
 |--|----------------------|----------------------|
 | **Glasses Single Charge** | ~4 hours | **~8 hours** ⚡ |
-| **With Charging Case** | ~32 hours | **~48 hours** ⚡ |
 
 > 💡 Simply put: **Gen1 with Gen2 battery = Double the battery life**, same glasses, twice the experience!
 
