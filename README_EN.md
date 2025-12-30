@@ -37,7 +37,7 @@ Due to Meta DAT SDK limitations, the app cannot directly access the glasses came
 - 🔊 **Voice Result Announcement**: High-quality TTS powered by qwen3-tts-flash
 - 🎯 **Fully Automated**: Start stream → Capture → Stop stream → AI Recognition → TTS Announcement
 
-👉 [View Detailed Tutorial](#-quick-vision-tutorial)
+👉 [View Detailed Tutorial](#quick-vision-tutorial)
 
 ---
 
@@ -360,6 +360,8 @@ ios-deploy --bundle YourApp.app
 4. Tap stop button to end the stream
 
 ---
+
+<a id="quick-vision-tutorial"></a>
 
 ## 👁️ Quick Vision Tutorial
 

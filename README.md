@@ -37,7 +37,7 @@
 - 🔊 **语音播报结果**：使用阿里云 qwen3-tts-flash 高品质语音播报
 - 🎯 **全自动流程**：启动流 → 拍照 → 停止流 → AI 识别 → TTS 播报
 
-👉 [查看详细使用教程](#-quick-vision-快速识图使用教程)
+👉 [查看详细使用教程](#quick-vision-tutorial)
 
 ---
 
@@ -359,6 +359,8 @@ ios-deploy --bundle YourApp.app
 4. 点击停止按钮结束直播
 
 ---
+
+<a id="quick-vision-tutorial"></a>
 
 ## 👁️ Quick Vision 快速识图使用教程
 
