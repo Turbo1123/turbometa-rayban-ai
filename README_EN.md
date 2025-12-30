@@ -12,7 +12,7 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9-purple.svg)](https://kotlinlang.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Turbo1123/turbometa-rayban-ai)](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-yellow?style=flat-square)](#-buy-me-a-coffee)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/turbo1123)
 
 [English](./README_EN.md) | [简体中文](./README.md)
 
@@ -92,7 +92,7 @@ Due to Meta DAT SDK limitations, the app cannot directly access the glasses came
 
 👉 <a href="https://www.bilibili.com/video/BV1aTqSBHEqN" target="_blank">Watch on Bilibili</a>
 
-> 💡 If you find this project helpful, consider [buying me a coffee](#-buy-me-a-coffee) ☕
+> 💡 If you find this project helpful, consider [**buying me a coffee**](https://buymeacoffee.com/turbo1123) ☕
 
 ## 📥 Download
 
@@ -674,22 +674,30 @@ Visit [Alibaba Cloud Bailian](https://www.aliyun.com/product/bailian) to registe
 
 ## ☕ Buy Me a Coffee
 
-如果这个项目对你有帮助，欢迎请我喝杯咖啡！
-
-If this project helps you, consider buying me a coffee!
+If this project helps you, consider buying me a coffee! Your support keeps this project alive and growing.
 
 <div align="center">
-<img src="./screenshots/请我喝咖啡.png" width="200" alt="WeChat Pay"/>
 
-**WeChat Pay / 微信支付**
+<a href="https://buymeacoffee.com/turbo1123" target="_blank">
+  <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee" height="50"/>
+</a>
+
+### 👉 [**buymeacoffee.com/turbo1123**](https://buymeacoffee.com/turbo1123) 👈
+
 </div>
+
+**Why support?**
+- 🚀 Help fund new features and updates
+- 🐛 Support ongoing bug fixes and maintenance
+- 🌍 Enable more language support
+- ❤️ Show appreciation for open source work
 
 ---
 
 <div align="center">
 
-**Making Smart Glasses Speak Chinese 🇨🇳**
+**Making Smart Glasses Smarter 🕶️**
 
-Made with ❤️ for RayBan Meta Users
+Made with ❤️ for RayBan Meta Users Worldwide
 
 </div>
