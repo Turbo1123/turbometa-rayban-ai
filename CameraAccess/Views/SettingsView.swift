@@ -9,17 +9,22 @@ import MWDATCore
 struct SettingsView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
     @ObservedObject var languageManager = LanguageManager.shared
+    @ObservedObject var providerManager = APIProviderManager.shared
     let apiKey: String
 
     @State private var showAPIKeySettings = false
+    @State private var showProviderSettings = false
     @State private var showModelSettings = false
     @State private var showLanguageSettings = false
     @State private var showAppLanguageSettings = false
     @State private var showQualitySettings = false
+    @State private var showLiveAIProviderSettings = false
+    @State private var showGoogleAPIKeySettings = false
     @State private var selectedModel = "qwen3-omni-flash-realtime"
     @State private var selectedLanguage = "zh-CN" // 默认中文
     @State private var selectedQuality = UserDefaults.standard.string(forKey: "video_quality") ?? "medium"
     @State private var hasAPIKey = false // 改为 State 变量
+    @State private var hasGoogleAPIKey = false // Google API Key 状态
 
     init(streamViewModel: StreamSessionViewModel, apiKey: String) {
         self.streamViewModel = streamViewModel
@@ -28,7 +33,8 @@ struct SettingsView: View {
 
     // 刷新 API Key 状态
     private func refreshAPIKeyStatus() {
-        hasAPIKey = APIKeyManager.shared.hasAPIKey()
+        hasAPIKey = providerManager.hasAPIKey
+        hasGoogleAPIKey = APIKeyManager.shared.hasGoogleAPIKey()
     }
 
     var body: some View {
@@ -98,6 +104,25 @@ struct SettingsView: View {
                         }
                     }
 
+                    // API Provider
+                    Button {
+                        showProviderSettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "server.rack")
+                                .foregroundColor(AppColors.accent)
+                            Text("settings.provider".localized)
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Text(providerManager.currentProvider.displayName)
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
+
                     Button {
                         showModelSettings = true
                     } label: {
@@ -107,9 +132,10 @@ struct SettingsView: View {
                             Text("settings.model".localized)
                                 .foregroundColor(AppColors.textPrimary)
                             Spacer()
-                            Text(selectedModel)
+                            Text(providerManager.selectedModel)
                                 .font(AppTypography.caption)
                                 .foregroundColor(AppColors.textSecondary)
+                                .lineLimit(1)
                             Image(systemName: "chevron.right")
                                 .font(AppTypography.caption)
                                 .foregroundColor(AppColors.textTertiary)
@@ -173,9 +199,54 @@ struct SettingsView: View {
                     Text("settings.ai".localized)
                 }
 
+                // Live AI 设置
+                Section {
+                    // Live AI Provider
+                    Button {
+                        showLiveAIProviderSettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "waveform.circle.fill")
+                                .foregroundColor(AppColors.primary)
+                            Text("settings.liveai.provider".localized)
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Text(providerManager.liveAIProvider.displayName)
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
+
+                    // Google API Key (only show when Google is selected for Live AI)
+                    if providerManager.liveAIProvider == .google {
+                        Button {
+                            showGoogleAPIKeySettings = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "key.fill")
+                                    .foregroundColor(.orange)
+                                Text("Google API Key")
+                                    .foregroundColor(AppColors.textPrimary)
+                                Spacer()
+                                Text(hasGoogleAPIKey ? "settings.apikey.configured".localized : "settings.apikey.notconfigured".localized)
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(hasGoogleAPIKey ? .green : .red)
+                                Image(systemName: "chevron.right")
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(AppColors.textTertiary)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("settings.liveai".localized)
+                }
+
                 // 关于
                 Section {
-                    InfoRow(title: "settings.version".localized, value: "1.0.0")
+                    InfoRow(title: "settings.version".localized, value: "1.3.0")
                     InfoRow(title: "settings.sdkversion".localized, value: "0.3.0")
                 } header: {
                     Text("settings.about".localized)
@@ -183,7 +254,11 @@ struct SettingsView: View {
             }
             .navigationTitle("settings.title".localized)
             .sheet(isPresented: $showAPIKeySettings) {
-                APIKeySettingsView()
+                if providerManager.currentProvider == .alibaba {
+                    APIKeySettingsView(provider: providerManager.currentProvider, endpoint: providerManager.alibabaEndpoint)
+                } else {
+                    APIKeySettingsView(provider: providerManager.currentProvider)
+                }
             }
             .onChange(of: showAPIKeySettings) { isShowing in
                 // 当 API Key 设置界面关闭时，刷新状态
@@ -191,8 +266,16 @@ struct SettingsView: View {
                     refreshAPIKeyStatus()
                 }
             }
+            .sheet(isPresented: $showProviderSettings) {
+                APIProviderSettingsView()
+            }
+            .onChange(of: showProviderSettings) { isShowing in
+                if !isShowing {
+                    refreshAPIKeyStatus()
+                }
+            }
             .sheet(isPresented: $showModelSettings) {
-                ModelSettingsView(selectedModel: $selectedModel)
+                VisionModelSettingsView()
             }
             .sheet(isPresented: $showLanguageSettings) {
                 LanguageSettingsView(selectedLanguage: $selectedLanguage)
@@ -202,6 +285,18 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showAppLanguageSettings) {
                 AppLanguageSettingsView()
+            }
+            .sheet(isPresented: $showLiveAIProviderSettings) {
+                LiveAIProviderSettingsView()
+            }
+            .sheet(isPresented: $showGoogleAPIKeySettings) {
+                GoogleAPIKeySettingsView()
+            }
+            .onChange(of: showGoogleAPIKeySettings) { isShowing in
+                // 当 Google API Key 设置界面关闭时，刷新状态
+                if !isShowing {
+                    refreshAPIKeyStatus()
+                }
             }
             .onAppear {
                 // 视图出现时刷新 API Key 状态
@@ -251,71 +346,196 @@ struct InfoRow: View {
     }
 }
 
+// MARK: - API Provider Settings
+
+struct APIProviderSettingsView: View {
+    @ObservedObject var providerManager = APIProviderManager.shared
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    ForEach(APIProvider.allCases, id: \.self) { provider in
+                        Button {
+                            providerManager.currentProvider = provider
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(provider.displayName)
+                                        .foregroundColor(.primary)
+                                    Text(provider == .alibaba ? "settings.provider.alibaba.desc".localized : "settings.provider.openrouter.desc".localized)
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(AppColors.textSecondary)
+                                }
+                                Spacer()
+                                if providerManager.currentProvider == provider {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text("settings.provider.select".localized)
+                } footer: {
+                    Text("settings.provider.description".localized)
+                }
+
+                // Alibaba endpoint selection (only show when Alibaba is selected)
+                if providerManager.currentProvider == .alibaba {
+                    Section {
+                        ForEach(AlibabaEndpoint.allCases, id: \.self) { endpoint in
+                            Button {
+                                providerManager.alibabaEndpoint = endpoint
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(endpoint.displayName)
+                                            .foregroundColor(.primary)
+                                        Text(endpoint == .beijing ? "settings.endpoint.beijing.desc".localized : "settings.endpoint.singapore.desc".localized)
+                                            .font(AppTypography.caption)
+                                            .foregroundColor(AppColors.textSecondary)
+                                    }
+                                    Spacer()
+                                    if providerManager.alibabaEndpoint == endpoint {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.blue)
+                                    }
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("settings.endpoint".localized)
+                    } footer: {
+                        Text("settings.endpoint.description".localized)
+                    }
+                }
+
+                // API Key status for current provider
+                Section {
+                    HStack {
+                        Text("settings.apikey.status".localized)
+                        Spacer()
+                        if providerManager.hasAPIKey {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                Text("settings.apikey.configured".localized)
+                                    .foregroundColor(.green)
+                            }
+                        } else {
+                            HStack(spacing: 4) {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .foregroundColor(.red)
+                                Text("settings.apikey.notconfigured".localized)
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+
+                    Link(destination: URL(string: providerManager.currentProvider.apiKeyHelpURL)!) {
+                        HStack {
+                            Text("settings.provider.getapikey".localized)
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                        }
+                    }
+                } header: {
+                    if providerManager.currentProvider == .alibaba {
+                        Text("\(providerManager.currentProvider.displayName) (\(providerManager.alibabaEndpoint.displayName)) API Key")
+                    } else {
+                        Text("\(providerManager.currentProvider.displayName) API Key")
+                    }
+                }
+            }
+            .navigationTitle("settings.provider".localized)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("done".localized) {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
 // MARK: - API Key Settings
 
 struct APIKeySettingsView: View {
+    let provider: APIProvider
+    var endpoint: AlibabaEndpoint? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var apiKey: String = ""
     @State private var showSaveSuccess = false
     @State private var showError = false
     @State private var errorMessage = ""
 
+    private var displayTitle: String {
+        if provider == .alibaba, let endpoint = endpoint {
+            return "\(provider.displayName) (\(endpoint.displayName))"
+        }
+        return provider.displayName
+    }
+
     var body: some View {
         NavigationView {
             Form {
                 Section {
-                    SecureField("请输入 API Key", text: $apiKey)
+                    SecureField("settings.apikey.placeholder".localized, text: $apiKey)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                 } header: {
-                    Text("阿里云 Dashscope API Key")
+                    Text("\(displayTitle) API Key")
                 } footer: {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("请前往阿里云控制台获取您的 API Key")
-                        Link("获取 API Key", destination: URL(string: "https://help.aliyun.com/zh/model-studio/get-api-key")!)
+                        Text(provider == .alibaba ? "settings.apikey.alibaba.help".localized : "settings.apikey.openrouter.help".localized)
+                        Link("settings.apikey.get".localized, destination: URL(string: provider.apiKeyHelpURL)!)
                             .font(.caption)
                     }
                 }
 
                 Section {
-                    Button("保存") {
+                    Button("save".localized) {
                         saveAPIKey()
                     }
                     .frame(maxWidth: .infinity)
                     .disabled(apiKey.isEmpty)
 
-                    if APIKeyManager.shared.hasAPIKey() {
-                        Button("删除 API Key", role: .destructive) {
+                    if APIKeyManager.shared.hasAPIKey(for: provider, endpoint: endpoint) {
+                        Button("settings.apikey.delete".localized, role: .destructive) {
                             deleteAPIKey()
                         }
                         .frame(maxWidth: .infinity)
                     }
                 }
             }
-            .navigationTitle("API Key 管理")
+            .navigationTitle("settings.apikey.manage".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("完成") {
+                    Button("done".localized) {
                         dismiss()
                     }
                 }
             }
-            .alert("保存成功", isPresented: $showSaveSuccess) {
-                Button("确定") {
+            .alert("settings.apikey.saved".localized, isPresented: $showSaveSuccess) {
+                Button("ok".localized) {
                     dismiss()
                 }
             } message: {
-                Text("API Key 已安全保存")
+                Text("settings.apikey.saved.message".localized)
             }
-            .alert("错误", isPresented: $showError) {
-                Button("确定") {}
+            .alert("error".localized, isPresented: $showError) {
+                Button("ok".localized) {}
             } message: {
                 Text(errorMessage)
             }
             .onAppear {
                 // Load existing key if available
-                if let existingKey = APIKeyManager.shared.getAPIKey() {
+                if let existingKey = APIKeyManager.shared.getAPIKey(for: provider, endpoint: endpoint) {
                     apiKey = existingKey
                 }
             }
@@ -324,76 +544,213 @@ struct APIKeySettingsView: View {
 
     private func saveAPIKey() {
         guard !apiKey.isEmpty else {
-            errorMessage = "API Key 不能为空"
+            errorMessage = "settings.apikey.empty".localized
             showError = true
             return
         }
 
-        if APIKeyManager.shared.saveAPIKey(apiKey) {
+        if APIKeyManager.shared.saveAPIKey(apiKey, for: provider, endpoint: endpoint) {
             showSaveSuccess = true
         } else {
-            errorMessage = "保存失败，请重试"
+            errorMessage = "settings.apikey.savefailed".localized
             showError = true
         }
     }
 
     private func deleteAPIKey() {
-        if APIKeyManager.shared.deleteAPIKey() {
+        if APIKeyManager.shared.deleteAPIKey(for: provider, endpoint: endpoint) {
             apiKey = ""
             dismiss()
         } else {
-            errorMessage = "删除失败，请重试"
+            errorMessage = "settings.apikey.deletefailed".localized
             showError = true
         }
     }
 }
 
-// MARK: - Model Settings
+// MARK: - Vision Model Settings
 
-struct ModelSettingsView: View {
-    @Binding var selectedModel: String
+struct VisionModelSettingsView: View {
+    @ObservedObject var providerManager = APIProviderManager.shared
     @Environment(\.dismiss) private var dismiss
-
-    let models = [
-        "qwen3-omni-flash-realtime",
-        "qwen3-omni-standard-realtime"
-    ]
+    @State private var searchText = ""
+    @State private var showVisionOnly = true
 
     var body: some View {
         NavigationView {
-            List {
-                Section {
-                    ForEach(models, id: \.self) { model in
-                        Button {
-                            selectedModel = model
-                        } label: {
-                            HStack {
-                                Text(model)
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                if selectedModel == model {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                        }
-                    }
-                } header: {
-                    Text("选择模型")
-                } footer: {
-                    Text("当前使用: \(selectedModel)")
+            Group {
+                if providerManager.currentProvider == .alibaba {
+                    alibabaModelList
+                } else {
+                    openRouterModelList
                 }
             }
-            .navigationTitle("模型设置")
+            .navigationTitle("settings.model".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("完成") {
+                    Button("done".localized) {
                         dismiss()
                     }
                 }
             }
         }
+    }
+
+    private var alibabaModelList: some View {
+        let models = [
+            ("qwen3-vl-plus", "Qwen3 VL Plus", "settings.model.qwen3vlplus.desc".localized),
+            ("qwen3-vl-max", "Qwen3 VL Max", "settings.model.qwen3vlmax.desc".localized)
+        ]
+
+        return List {
+            Section {
+                ForEach(models, id: \.0) { model in
+                    Button {
+                        providerManager.selectedModel = model.0
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(model.1)
+                                    .foregroundColor(.primary)
+                                Text(model.2)
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(AppColors.textSecondary)
+                            }
+                            Spacer()
+                            if providerManager.selectedModel == model.0 {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                    }
+                }
+            } header: {
+                Text("settings.model.alibaba".localized)
+            } footer: {
+                Text("settings.model.current".localized + ": \(providerManager.selectedModel)")
+            }
+        }
+    }
+
+    private var openRouterModelList: some View {
+        VStack {
+            // Search bar
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.gray)
+                TextField("settings.model.search".localized, text: $searchText)
+                    .textInputAutocapitalization(.never)
+                if !searchText.isEmpty {
+                    Button {
+                        searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+            .padding(8)
+            .background(Color(.systemGray6))
+            .cornerRadius(8)
+            .padding(.horizontal)
+            .padding(.top, 8)
+
+            // Vision only toggle
+            Toggle("settings.model.visiononly".localized, isOn: $showVisionOnly)
+                .padding(.horizontal)
+                .padding(.vertical, 4)
+
+            if providerManager.isLoadingModels {
+                Spacer()
+                ProgressView("settings.model.loading".localized)
+                Spacer()
+            } else if let error = providerManager.modelsError {
+                Spacer()
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .foregroundColor(.orange)
+                    Text(error)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button("settings.model.retry".localized) {
+                        Task {
+                            await providerManager.fetchOpenRouterModels()
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding()
+                Spacer()
+            } else {
+                List {
+                    let filteredModels = getFilteredModels()
+
+                    if filteredModels.isEmpty {
+                        Text("settings.model.notfound".localized)
+                            .foregroundColor(.secondary)
+                    } else {
+                        ForEach(filteredModels) { model in
+                            Button {
+                                providerManager.selectedModel = model.id
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        HStack {
+                                            Text(model.displayName)
+                                                .foregroundColor(.primary)
+                                                .lineLimit(1)
+                                            if model.isVisionCapable {
+                                                Image(systemName: "eye.fill")
+                                                    .font(.caption)
+                                                    .foregroundColor(.purple)
+                                            }
+                                        }
+                                        Text(model.id)
+                                            .font(AppTypography.caption)
+                                            .foregroundColor(AppColors.textSecondary)
+                                            .lineLimit(1)
+                                        if !model.priceDisplay.isEmpty {
+                                            Text(model.priceDisplay)
+                                                .font(.caption2)
+                                                .foregroundColor(.green)
+                                        }
+                                    }
+                                    Spacer()
+                                    if providerManager.selectedModel == model.id {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.blue)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .task {
+            if providerManager.openRouterModels.isEmpty {
+                await providerManager.fetchOpenRouterModels()
+            }
+        }
+    }
+
+    private func getFilteredModels() -> [OpenRouterModel] {
+        var models = providerManager.openRouterModels
+
+        if showVisionOnly {
+            models = models.filter { $0.isVisionCapable }
+        }
+
+        if !searchText.isEmpty {
+            models = providerManager.searchModels(searchText)
+            if showVisionOnly {
+                models = models.filter { $0.isVisionCapable }
+            }
+        }
+
+        return models
     }
 }
 
@@ -570,6 +927,193 @@ struct AppLanguageSettingsView: View {
             } message: {
                 Text("settings.applanguage.restart.message".localized)
             }
+        }
+    }
+}
+
+// MARK: - Live AI Provider Settings
+
+struct LiveAIProviderSettingsView: View {
+    @ObservedObject var providerManager = APIProviderManager.shared
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    ForEach(LiveAIProvider.allCases, id: \.self) { provider in
+                        Button {
+                            providerManager.liveAIProvider = provider
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(provider.displayName)
+                                        .foregroundColor(.primary)
+                                    Text(liveAIProviderDescription(provider))
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(AppColors.textSecondary)
+                                }
+                                Spacer()
+                                if providerManager.liveAIProvider == provider {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text("settings.liveai.provider.select".localized)
+                } footer: {
+                    Text("settings.liveai.provider.description".localized)
+                }
+
+                // API Key status
+                Section {
+                    HStack {
+                        Text("settings.apikey.status".localized)
+                        Spacer()
+                        if providerManager.hasLiveAIAPIKey {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                Text("settings.apikey.configured".localized)
+                                    .foregroundColor(.green)
+                            }
+                        } else {
+                            HStack(spacing: 4) {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .foregroundColor(.red)
+                                Text("settings.apikey.notconfigured".localized)
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+
+                    Link(destination: URL(string: providerManager.liveAIProvider.apiKeyHelpURL)!) {
+                        HStack {
+                            Text("settings.provider.getapikey".localized)
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                        }
+                    }
+                } header: {
+                    Text("\(providerManager.liveAIProvider.displayName) API Key")
+                }
+            }
+            .navigationTitle("settings.liveai.provider".localized)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("done".localized) {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    private func liveAIProviderDescription(_ provider: LiveAIProvider) -> String {
+        switch provider {
+        case .alibaba:
+            return "settings.liveai.alibaba.desc".localized
+        case .google:
+            return "settings.liveai.google.desc".localized
+        }
+    }
+}
+
+// MARK: - Google API Key Settings
+
+struct GoogleAPIKeySettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var apiKey: String = ""
+    @State private var showSaveSuccess = false
+    @State private var showError = false
+    @State private var errorMessage = ""
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    SecureField("settings.apikey.placeholder".localized, text: $apiKey)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                } header: {
+                    Text("Google Gemini API Key")
+                } footer: {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("settings.apikey.google.help".localized)
+                        Link("settings.apikey.get".localized, destination: URL(string: "https://aistudio.google.com/apikey")!)
+                            .font(.caption)
+                    }
+                }
+
+                Section {
+                    Button("save".localized) {
+                        saveAPIKey()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .disabled(apiKey.isEmpty)
+
+                    if APIKeyManager.shared.hasGoogleAPIKey() {
+                        Button("settings.apikey.delete".localized, role: .destructive) {
+                            deleteAPIKey()
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+            .navigationTitle("settings.apikey.manage".localized)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("done".localized) {
+                        dismiss()
+                    }
+                }
+            }
+            .alert("settings.apikey.saved".localized, isPresented: $showSaveSuccess) {
+                Button("ok".localized) {
+                    dismiss()
+                }
+            } message: {
+                Text("settings.apikey.saved.message".localized)
+            }
+            .alert("error".localized, isPresented: $showError) {
+                Button("ok".localized) {}
+            } message: {
+                Text(errorMessage)
+            }
+            .onAppear {
+                if let existingKey = APIKeyManager.shared.getGoogleAPIKey() {
+                    apiKey = existingKey
+                }
+            }
+        }
+    }
+
+    private func saveAPIKey() {
+        guard !apiKey.isEmpty else {
+            errorMessage = "settings.apikey.empty".localized
+            showError = true
+            return
+        }
+
+        if APIKeyManager.shared.saveGoogleAPIKey(apiKey) {
+            showSaveSuccess = true
+        } else {
+            errorMessage = "settings.apikey.savefailed".localized
+            showError = true
+        }
+    }
+
+    private func deleteAPIKey() {
+        if APIKeyManager.shared.deleteGoogleAPIKey() {
+            apiKey = ""
+            dismiss()
+        } else {
+            errorMessage = "settings.apikey.deletefailed".localized
+            showError = true
         }
     }
 }

@@ -138,9 +138,43 @@
 "settings.device.stream.active" = "活跃";
 "settings.device.stream.inactive" = "未启动";
 "settings.ai" = "AI 设置";
+
+// API Provider
+"settings.provider" = "API 提供商";
+"settings.provider.select" = "选择 API 提供商";
+"settings.provider.description" = "选择用于 AI 识图的 API 服务提供商";
+"settings.provider.alibaba.desc" = "阿里云通义千问视觉模型";
+"settings.provider.openrouter.desc" = "统一接口，500+ AI 模型";
+"settings.provider.getapikey" = "获取 API Key";
+
+// Model Settings
 "settings.model" = "模型设置";
 "settings.model.select" = "选择模型";
 "settings.model.current" = "当前使用";
+"settings.model.alibaba" = "阿里云模型";
+"settings.model.openrouter" = "OpenRouter 模型";
+"settings.model.qwen3vlplus.desc" = "高性能视觉理解模型";
+"settings.model.qwen3vlmax.desc" = "最强视觉理解模型";
+"settings.model.search" = "搜索模型...";
+"settings.model.visiononly" = "仅显示支持视觉的模型";
+"settings.model.loading" = "加载模型列表...";
+"settings.model.retry" = "重试";
+"settings.model.notfound" = "未找到匹配的模型";
+
+// Endpoint Settings
+"settings.endpoint" = "服务区域";
+"settings.endpoint.beijing.desc" = "中国大陆用户使用";
+"settings.endpoint.singapore.desc" = "海外用户使用";
+"settings.endpoint.description" = "不同区域的 API Key 不能互通使用";
+
+// Live AI Settings
+"settings.liveai" = "Live AI";
+"settings.liveai.provider" = "Live AI 提供商";
+"settings.liveai.provider.select" = "选择 Live AI 提供商";
+"settings.liveai.provider.description" = "选择用于实时语音对话的 AI 提供商";
+"settings.liveai.alibaba.desc" = "通义千问 Omni 实时音频模型";
+"settings.liveai.google.desc" = "Gemini Live 实时音频模型";
+
 "settings.language" = "输出语言";
 "settings.language.select" = "选择输出语言";
 "settings.language.description" = "AI 将使用该语言进行语音输出和文字回复";
@@ -150,20 +184,25 @@
 "settings.applanguage.restart.title" = "需要重启";
 "settings.applanguage.restart.message" = "切换语言需要重启 App 才能生效";
 "settings.applanguage.restart.confirm" = "立即重启";
+
+// API Key
 "settings.apikey" = "API Key 管理";
+"settings.apikey.manage" = "API Key 管理";
+"settings.apikey.status" = "API Key 状态";
 "settings.apikey.configured" = "已配置";
 "settings.apikey.notconfigured" = "未配置";
-"settings.apikey.enter" = "请输入 API Key";
-"settings.apikey.dashscope" = "阿里云 Dashscope API Key";
-"settings.apikey.help" = "请前往阿里云控制台获取您的 API Key";
-"settings.apikey.getkey" = "获取 API Key";
-"settings.apikey.save" = "保存";
+"settings.apikey.placeholder" = "请输入 API Key";
+"settings.apikey.alibaba.help" = "请前往阿里云控制台获取您的 API Key";
+"settings.apikey.openrouter.help" = "请前往 OpenRouter 网站获取您的 API Key";
+"settings.apikey.google.help" = "请前往 Google AI Studio 获取您的 API Key";
+"settings.apikey.get" = "获取 API Key";
 "settings.apikey.delete" = "删除 API Key";
 "settings.apikey.saved" = "保存成功";
-"settings.apikey.savedmessage" = "API Key 已安全保存";
+"settings.apikey.saved.message" = "API Key 已安全保存";
 "settings.apikey.empty" = "API Key 不能为空";
 "settings.apikey.savefailed" = "保存失败，请重试";
 "settings.apikey.deletefailed" = "删除失败，请重试";
+
 "settings.quality" = "视频画质";
 "settings.quality.select" = "选择视频画质";
 "settings.quality.description" = "更高的画质会消耗更多电量";

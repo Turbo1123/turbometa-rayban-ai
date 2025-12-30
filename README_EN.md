@@ -20,7 +20,33 @@
 
 ---
 
-## 🎉 Major Update v1.1.0 - Quick Vision
+## 🎉 Major Update v1.3.0
+
+<div align="center">
+
+### 🌍 Bilingual UI + Multi-Platform AI + Full Multimodal Interaction
+
+**Quick Vision | Live AI | OpenRouter & Gemini Support**
+
+</div>
+
+### 🆕 Core Features
+
+- 👁️ **Quick Vision**: Siri voice activation - identify objects without unlocking your phone
+- 🤖 **Live AI**: Real-time multimodal AI conversation via glasses camera and microphone
+- 🍽️ **LeanEat**: Take a photo to get nutrition analysis and health scores
+
+### 🌐 Multi-Language & Multi-Platform
+
+- 🌐 **Bilingual Interface**: Full English and Chinese UI support with easy switching
+- 🔌 **OpenRouter Support**: Access 500+ AI models including GPT-4, Claude, Gemini, and more
+- 🎙️ **Google Gemini Live**: Live AI now supports Google Gemini real-time voice chat (requires non-China network)
+- 🌏 **Alibaba Multi-Region**: Support for Beijing (China mainland) and Singapore (International) endpoints
+- 🔑 **Independent API Key Management**: Separate API keys for different providers and regions
+
+---
+
+## 📱 Quick Vision
 
 <div align="center">
 

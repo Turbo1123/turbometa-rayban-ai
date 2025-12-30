@@ -1,6 +1,6 @@
 /*
  * Quick Vision Service
- * 快速识图服务 - 使用 qwen3-vl-plus 模型进行图像识别
+ * 快速识图服务 - 支持多提供商 (阿里云/OpenRouter)
  * 返回简洁的描述，适合 TTS 播报
  */
 
@@ -9,11 +9,25 @@ import UIKit
 
 class QuickVisionService {
     private let apiKey: String
-    private let baseURL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    private let model = "qwen3-vl-plus"
+    private let baseURL: String
+    private let model: String
+    private let provider: APIProvider
 
-    init(apiKey: String) {
+    /// Initialize with explicit configuration
+    init(apiKey: String, baseURL: String? = nil, model: String? = nil) {
         self.apiKey = apiKey
+        self.provider = VisionAPIConfig.provider
+        self.baseURL = baseURL ?? VisionAPIConfig.baseURL
+        self.model = model ?? VisionAPIConfig.model
+    }
+
+    /// Initialize with current provider configuration
+    convenience init() {
+        self.init(
+            apiKey: VisionAPIConfig.apiKey,
+            baseURL: VisionAPIConfig.baseURL,
+            model: VisionAPIConfig.model
+        )
     }
 
     // MARK: - API Request/Response Models
@@ -45,14 +59,25 @@ class QuickVisionService {
     }
 
     struct ChatCompletionResponse: Codable {
-        let choices: [Choice]
+        let choices: [Choice]?
+        let error: APIError?
 
         struct Choice: Codable {
-            let message: Message
+            let message: Message?
+            let delta: Delta?
 
             struct Message: Codable {
-                let content: String
+                let content: String?
             }
+
+            struct Delta: Codable {
+                let content: String?
+            }
+        }
+
+        struct APIError: Codable {
+            let message: String?
+            let code: Int?
         }
     }
 
@@ -108,20 +133,31 @@ class QuickVisionService {
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        urlRequest.timeoutInterval = 30 // 30秒超时
+
+        // Set headers based on provider
+        let headers = VisionAPIConfig.headers(with: apiKey)
+        for (key, value) in headers {
+            urlRequest.setValue(value, forHTTPHeaderField: key)
+        }
+
+        urlRequest.timeoutInterval = 60 // 60秒超时（OpenRouter 可能需要更长时间）
 
         let encoder = JSONEncoder()
         urlRequest.httpBody = try encoder.encode(request)
 
-        print("📡 [QuickVision] Sending request to qwen3-vl-plus...")
+        print("📡 [QuickVision] Sending request to \(model) via \(provider.displayName)...")
+        print("📡 [QuickVision] URL: \(url.absoluteString)")
 
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw QuickVisionError.invalidResponse
         }
+
+        // Log raw response for debugging
+        let rawResponse = String(data: data, encoding: .utf8) ?? "Unable to decode"
+        print("📡 [QuickVision] HTTP Status: \(httpResponse.statusCode)")
+        print("📡 [QuickVision] Raw response: \(rawResponse.prefix(500))")
 
         guard httpResponse.statusCode == 200 else {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
@@ -130,16 +166,40 @@ class QuickVisionService {
         }
 
         let decoder = JSONDecoder()
-        let apiResponse = try decoder.decode(ChatCompletionResponse.self, from: data)
+        let apiResponse: ChatCompletionResponse
 
-        guard let firstChoice = apiResponse.choices.first else {
+        do {
+            apiResponse = try decoder.decode(ChatCompletionResponse.self, from: data)
+        } catch {
+            print("❌ [QuickVision] JSON decode error: \(error)")
+            throw QuickVisionError.invalidResponse
+        }
+
+        // Check for API error in response body
+        if let apiError = apiResponse.error {
+            let errorMsg = apiError.message ?? "Unknown API error"
+            print("❌ [QuickVision] API returned error: \(errorMsg)")
+            throw QuickVisionError.apiError(statusCode: apiError.code ?? -1, message: errorMsg)
+        }
+
+        // Get content from choices
+        guard let choices = apiResponse.choices, let firstChoice = choices.first else {
+            print("❌ [QuickVision] No choices in response")
             throw QuickVisionError.emptyResponse
         }
 
-        let result = firstChoice.message.content.trimmingCharacters(in: .whitespacesAndNewlines)
-        print("✅ [QuickVision] Result: \(result)")
+        // Try message.content first, then delta.content
+        let content = firstChoice.message?.content ?? firstChoice.delta?.content
 
-        return result
+        guard let result = content, !result.isEmpty else {
+            print("❌ [QuickVision] Empty content in response")
+            throw QuickVisionError.emptyResponse
+        }
+
+        let trimmedResult = result.trimmingCharacters(in: .whitespacesAndNewlines)
+        print("✅ [QuickVision] Result: \(trimmedResult)")
+
+        return trimmedResult
     }
 }
 

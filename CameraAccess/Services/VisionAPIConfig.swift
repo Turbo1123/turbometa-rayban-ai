@@ -1,22 +1,63 @@
 /*
  * Vision API Configuration
- * Centralized configuration for Alibaba Cloud Dashscope API
+ * Centralized configuration for Vision API
+ * Supports multiple providers: Alibaba Cloud Dashscope, OpenRouter
  */
 
 import Foundation
 
 struct VisionAPIConfig {
-    // API Key is now securely stored in Keychain
-    // Get your API key from: https://help.aliyun.com/zh/model-studio/get-api-key
+    // MARK: - Dynamic Configuration (based on current provider)
+
+    /// Current API Key based on selected provider
     static var apiKey: String {
-        return APIKeyManager.shared.getAPIKey() ?? ""
+        return APIProviderManager.staticAPIKey
     }
 
-    // Base URL for Alibaba Cloud Dashscope API
-    // Beijing region: https://dashscope.aliyuncs.com/compatible-mode/v1
-    // Singapore region: https://dashscope-intl.aliyuncs.com/compatible-mode/v1
-    static let baseURL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    /// Current Base URL based on selected provider
+    static var baseURL: String {
+        return APIProviderManager.staticBaseURL
+    }
 
-    // Model name
-    static let model = "qwen3-vl-plus"
+    /// Current Model based on selected provider
+    static var model: String {
+        return APIProviderManager.staticCurrentModel
+    }
+
+    /// Current Provider
+    static var provider: APIProvider {
+        return APIProviderManager.staticCurrentProvider
+    }
+
+    // MARK: - Provider-specific URLs
+
+    /// Alibaba Cloud Dashscope API URLs
+    static let alibabaBeijingURL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    static let alibabaSingaporeURL = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+
+    /// OpenRouter API URL
+    static let openRouterURL = "https://openrouter.ai/api/v1"
+
+    // MARK: - Default Models
+
+    static let defaultAlibabaModel = "qwen3-vl-plus"
+    static let defaultOpenRouterModel = "google/gemini-3-flash-preview"
+
+    // MARK: - Request Headers
+
+    /// Get headers for the current provider
+    static func headers(with apiKey: String) -> [String: String] {
+        var headers = [
+            "Content-Type": "application/json",
+            "Authorization": "Bearer \(apiKey)"
+        ]
+
+        // Add OpenRouter-specific headers
+        if provider == .openrouter {
+            headers["HTTP-Referer"] = "https://turbometa.app"
+            headers["X-Title"] = "TurboMeta"
+        }
+
+        return headers
+    }
 }

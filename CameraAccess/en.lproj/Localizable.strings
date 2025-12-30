@@ -138,9 +138,43 @@
 "settings.device.stream.active" = "Active";
 "settings.device.stream.inactive" = "Inactive";
 "settings.ai" = "AI Settings";
+
+// API Provider
+"settings.provider" = "API Provider";
+"settings.provider.select" = "Select API Provider";
+"settings.provider.description" = "Choose the API service provider for AI vision";
+"settings.provider.alibaba.desc" = "Alibaba Qwen Vision Models";
+"settings.provider.openrouter.desc" = "Unified API, 500+ AI Models";
+"settings.provider.getapikey" = "Get API Key";
+
+// Model Settings
 "settings.model" = "Model Settings";
 "settings.model.select" = "Select Model";
 "settings.model.current" = "Currently using";
+"settings.model.alibaba" = "Alibaba Models";
+"settings.model.openrouter" = "OpenRouter Models";
+"settings.model.qwen3vlplus.desc" = "High-performance vision model";
+"settings.model.qwen3vlmax.desc" = "Most powerful vision model";
+"settings.model.search" = "Search models...";
+"settings.model.visiononly" = "Show vision-capable models only";
+"settings.model.loading" = "Loading models...";
+"settings.model.retry" = "Retry";
+"settings.model.notfound" = "No matching models found";
+
+// Endpoint Settings
+"settings.endpoint" = "Service Region";
+"settings.endpoint.beijing.desc" = "China mainland users";
+"settings.endpoint.singapore.desc" = "International users";
+"settings.endpoint.description" = "API Keys for different regions are not interchangeable";
+
+// Live AI Settings
+"settings.liveai" = "Live AI";
+"settings.liveai.provider" = "Live AI Provider";
+"settings.liveai.provider.select" = "Select Live AI Provider";
+"settings.liveai.provider.description" = "Choose the provider for real-time voice chat";
+"settings.liveai.alibaba.desc" = "Qwen Omni real-time audio model";
+"settings.liveai.google.desc" = "Gemini Live real-time audio model";
+
 "settings.language" = "Output Language";
 "settings.language.select" = "Select Output Language";
 "settings.language.description" = "AI will use this language for voice output and text responses";
@@ -150,20 +184,25 @@
 "settings.applanguage.restart.title" = "Restart Required";
 "settings.applanguage.restart.message" = "The app needs to restart for the language change to take effect";
 "settings.applanguage.restart.confirm" = "Restart Now";
+
+// API Key
 "settings.apikey" = "API Key Management";
+"settings.apikey.manage" = "API Key Management";
+"settings.apikey.status" = "API Key Status";
 "settings.apikey.configured" = "Configured";
 "settings.apikey.notconfigured" = "Not Configured";
-"settings.apikey.enter" = "Enter API Key";
-"settings.apikey.dashscope" = "Alibaba Cloud Dashscope API Key";
-"settings.apikey.help" = "Please visit Alibaba Cloud console to get your API Key";
-"settings.apikey.getkey" = "Get API Key";
-"settings.apikey.save" = "Save";
+"settings.apikey.placeholder" = "Enter API Key";
+"settings.apikey.alibaba.help" = "Please visit Alibaba Cloud console to get your API Key";
+"settings.apikey.openrouter.help" = "Please visit OpenRouter website to get your API Key";
+"settings.apikey.google.help" = "Please visit Google AI Studio to get your API Key";
+"settings.apikey.get" = "Get API Key";
 "settings.apikey.delete" = "Delete API Key";
 "settings.apikey.saved" = "Saved Successfully";
-"settings.apikey.savedmessage" = "API Key has been securely saved";
+"settings.apikey.saved.message" = "API Key has been securely saved";
 "settings.apikey.empty" = "API Key cannot be empty";
 "settings.apikey.savefailed" = "Save failed, please retry";
 "settings.apikey.deletefailed" = "Delete failed, please retry";
+
 "settings.quality" = "Video Quality";
 "settings.quality.select" = "Select Video Quality";
 "settings.quality.description" = "Higher quality consumes more battery";

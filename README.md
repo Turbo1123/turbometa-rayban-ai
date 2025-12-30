@@ -14,13 +14,43 @@
 [![Release](https://img.shields.io/github/v/release/Turbo1123/turbometa-rayban-ai)](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 [![请我喝咖啡](https://img.shields.io/badge/请我喝咖啡-☕-yellow?style=flat-square)](#-请我喝杯咖啡)
 
-[English](./README_EN.md) | 简体中文
+**🇺🇸 [English Version / README in English](./README_EN.md)** | 简体中文
 
 </div>
 
 ---
 
-## 🎉 重磅更新 v1.1.0 - Quick Vision 快速识图
+> 🌍 **For English speakers**: Please check [**README_EN.md**](./README_EN.md) for the English version of this documentation.
+
+---
+
+## 🎉 重磅更新 v1.3.0
+
+<div align="center">
+
+### 🌍 中英文双语 + 多平台 AI + 全模态交互
+
+**Quick Vision 快速识图 | Live AI 实时对话 | OpenRouter & Gemini 支持**
+
+</div>
+
+### 🆕 核心功能
+
+- 👁️ **Quick Vision 快速识图**：Siri 语音唤醒，无需解锁手机即可识别眼前物体
+- 🤖 **Live AI 实时对话**：通过眼镜摄像头和麦克风进行多模态实时 AI 对话
+- 🍽️ **LeanEat 营养分析**：拍照即可获得食物营养成分和健康评分
+
+### 🌐 多语言 & 多平台
+
+- 🌐 **中英文双语界面**：App 界面完整支持中文和英文切换
+- 🔌 **OpenRouter 支持**：接入 500+ AI 模型，包括 GPT-4、Claude、Gemini 等
+- 🎙️ **Google Gemini Live**：Live AI 支持 Google Gemini 实时语音对话（需海外网络）
+- 🌏 **阿里云多区域**：支持北京（中国大陆）和新加坡（国际）两个服务区域
+- 🔑 **独立 API Key 管理**：不同服务商和区域的 API Key 独立管理
+
+---
+
+## 📱 Quick Vision 快速识图
 
 <div align="center">
 

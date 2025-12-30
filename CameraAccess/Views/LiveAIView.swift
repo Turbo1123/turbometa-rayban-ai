@@ -13,7 +13,9 @@ struct LiveAIView: View {
 
     init(streamViewModel: StreamSessionViewModel, apiKey: String) {
         self.streamViewModel = streamViewModel
-        self._viewModel = StateObject(wrappedValue: OmniRealtimeViewModel(apiKey: apiKey))
+        // Use the Live AI API key based on selected provider
+        let liveAIApiKey = APIProviderManager.staticLiveAIAPIKey
+        self._viewModel = StateObject(wrappedValue: OmniRealtimeViewModel(apiKey: liveAIApiKey.isEmpty ? apiKey : liveAIApiKey))
     }
 
     var body: some View {

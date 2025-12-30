@@ -33,6 +33,7 @@ class TTSService: NSObject, ObservableObject {
     private var isPlaybackEngineRunning = false
 
     private var currentTask: Task<Void, Never>?
+    private var systemSynthesizer: AVSpeechSynthesizer?
 
     private override init() {
         super.init()
@@ -118,17 +119,30 @@ class TTSService: NSObject, ObservableObject {
         print("🔊 [TTS] 音频会话已预配置")
     }
 
-    /// 播报文本（使用传入的 API Key）
+    /// 播报文本
+    /// - 阿里云 API：使用阿里云 qwen3-tts-flash
+    /// - OpenRouter API：使用系统 TTS
     func speak(_ text: String, apiKey: String? = nil) {
         // 取消之前的任务
         currentTask?.cancel()
         stop()
 
-        // 使用传入的 API Key，或尝试获取
-        let key = apiKey ?? APIKeyManager.shared.getAPIKey()
+        // OpenRouter 使用系统 TTS
+        if APIProviderManager.staticCurrentProvider == .openrouter {
+            print("🔊 [TTS] OpenRouter mode, using system TTS")
+            isSpeaking = true
+            currentTask = Task {
+                await fallbackToSystemTTS(text: text)
+                isSpeaking = false
+            }
+            return
+        }
+
+        // 阿里云：使用阿里云 TTS
+        let key = apiKey ?? APIKeyManager.shared.getAPIKey(for: .alibaba)
 
         guard let finalKey = key, !finalKey.isEmpty else {
-            print("❌ [TTS] No API key, falling back to system TTS")
+            print("❌ [TTS] No Alibaba API key, falling back to system TTS")
             isSpeaking = true
             currentTask = Task {
                 await fallbackToSystemTTS(text: text)
@@ -324,26 +338,47 @@ class TTSService: NSObject, ObservableObject {
     private func fallbackToSystemTTS(text: String) async {
         print("🔊 [TTS] Falling back to system TTS")
 
-        // 先配置音频会话
-        configureAudioSession()
+        // 系统 TTS 使用 Playback 模式（不是 PlayAndRecord）
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playback, mode: .default, options: [.duckOthers])
+            try audioSession.setActive(true)
+            print("✅ [TTS] System TTS audio session configured")
+        } catch {
+            print("⚠️ [TTS] System TTS audio session error: \(error)")
+        }
 
-        let synthesizer = AVSpeechSynthesizer()
+        // 使用实例变量保持强引用，防止被释放
+        systemSynthesizer = AVSpeechSynthesizer()
+
+        guard let synthesizer = systemSynthesizer else { return }
+
         let utterance = AVSpeechUtterance(string: text)
         // 根据当前语言设置选择系统语音
         let voiceLanguage = LanguageManager.staticIsChinese ? "zh-CN" : "en-US"
         utterance.voice = AVSpeechSynthesisVoice(language: voiceLanguage)
-        utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 1.1
+        utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 1.0
+        utterance.volume = 1.0
+        utterance.pitchMultiplier = 1.0
 
+        print("🔊 [TTS] System TTS speaking: \(text.prefix(30))...")
         synthesizer.speak(utterance)
+
+        // 等待一小段时间让播放开始
+        try? await Task.sleep(nanoseconds: 100_000_000)
 
         // 等待播放完成
         while synthesizer.isSpeaking {
             if Task.isCancelled {
                 synthesizer.stopSpeaking(at: .immediate)
+                systemSynthesizer = nil
                 return
             }
             try? await Task.sleep(nanoseconds: 100_000_000)
         }
+
+        print("✅ [TTS] System TTS finished")
+        systemSynthesizer = nil
     }
 }
 
