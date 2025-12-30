@@ -52,9 +52,13 @@
 	</dict>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>bluetooth-central</string>
 		<string>bluetooth-peripheral</string>
 		<string>external-accessory</string>
+		<string>audio</string>
 	</array>
+	<key>NSSiriUsageDescription</key>
+	<string>TurboMeta 需要 Siri 权限以支持语音快捷指令触发快速识图功能。</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Needed to connect to Meta AI Glasses</string>
 	<key>UISupportedExternalAccessoryProtocols</key>

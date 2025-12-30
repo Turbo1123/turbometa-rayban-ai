@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		05043536CDB06C0B88B3C4D9 /* TTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069172850B30A2766C8BD4B5 /* TTSService.swift */; };
+		26664DE8308E3F2981609421 /* QuickVisionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA3E36CE337855A7F17F2AC8 /* QuickVisionService.swift */; };
 		4BA57AC32EF8227E002EC214 /* ConversationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA57AAC2EF8227E002EC214 /* ConversationDetailView.swift */; };
 		4BA57AC42EF8227E002EC214 /* CircleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA57AA32EF8227E002EC214 /* CircleButton.swift */; };
 		4BA57AC52EF8227E002EC214 /* CustomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA57AA42EF8227E002EC214 /* CustomButton.swift */; };
@@ -61,6 +63,8 @@
 		8FD96B952E6F0F7D00F56AB1 /* MWDATCore in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB1 /* MWDATCore */; };
 		8FD96B952E6F0F7D00F56AB2 /* MWDATCamera in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB2 /* MWDATCamera */; };
 		8FD96B952E6F0F7D00F56AB3 /* MWDATMockDevice in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB3 /* MWDATMockDevice */; };
+		A5C50340AFD334B459151AF1 /* QuickVisionIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568E19B82D2116C7FE3B1829 /* QuickVisionIntent.swift */; };
+		D83E4BD577765733E71A0068 /* QuickVisionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B037E0156E90DE2314A9F47 /* QuickVisionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,6 +91,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		069172850B30A2766C8BD4B5 /* TTSService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TTSService.swift; sourceTree = "<group>"; };
 		3A3A3A3A3A3A3A3A3A3A3A3A /* CameraAccess.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CameraAccess.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BA57A872EF8227E002EC214 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localizable.strings; sourceTree = "<group>"; };
 		4BA57A8A2EF8227E002EC214 /* ConversationRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationRecord.swift; sourceTree = "<group>"; };
@@ -137,15 +142,28 @@
 		4BA57AC02EF8227E002EC214 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = Localizable.strings; sourceTree = "<group>"; };
 		4BA57AF22EF823ED002EC214 /* PermissionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsManager.swift; sourceTree = "<group>"; };
 		4BA57AF52EF82400002EC214 /* PermissionsRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsRequestView.swift; sourceTree = "<group>"; };
+		568E19B82D2116C7FE3B1829 /* QuickVisionIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickVisionIntent.swift; sourceTree = "<group>"; };
+		6B037E0156E90DE2314A9F47 /* QuickVisionView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickVisionView.swift; sourceTree = "<group>"; };
 		8FD96B772E6F0A9800F56AB1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8FD96B782E6F0A9800F56AB1 /* TurboMeta.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TurboMeta.entitlements; sourceTree = "<group>"; };
 		8FD96B792E6F0A9800F56AB1 /* TurboMetaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurboMetaApp.swift; sourceTree = "<group>"; };
 		8FD96B7B2E6F0A9800F56AB1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CA3E36CE337855A7F17F2AC8 /* QuickVisionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickVisionService.swift; sourceTree = "<group>"; };
 		E699CC952E8150670052C240 /* CameraAccessTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CameraAccessTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		E699CC962E8150670052C240 /* CameraAccessTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CameraAccessTests; sourceTree = "<group>"; };
+		E699CC962E8150670052C240 /* CameraAccessTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = CameraAccessTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,6 +180,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2BDC3665CD11E348EEEBA8F7 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				568E19B82D2116C7FE3B1829 /* QuickVisionIntent.swift */,
+			);
+			name = Intents;
+			path = Intents;
+			sourceTree = "<group>";
+		};
 		4BA57A892EF8227E002EC214 /* en.lproj */ = {
 			isa = PBXGroup;
 			children = (
@@ -187,6 +214,8 @@
 				4BA57A8F2EF8227E002EC214 /* OmniRealtimeService.swift */,
 				4BA57A902EF8227E002EC214 /* VisionAPIConfig.swift */,
 				4BA57A912EF8227E002EC214 /* VisionAPIService.swift */,
+				069172850B30A2766C8BD4B5 /* TTSService.swift */,
+				CA3E36CE337855A7F17F2AC8 /* QuickVisionService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -279,6 +308,7 @@
 				4BA57ABC2EF8227E002EC214 /* StreamView.swift */,
 				4BA57ABD2EF8227E002EC214 /* TurboMetaHomeView.swift */,
 				4BA57ABE2EF8227E002EC214 /* VisionRecognitionView.swift */,
+				6B037E0156E90DE2314A9F47 /* QuickVisionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -332,6 +362,7 @@
 				8FD96B782E6F0A9800F56AB1 /* TurboMeta.entitlements */,
 				8FD96B792E6F0A9800F56AB1 /* TurboMetaApp.swift */,
 				8FD96B7B2E6F0A9800F56AB1 /* Info.plist */,
+				2BDC3665CD11E348EEEBA8F7 /* Intents */,
 			);
 			path = CameraAccess;
 			sourceTree = "<group>";
@@ -373,8 +404,6 @@
 				E699CC962E8150670052C240 /* CameraAccessTests */,
 			);
 			name = CameraAccessTests;
-			packageProductDependencies = (
-			);
 			productName = CameraAccessTests;
 			productReference = E699CC952E8150670052C240 /* CameraAccessTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -493,6 +522,10 @@
 				4BA57AED2EF8227E002EC214 /* TurboMetaHomeView.swift in Sources */,
 				4BA57AEE2EF8227E002EC214 /* OmniRealtimeService.swift in Sources */,
 				4BA57AEF2EF8227E002EC214 /* HomeScreenView.swift in Sources */,
+				05043536CDB06C0B88B3C4D9 /* TTSService.swift in Sources */,
+				26664DE8308E3F2981609421 /* QuickVisionService.swift in Sources */,
+				A5C50340AFD334B459151AF1 /* QuickVisionIntent.swift in Sources */,
+				D83E4BD577765733E71A0068 /* QuickVisionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

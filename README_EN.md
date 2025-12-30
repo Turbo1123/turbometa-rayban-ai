@@ -18,6 +18,29 @@
 
 </div>
 
+---
+
+## 🎉 Major Update v1.1.0 - Quick Vision
+
+<div align="center">
+
+### 🚀 Background Wake-up + Siri Voice Trigger!
+
+**No need to unlock your phone - just say a word and let AI identify everything in front of you**
+
+</div>
+
+Due to Meta DAT SDK limitations, the app cannot directly access the glasses camera in the background. We innovatively combined **Siri Shortcuts + App Intent + Alibaba Cloud TTS** to achieve this feature:
+
+- 📱 **Siri Voice Wake-up**: Just say "Hey Siri, TurboMeta Quick Vision"
+- ⌚ **Action Button Trigger** (iPhone 15 Pro+): One-tap Quick Vision
+- 🔊 **Voice Result Announcement**: High-quality TTS powered by qwen3-tts-flash
+- 🎯 **Fully Automated**: Start stream → Capture → Stop stream → AI Recognition → TTS Announcement
+
+👉 [View Detailed Tutorial](#-quick-vision-tutorial)
+
+---
+
 ## 🎨 Interface Preview
 
 <table>
@@ -169,6 +192,13 @@ This is the world's first **fully Chinese-enabled** RayBan Meta AI assistant, br
 
 ## ✨ Core Features
 
+### 👁️ Quick Vision <sup>`NEW`</sup>
+- **Siri Wake-up**: Voice-triggered recognition without unlocking your phone
+- **Shortcuts Integration**: Supports iOS Shortcuts automation
+- **Action Button Support**: One-tap trigger on iPhone 15 Pro series
+- **High-quality TTS**: Voice announcement powered by qwen3-tts-flash
+- **Smart Recognition**: Based on qwen3-vl-plus multimodal visual understanding
+
 ### 🤖 Live AI - Real-time Conversations
 - **Multimodal Interaction**: Simultaneous voice and visual input support
 - **Real-time Response**: Based on Qwen Omni-Realtime model with low-latency voice conversations
@@ -211,6 +241,7 @@ This is the world's first **fully Chinese-enabled** RayBan Meta AI assistant, br
 ### AI Models
 - **Qwen Omni-Realtime**: Real-time multimodal conversations
 - **Qwen VL-Plus**: Visual understanding and image analysis
+- **Qwen TTS-Flash**: High-quality Chinese text-to-speech
 
 ## 📋 Requirements
 
@@ -328,6 +359,108 @@ ios-deploy --bundle YourApp.app
 3. Create your streaming content
 4. Tap stop button to end the stream
 
+---
+
+## 👁️ Quick Vision Tutorial
+
+Quick Vision allows you to quickly identify objects in front of you through Siri or Shortcuts without unlocking your phone.
+
+### 📋 Prerequisites
+
+1. ✅ TurboMeta App installed and API Key configured
+2. ✅ RayBan Meta glasses paired and turned on
+3. ✅ Open TurboMeta App once for first-time initialization
+
+### 🔧 Setting Up Shortcuts
+
+#### Method 1: Siri Voice Trigger
+
+1. Open the **Shortcuts** app on iPhone
+2. Tap **+** in the top right to create a new shortcut
+3. Tap **Add Action**
+4. Search for **TurboMeta** or **Turbo Meta**
+5. Select **Quick Vision** action
+6. Tap the shortcut name at the top to rename it (e.g., "Quick Vision", "What's This")
+7. Tap **Done** to save
+
+**How to Use**:
+- Say "Hey Siri, Quick Vision" (or your custom shortcut name)
+- AI will automatically capture, recognize, and announce the result
+
+<details>
+<summary>📸 Click to view setup screenshots</summary>
+
+1. Search for TurboMeta in Shortcuts app
+2. Add "Quick Vision" action
+3. Rename the shortcut
+
+</details>
+
+#### Method 2: iPhone 15 Pro Action Button
+
+If you have iPhone 15 Pro / 15 Pro Max / 16 series, you can bind Quick Vision to the Action Button:
+
+1. Open **Settings** → **Action Button**
+2. Select **Shortcut**
+3. Choose your TurboMeta Quick Vision shortcut
+4. Done!
+
+**How to Use**:
+- Long press the Action Button to trigger Quick Vision
+- No need to unlock your phone - works while wearing glasses
+
+#### Method 3: Lock Screen Widget
+
+1. Long press on the lock screen to enter edit mode
+2. Tap **Customize**
+3. Add **Shortcuts** widget to the lock screen widget area
+4. Select TurboMeta Quick Vision shortcut
+5. Tap Done
+
+**How to Use**:
+- Tap the widget directly on the lock screen to trigger
+
+### 🎯 Quick Vision Workflow
+
+```
+Siri/Shortcut Trigger
+        ↓
+   Start Video Stream
+        ↓
+   Auto Capture Photo
+        ↓
+   Stop Video Stream
+        ↓
+   AI Image Recognition (qwen3-vl-plus)
+        ↓
+   TTS Voice Announcement (qwen3-tts-flash)
+```
+
+### 💡 Tips
+
+- **Ensure glasses are on**: Make sure glasses aren't in the charging case
+- **Stay steady**: Keep your head stable while capturing
+- **Good lighting**: Better recognition in well-lit environments
+- **Wait for announcement**: Recognition takes a few seconds, wait patiently for voice announcement
+
+### ⚠️ Troubleshooting
+
+**Q: Why does it say "Glasses not connected"?**
+- Ensure glasses are on and paired with Meta View App
+- Make sure developer mode is enabled
+- Try reopening TurboMeta App
+
+**Q: Why is there no sound?**
+- Check if phone is on silent mode
+- Check Bluetooth audio output settings
+- TTS requires network connection (Alibaba Cloud service)
+
+**Q: Can't find TurboMeta in Shortcuts?**
+- Open TurboMeta App at least once after installation
+- Try restarting your phone
+
+---
+
 ## ⚙️ Configuration Options
 
 ### API Configuration
@@ -414,6 +547,11 @@ Customize AI response style in `OmniRealtimeService.swift`:
 - [x] Conversation history saving
 - [x] One-tap hide conversations
 - [x] **Android version released** 🎉
+- [x] **Quick Vision** 🆕
+  - [x] Siri Shortcuts integration
+  - [x] App Intent support
+  - [x] Alibaba Cloud TTS voice announcement
+  - [x] iPhone Action Button support
 
 ### 🚧 In Progress
 - [ ] Improve multilingual support
@@ -427,6 +565,7 @@ Customize AI response style in `OmniRealtimeService.swift`:
 - [ ] More live streaming platform support
 - [ ] Offline mode
 - [ ] Apple Watch companion app
+- [ ] Android Quick Vision support
 
 ## 🤝 Contributing
 

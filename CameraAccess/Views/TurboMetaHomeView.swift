@@ -8,11 +8,13 @@ import SwiftUI
 struct TurboMetaHomeView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
     @ObservedObject var wearablesViewModel: WearablesViewModel
+    @StateObject private var quickVisionManager = QuickVisionManager.shared
     let apiKey: String
 
     @State private var showLiveAI = false
     @State private var showLiveStream = false
     @State private var showLeanEat = false
+    @State private var showQuickVision = false
 
     var body: some View {
         NavigationView {
@@ -56,13 +58,12 @@ struct TurboMetaHomeView: View {
                                 }
 
                                 FeatureCard(
-                                    title: NSLocalizedString("home.translate.title", comment: "Translate title"),
-                                    subtitle: NSLocalizedString("home.translate.subtitle", comment: "Translate subtitle"),
-                                    icon: "text.bubble",
-                                    gradient: [AppColors.translate, AppColors.translate.opacity(0.7)],
-                                    isPlaceholder: true
+                                    title: "快速识图",
+                                    subtitle: "Siri/快捷指令",
+                                    icon: "eye.circle.fill",
+                                    gradient: [Color.purple, Color.purple.opacity(0.7)]
                                 ) {
-                                    // Placeholder
+                                    showQuickVision = true
                                 }
                             }
 
@@ -113,6 +114,13 @@ struct TurboMetaHomeView: View {
             .fullScreenCover(isPresented: $showLeanEat) {
                 StreamView(viewModel: streamViewModel, wearablesVM: wearablesViewModel)
             }
+            .fullScreenCover(isPresented: $showQuickVision) {
+                QuickVisionView(streamViewModel: streamViewModel, apiKey: apiKey)
+            }
+        }
+        .onAppear {
+            // 确保 QuickVisionManager 有 streamViewModel 引用
+            quickVisionManager.setStreamViewModel(streamViewModel)
         }
     }
 }
