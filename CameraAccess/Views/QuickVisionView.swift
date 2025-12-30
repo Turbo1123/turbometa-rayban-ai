@@ -21,11 +21,11 @@ struct QuickVisionView: View {
 
     private var buttonText: String {
         if quickVisionManager.isProcessing {
-            return "识别中..."
+            return "quickvision.processing".localized
         } else if !streamViewModel.hasActiveDevice {
-            return "眼镜未连接"
+            return "quickvision.glasses.notconnected".localized
         } else {
-            return "开始识图"
+            return "quickvision.start".localized
         }
     }
 
@@ -52,11 +52,11 @@ struct QuickVisionView: View {
                 }
                 .padding()
             }
-            .navigationTitle("快速识图")
+            .navigationTitle("quickvision.title".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("关闭") {
+                    Button("close".localized) {
                         Task {
                             tts.stop() // 停止播报
                             await quickVisionManager.stopStream() // 停止视频流
@@ -126,10 +126,10 @@ struct QuickVisionView: View {
                                 Image(systemName: "antenna.radiowaves.left.and.right.slash")
                                     .font(.system(size: 50))
                                     .foregroundColor(.orange)
-                                Text("眼镜未连接")
+                                Text("quickvision.glasses.notconnected".localized)
                                     .font(AppTypography.headline)
                                     .foregroundColor(.white)
-                                Text("请先在 Meta View 中配对眼镜")
+                                Text("quickvision.error.nodevice".localized)
                                     .font(AppTypography.caption)
                                     .foregroundColor(.white.opacity(0.7))
                             }
@@ -138,7 +138,7 @@ struct QuickVisionView: View {
                                 ProgressView()
                                     .scaleEffect(1.5)
                                     .tint(.white)
-                                Text(quickVisionManager.isProcessing ? "正在识别..." : "正在连接眼镜...")
+                                Text(quickVisionManager.isProcessing ? "quickvision.recognizing".localized : "stream.connecting".localized)
                                     .foregroundColor(.white.opacity(0.8))
                             }
                         } else {
@@ -146,7 +146,7 @@ struct QuickVisionView: View {
                                 Image(systemName: "eye.circle.fill")
                                     .font(.system(size: 50))
                                     .foregroundColor(.purple.opacity(0.7))
-                                Text("点击下方按钮开始识图")
+                                Text("quickvision.start".localized)
                                     .foregroundColor(.white.opacity(0.8))
                             }
                         }
@@ -162,7 +162,7 @@ struct QuickVisionView: View {
                             ProgressView()
                                 .scaleEffect(2)
                                 .tint(.white)
-                            Text("AI 正在识别...")
+                            Text("vision.analyzing".localized)
                                 .font(AppTypography.headline)
                                 .foregroundColor(.white)
                         }
@@ -182,7 +182,7 @@ struct QuickVisionView: View {
                     HStack {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
-                        Text("识别结果")
+                        Text("quickvision.result".localized)
                             .font(AppTypography.headline)
                             .foregroundColor(.white)
                         Spacer()
@@ -264,7 +264,7 @@ struct QuickVisionView: View {
                 } label: {
                     HStack {
                         Image(systemName: "stop.fill")
-                        Text("停止播报")
+                        Text("quickvision.stop.speaking".localized)
                     }
                     .font(AppTypography.subheadline)
                     .foregroundColor(.white)
@@ -283,18 +283,17 @@ struct QuickVisionView: View {
         VStack(spacing: AppSpacing.sm) {
             if showSiriTip {
                 VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text("Siri 快捷指令")
+                    Text("quickvision.siri.tip.title".localized)
                         .font(AppTypography.headline)
                         .foregroundColor(.white)
 
-                    Text("你可以通过以下方式触发快速识图：")
+                    Text("quickvision.siri.tip.description".localized)
                         .font(AppTypography.caption)
                         .foregroundColor(.white.opacity(0.7))
 
                     VStack(alignment: .leading, spacing: 4) {
-                        tipRow("嘿 Siri，用 TurboMeta 识图")
-                        tipRow("嘿 Siri，TurboMeta 看看这是什么")
-                        tipRow("添加到快捷指令 App 的锁屏小组件")
+                        tipRow("quickvision.siri.tip.voice".localized)
+                        tipRow("quickvision.siri.tip.action".localized)
                     }
                 }
                 .padding()
@@ -307,7 +306,7 @@ struct QuickVisionView: View {
                     HStack {
                         Image(systemName: "waveform.circle.fill")
                             .foregroundColor(.purple)
-                        Text("支持 Siri 和快捷指令")
+                        Text("quickvision.siri.support".localized)
                             .font(AppTypography.caption)
                             .foregroundColor(.white.opacity(0.7))
                     }

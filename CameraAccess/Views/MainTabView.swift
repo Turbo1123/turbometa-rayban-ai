@@ -21,28 +21,28 @@ struct MainTabView: View {
             // Home - Feature entry
             TurboMetaHomeView(streamViewModel: streamViewModel, wearablesViewModel: wearablesViewModel, apiKey: apiKey)
                 .tabItem {
-                    Label(NSLocalizedString("tab.home", comment: "Home tab"), systemImage: "house.fill")
+                    Label("tab.home".localized, systemImage: "house.fill")
                 }
                 .tag(0)
 
             // Records
             RecordsView()
                 .tabItem {
-                    Label(NSLocalizedString("tab.records", comment: "Records tab"), systemImage: "list.bullet.rectangle")
+                    Label("tab.records".localized, systemImage: "list.bullet.rectangle")
                 }
                 .tag(1)
 
             // Gallery
             GalleryView()
                 .tabItem {
-                    Label(NSLocalizedString("tab.gallery", comment: "Gallery tab"), systemImage: "photo.on.rectangle")
+                    Label("tab.gallery".localized, systemImage: "photo.on.rectangle")
                 }
                 .tag(2)
 
             // Settings
             SettingsView(streamViewModel: streamViewModel, apiKey: apiKey)
                 .tabItem {
-                    Label(NSLocalizedString("tab.settings", comment: "Settings tab"), systemImage: "person.fill")
+                    Label("tab.settings".localized, systemImage: "person.fill")
                 }
                 .tag(3)
         }

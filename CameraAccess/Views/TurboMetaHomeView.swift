@@ -34,11 +34,11 @@ struct TurboMetaHomeView: View {
                     VStack(spacing: AppSpacing.lg) {
                         // Header
                         VStack(spacing: AppSpacing.sm) {
-                            Text(NSLocalizedString("app.name", comment: "App name"))
+                            Text("app.name".localized)
                                 .font(AppTypography.largeTitle)
                                 .foregroundColor(AppColors.textPrimary)
 
-                            Text(NSLocalizedString("app.subtitle", comment: "App subtitle"))
+                            Text("app.subtitle".localized)
                                 .font(AppTypography.callout)
                                 .foregroundColor(AppColors.textSecondary)
                         }
@@ -49,8 +49,8 @@ struct TurboMetaHomeView: View {
                             // Row 1
                             HStack(spacing: AppSpacing.md) {
                                 FeatureCard(
-                                    title: NSLocalizedString("home.liveai.title", comment: "Live AI title"),
-                                    subtitle: NSLocalizedString("home.liveai.subtitle", comment: "Live AI subtitle"),
+                                    title: "home.liveai.title".localized,
+                                    subtitle: "home.liveai.subtitle".localized,
                                     icon: "brain.head.profile",
                                     gradient: [AppColors.liveAI, AppColors.liveAI.opacity(0.7)]
                                 ) {
@@ -58,8 +58,8 @@ struct TurboMetaHomeView: View {
                                 }
 
                                 FeatureCard(
-                                    title: "快速识图",
-                                    subtitle: "Siri/快捷指令",
+                                    title: "home.quickvision.title".localized,
+                                    subtitle: "home.quickvision.subtitle".localized,
                                     icon: "eye.circle.fill",
                                     gradient: [Color.purple, Color.purple.opacity(0.7)]
                                 ) {
@@ -70,8 +70,8 @@ struct TurboMetaHomeView: View {
                             // Row 2
                             HStack(spacing: AppSpacing.md) {
                                 FeatureCard(
-                                    title: NSLocalizedString("home.leaneat.title", comment: "LeanEat title"),
-                                    subtitle: NSLocalizedString("home.leaneat.subtitle", comment: "LeanEat subtitle"),
+                                    title: "home.leaneat.title".localized,
+                                    subtitle: "home.leaneat.subtitle".localized,
                                     icon: "chart.bar.fill",
                                     gradient: [AppColors.leanEat, AppColors.leanEat.opacity(0.7)]
                                 ) {
@@ -79,8 +79,8 @@ struct TurboMetaHomeView: View {
                                 }
 
                                 FeatureCard(
-                                    title: NSLocalizedString("home.wordlearn.title", comment: "WordLearn title"),
-                                    subtitle: NSLocalizedString("home.wordlearn.subtitle", comment: "WordLearn subtitle"),
+                                    title: "home.wordlearn.title".localized,
+                                    subtitle: "home.wordlearn.subtitle".localized,
                                     icon: "book.closed.fill",
                                     gradient: [AppColors.wordLearn, AppColors.wordLearn.opacity(0.7)],
                                     isPlaceholder: true
@@ -91,8 +91,8 @@ struct TurboMetaHomeView: View {
 
                             // Row 3 - Full width
                             FeatureCardWide(
-                                title: NSLocalizedString("home.livestream.title", comment: "Live Stream title"),
-                                subtitle: NSLocalizedString("home.livestream.subtitle", comment: "Live Stream subtitle"),
+                                title: "home.livestream.title".localized,
+                                subtitle: "home.livestream.subtitle".localized,
                                 icon: "video.fill",
                                 gradient: [AppColors.liveStream, AppColors.liveStream.opacity(0.7)]
                             ) {
@@ -163,7 +163,7 @@ struct FeatureCard: View {
                 }
 
                 if isPlaceholder {
-                    Text(NSLocalizedString("home.comingsoon", comment: "Coming soon"))
+                    Text("home.comingsoon".localized)
                         .font(AppTypography.caption)
                         .foregroundColor(.white.opacity(0.9))
                         .padding(.horizontal, AppSpacing.md)

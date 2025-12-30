@@ -12,11 +12,17 @@
 "done" = "完成";
 "error" = "错误";
 "loading" = "加载中...";
+"save" = "保存";
+"delete" = "删除";
+"retry" = "重试";
+"back" = "返回";
 
 // MARK: - Home Screen
 "home.title" = "首页";
 "home.liveai.title" = "Live AI";
 "home.liveai.subtitle" = "实时对话";
+"home.quickvision.title" = "快速识图";
+"home.quickvision.subtitle" = "Siri 语音触发";
 "home.translate.title" = "实时翻译";
 "home.translate.subtitle" = "即时翻译";
 "home.leaneat.title" = "LeanEat";
@@ -31,27 +37,54 @@
 "liveai.title" = "Live AI";
 "liveai.connected" = "已连接";
 "liveai.connecting" = "连接中...";
+"liveai.disconnected" = "未连接";
 "liveai.speaking" = "AI 说话中";
 "liveai.listening" = "正在听...";
+"liveai.thinking" = "思考中...";
 "liveai.stop" = "停止";
+"liveai.start" = "开始";
 "liveai.device.notconnected.title" = "未连接RayBan Meta眼镜";
 "liveai.device.notconnected.message" = "请先在首页连接你的智能眼镜，\n然后再使用Live AI功能";
 "liveai.device.backtohome" = "返回首页";
 
+// MARK: - Quick Vision
+"quickvision.title" = "快速识图";
+"quickvision.recognizing" = "正在识别";
+"quickvision.result" = "识别结果";
+"quickvision.start" = "开始识图";
+"quickvision.processing" = "识别中...";
+"quickvision.glasses.notconnected" = "眼镜未连接";
+"quickvision.siri.tip.title" = "Siri 快捷指令";
+"quickvision.siri.tip.description" = "你可以通过以下方式触发快速识图：";
+"quickvision.siri.tip.voice" = "嘿 Siri，用 TurboMeta 识图";
+"quickvision.siri.tip.action" = "添加到快捷指令 App 的锁屏小组件";
+"quickvision.siri.support" = "支持 Siri 和快捷指令";
+"quickvision.stop.speaking" = "停止播报";
+"quickvision.replay" = "重新播报";
+"quickvision.error.nodevice" = "眼镜未连接，请先在 Meta View 中配对眼镜";
+"quickvision.error.streamfailed" = "视频流启动失败，请检查眼镜连接状态";
+"quickvision.error.timeout" = "等待视频帧超时，请重试";
+"quickvision.error.noimage" = "无法处理图片";
+"quickvision.error.apikey" = "请先在设置中配置 API Key";
+
 // MARK: - Stream View (Camera)
 "stream.title" = "拍照";
-"stream.stop" = "Stop streaming";
+"stream.stop" = "停止直播";
 "stream.photo" = "拍照";
 "stream.timer" = "定时器";
-"stream.ending" = "Streaming ending in %@";
+"stream.ending" = "直播将在 %@ 后结束";
 "stream.device.notconnected.title" = "未连接RayBan Meta眼镜";
 "stream.device.notconnected.message" = "请先在首页连接你的智能眼镜，\n然后再使用直播功能";
 "stream.device.backtohome" = "返回首页";
+"stream.connecting" = "正在连接眼镜...";
+"stream.waiting" = "等待视频流...";
 
 // MARK: - Photo Preview
 "photo.share" = "分享";
 "photo.ai" = "AI 识别";
 "photo.nutrition" = "营养分析";
+"photo.save" = "保存到相册";
+"photo.saved" = "已保存";
 
 // MARK: - LeanEat (Nutrition Analysis)
 "leaneat.title" = "营养分析";
@@ -95,12 +128,54 @@
 
 // MARK: - Settings
 "settings.title" = "我的";
-"settings.account" = "账号设置";
-"settings.api" = "API 设置";
+"settings.device" = "设备管理";
+"settings.device.status" = "设备状态";
+"settings.device.online" = "在线";
+"settings.device.offline" = "离线";
+"settings.device.connected" = "已连接";
+"settings.device.notconnected" = "未连接";
+"settings.device.stream" = "视频流";
+"settings.device.stream.active" = "活跃";
+"settings.device.stream.inactive" = "未启动";
+"settings.ai" = "AI 设置";
 "settings.model" = "模型设置";
+"settings.model.select" = "选择模型";
+"settings.model.current" = "当前使用";
+"settings.language" = "输出语言";
+"settings.language.select" = "选择输出语言";
+"settings.language.description" = "AI 将使用该语言进行语音输出和文字回复";
+"settings.applanguage" = "App 语言";
+"settings.applanguage.select" = "选择 App 语言";
+"settings.applanguage.description" = "更改 App 界面语言";
+"settings.applanguage.restart.title" = "需要重启";
+"settings.applanguage.restart.message" = "切换语言需要重启 App 才能生效";
+"settings.applanguage.restart.confirm" = "立即重启";
+"settings.apikey" = "API Key 管理";
+"settings.apikey.configured" = "已配置";
+"settings.apikey.notconfigured" = "未配置";
+"settings.apikey.enter" = "请输入 API Key";
+"settings.apikey.dashscope" = "阿里云 Dashscope API Key";
+"settings.apikey.help" = "请前往阿里云控制台获取您的 API Key";
+"settings.apikey.getkey" = "获取 API Key";
+"settings.apikey.save" = "保存";
+"settings.apikey.delete" = "删除 API Key";
+"settings.apikey.saved" = "保存成功";
+"settings.apikey.savedmessage" = "API Key 已安全保存";
+"settings.apikey.empty" = "API Key 不能为空";
+"settings.apikey.savefailed" = "保存失败，请重试";
+"settings.apikey.deletefailed" = "删除失败，请重试";
+"settings.quality" = "视频画质";
+"settings.quality.select" = "选择视频画质";
+"settings.quality.description" = "更高的画质会消耗更多电量";
+"settings.quality.low" = "低画质";
+"settings.quality.low.desc" = "省电模式，适合长时间使用";
+"settings.quality.medium" = "中画质";
+"settings.quality.medium.desc" = "平衡模式（推荐）";
+"settings.quality.high" = "高画质";
+"settings.quality.high.desc" = "最佳画质，耗电较快";
 "settings.about" = "关于";
 "settings.version" = "版本";
-"settings.logout" = "退出登录";
+"settings.sdkversion" = "SDK 版本";
 
 // MARK: - Tabs
 "tab.home" = "首页";
@@ -111,13 +186,25 @@
 // MARK: - Errors
 "error.network" = "网络错误，请检查网络连接";
 "error.api" = "API 错误";
-"error.permission.denied" = "相机权限被拒绝，请在设置中开启";
+"error.api.code" = "API 错误: %d";
+"error.permission.denied" = "权限被拒绝，请在设置中开启";
 "error.device.notfound" = "未找到设备";
 "error.device.notconnected" = "设备未连接";
 "error.timeout" = "操作超时，请重试";
 "error.unknown" = "未知错误";
+"error.invalidresponse" = "无效的响应";
+"error.noaudiodata" = "未收到音频数据";
+"error.playbackfailed" = "音频播放失败";
+
+// MARK: - TTS
+"tts.speaking" = "播报中...";
+"tts.stopped" = "已停止";
 
 // MARK: - Units
 "unit.kcal" = "千卡";
 "unit.gram" = "克";
 "unit.g" = "g";
+
+// MARK: - AI Prompts
+"prompt.quickvision" = "你是一个智能眼镜AI助手。请用简洁的中文描述图片内容，适合语音播报。\n\n要求：\n1. 用1-2句话描述主要内容\n2. 语言自然、口语化\n3. 不要使用标点符号过多\n4. 总字数控制在50字以内\n5. 直接描述，不要说\"图片中\"或\"我看到\"";
+"prompt.liveai" = "你是RayBan Meta智能眼镜AI助手。\n\n【重要】必须始终用中文回答，无论用户说什么语言。\n\n回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。";

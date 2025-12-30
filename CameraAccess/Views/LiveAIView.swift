@@ -129,8 +129,8 @@ struct LiveAIView: View {
                 }
             }
         }
-        .alert(NSLocalizedString("error", comment: "Error"), isPresented: $viewModel.showError) {
-            Button(NSLocalizedString("ok", comment: "OK")) {
+        .alert("error".localized, isPresented: $viewModel.showError) {
+            Button("ok".localized) {
                 viewModel.dismissError()
             }
         } message: {
@@ -144,7 +144,7 @@ struct LiveAIView: View {
 
     private var headerView: some View {
         HStack {
-            Text(NSLocalizedString("liveai.title", comment: "Live AI title"))
+            Text("liveai.title".localized)
                 .font(AppTypography.headline)
                 .foregroundColor(.white)
 
@@ -167,7 +167,7 @@ struct LiveAIView: View {
                 Circle()
                     .fill(viewModel.isConnected ? Color.green : Color.red)
                     .frame(width: 8, height: 8)
-                Text(viewModel.isConnected ? NSLocalizedString("liveai.connected", comment: "Connected") : NSLocalizedString("liveai.connecting", comment: "Connecting"))
+                Text(viewModel.isConnected ? "liveai.connected".localized : "liveai.connecting".localized)
                     .font(AppTypography.caption)
                     .foregroundColor(.white)
             }
@@ -177,7 +177,7 @@ struct LiveAIView: View {
                 HStack(spacing: AppSpacing.xs) {
                     Image(systemName: "waveform")
                         .foregroundColor(.green)
-                    Text(NSLocalizedString("liveai.speaking", comment: "AI speaking"))
+                    Text("liveai.speaking".localized)
                         .font(AppTypography.caption)
                         .foregroundColor(.white)
                 }
@@ -197,14 +197,14 @@ struct LiveAIView: View {
                     Circle()
                         .fill(Color.red)
                         .frame(width: 8, height: 8)
-                    Text(NSLocalizedString("liveai.listening", comment: "Listening"))
+                    Text("liveai.listening".localized)
                         .font(AppTypography.caption)
                         .foregroundColor(.white)
                 } else {
                     Circle()
                         .fill(Color.gray)
                         .frame(width: 8, height: 8)
-                    Text(NSLocalizedString("liveai.stop", comment: "Stopped"))
+                    Text("liveai.stop".localized)
                         .font(AppTypography.caption)
                         .foregroundColor(.white)
                 }
@@ -222,7 +222,7 @@ struct LiveAIView: View {
                 HStack(spacing: AppSpacing.sm) {
                     Image(systemName: "stop.fill")
                         .font(.title2)
-                    Text(NSLocalizedString("liveai.stop", comment: "Stop"))
+                    Text("liveai.stop".localized)
                         .font(AppTypography.headline)
                 }
                 .frame(maxWidth: .infinity)
@@ -254,11 +254,11 @@ struct LiveAIView: View {
                     .font(.system(size: 80))
                     .foregroundColor(AppColors.liveAI.opacity(0.6))
 
-                Text(NSLocalizedString("liveai.device.notconnected.title", comment: "Device not connected"))
+                Text("liveai.device.notconnected.title".localized)
                     .font(AppTypography.title2)
                     .foregroundColor(AppColors.textPrimary)
 
-                Text(NSLocalizedString("liveai.device.notconnected.message", comment: "Connection message"))
+                Text("liveai.device.notconnected.message".localized)
                     .font(AppTypography.body)
                     .foregroundColor(AppColors.textSecondary)
                     .multilineTextAlignment(.center)
@@ -273,7 +273,7 @@ struct LiveAIView: View {
             } label: {
                 HStack(spacing: AppSpacing.sm) {
                     Image(systemName: "chevron.left")
-                    Text(NSLocalizedString("liveai.device.backtohome", comment: "Back to home"))
+                    Text("liveai.device.backtohome".localized)
                         .font(AppTypography.headline)
                 }
                 .frame(maxWidth: .infinity)

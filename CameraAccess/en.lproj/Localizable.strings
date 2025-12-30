@@ -12,11 +12,17 @@
 "done" = "Done";
 "error" = "Error";
 "loading" = "Loading...";
+"save" = "Save";
+"delete" = "Delete";
+"retry" = "Retry";
+"back" = "Back";
 
 // MARK: - Home Screen
 "home.title" = "Home";
 "home.liveai.title" = "Live AI";
 "home.liveai.subtitle" = "Real-time Chat";
+"home.quickvision.title" = "Quick Vision";
+"home.quickvision.subtitle" = "Siri Voice Trigger";
 "home.translate.title" = "Live Translate";
 "home.translate.subtitle" = "Instant Translation";
 "home.leaneat.title" = "LeanEat";
@@ -24,34 +30,61 @@
 "home.wordlearn.title" = "WordLearn";
 "home.wordlearn.subtitle" = "Vocabulary Learning";
 "home.livestream.title" = "Live Stream";
-"home.livestream.subtitle" = "Douyin · Kuaishou · Xiaohongshu";
+"home.livestream.subtitle" = "Streaming Platforms";
 "home.comingsoon" = "Coming Soon";
 
 // MARK: - Live AI
 "liveai.title" = "Live AI";
 "liveai.connected" = "Connected";
 "liveai.connecting" = "Connecting...";
+"liveai.disconnected" = "Disconnected";
 "liveai.speaking" = "AI Speaking";
 "liveai.listening" = "Listening...";
+"liveai.thinking" = "Thinking...";
 "liveai.stop" = "Stop";
+"liveai.start" = "Start";
 "liveai.device.notconnected.title" = "RayBan Meta Glasses Not Connected";
-"liveai.device.notconnected.message" = "Please connect your smart glasses on the home screen first,\\nthen use the Live AI feature";
+"liveai.device.notconnected.message" = "Please connect your smart glasses on the home screen first,\nthen use the Live AI feature";
 "liveai.device.backtohome" = "Back to Home";
+
+// MARK: - Quick Vision
+"quickvision.title" = "Quick Vision";
+"quickvision.recognizing" = "Recognizing";
+"quickvision.result" = "Recognition Result";
+"quickvision.start" = "Start Recognition";
+"quickvision.processing" = "Processing...";
+"quickvision.glasses.notconnected" = "Glasses Not Connected";
+"quickvision.siri.tip.title" = "Siri Shortcuts";
+"quickvision.siri.tip.description" = "You can trigger Quick Vision in the following ways:";
+"quickvision.siri.tip.voice" = "Hey Siri, TurboMeta Quick Vision";
+"quickvision.siri.tip.action" = "Add to Shortcuts app lock screen widget";
+"quickvision.siri.support" = "Supports Siri and Shortcuts";
+"quickvision.stop.speaking" = "Stop Speaking";
+"quickvision.replay" = "Replay";
+"quickvision.error.nodevice" = "Glasses not connected. Please pair in Meta View first";
+"quickvision.error.streamfailed" = "Failed to start video stream. Check glasses connection";
+"quickvision.error.timeout" = "Waiting for video frame timed out. Please retry";
+"quickvision.error.noimage" = "Unable to process image";
+"quickvision.error.apikey" = "Please configure API Key in Settings first";
 
 // MARK: - Stream View (Camera)
 "stream.title" = "Camera";
-"stream.stop" = "Stop streaming";
+"stream.stop" = "Stop Streaming";
 "stream.photo" = "Take Photo";
 "stream.timer" = "Timer";
 "stream.ending" = "Streaming ending in %@";
 "stream.device.notconnected.title" = "RayBan Meta Glasses Not Connected";
-"stream.device.notconnected.message" = "Please connect your smart glasses on the home screen first,\\nthen use the streaming feature";
+"stream.device.notconnected.message" = "Please connect your smart glasses on the home screen first,\nthen use the streaming feature";
 "stream.device.backtohome" = "Back to Home";
+"stream.connecting" = "Connecting to glasses...";
+"stream.waiting" = "Waiting for video stream...";
 
 // MARK: - Photo Preview
 "photo.share" = "Share";
 "photo.ai" = "AI Recognition";
 "photo.nutrition" = "Nutrition Analysis";
+"photo.save" = "Save to Photos";
+"photo.saved" = "Saved";
 
 // MARK: - LeanEat (Nutrition Analysis)
 "leaneat.title" = "Nutrition Analysis";
@@ -95,12 +128,54 @@
 
 // MARK: - Settings
 "settings.title" = "Settings";
-"settings.account" = "Account Settings";
-"settings.api" = "API Settings";
+"settings.device" = "Device Management";
+"settings.device.status" = "Device Status";
+"settings.device.online" = "Online";
+"settings.device.offline" = "Offline";
+"settings.device.connected" = "Connected";
+"settings.device.notconnected" = "Not Connected";
+"settings.device.stream" = "Video Stream";
+"settings.device.stream.active" = "Active";
+"settings.device.stream.inactive" = "Inactive";
+"settings.ai" = "AI Settings";
 "settings.model" = "Model Settings";
+"settings.model.select" = "Select Model";
+"settings.model.current" = "Currently using";
+"settings.language" = "Output Language";
+"settings.language.select" = "Select Output Language";
+"settings.language.description" = "AI will use this language for voice output and text responses";
+"settings.applanguage" = "App Language";
+"settings.applanguage.select" = "Select App Language";
+"settings.applanguage.description" = "Change the app interface language";
+"settings.applanguage.restart.title" = "Restart Required";
+"settings.applanguage.restart.message" = "The app needs to restart for the language change to take effect";
+"settings.applanguage.restart.confirm" = "Restart Now";
+"settings.apikey" = "API Key Management";
+"settings.apikey.configured" = "Configured";
+"settings.apikey.notconfigured" = "Not Configured";
+"settings.apikey.enter" = "Enter API Key";
+"settings.apikey.dashscope" = "Alibaba Cloud Dashscope API Key";
+"settings.apikey.help" = "Please visit Alibaba Cloud console to get your API Key";
+"settings.apikey.getkey" = "Get API Key";
+"settings.apikey.save" = "Save";
+"settings.apikey.delete" = "Delete API Key";
+"settings.apikey.saved" = "Saved Successfully";
+"settings.apikey.savedmessage" = "API Key has been securely saved";
+"settings.apikey.empty" = "API Key cannot be empty";
+"settings.apikey.savefailed" = "Save failed, please retry";
+"settings.apikey.deletefailed" = "Delete failed, please retry";
+"settings.quality" = "Video Quality";
+"settings.quality.select" = "Select Video Quality";
+"settings.quality.description" = "Higher quality consumes more battery";
+"settings.quality.low" = "Low Quality";
+"settings.quality.low.desc" = "Battery saver, for extended use";
+"settings.quality.medium" = "Medium Quality";
+"settings.quality.medium.desc" = "Balanced mode (Recommended)";
+"settings.quality.high" = "High Quality";
+"settings.quality.high.desc" = "Best quality, higher battery usage";
 "settings.about" = "About";
 "settings.version" = "Version";
-"settings.logout" = "Logout";
+"settings.sdkversion" = "SDK Version";
 
 // MARK: - Tabs
 "tab.home" = "Home";
@@ -111,13 +186,25 @@
 // MARK: - Errors
 "error.network" = "Network error, please check your connection";
 "error.api" = "API Error";
-"error.permission.denied" = "Camera permission denied, please enable in Settings";
+"error.api.code" = "API Error: %d";
+"error.permission.denied" = "Permission denied, please enable in Settings";
 "error.device.notfound" = "Device not found";
 "error.device.notconnected" = "Device not connected";
 "error.timeout" = "Operation timeout, please retry";
 "error.unknown" = "Unknown error";
+"error.invalidresponse" = "Invalid response";
+"error.noaudiodata" = "No audio data received";
+"error.playbackfailed" = "Audio playback failed";
+
+// MARK: - TTS
+"tts.speaking" = "Speaking...";
+"tts.stopped" = "Stopped";
 
 // MARK: - Units
 "unit.kcal" = "kcal";
 "unit.gram" = "gram";
 "unit.g" = "g";
+
+// MARK: - AI Prompts
+"prompt.quickvision" = "You are a smart glasses AI assistant. Please describe the image content concisely, suitable for voice announcement.\n\nRequirements:\n1. Describe the main content in 1-2 sentences\n2. Use natural, conversational language\n3. Don't use too many punctuation marks\n4. Keep the total under 50 words\n5. Describe directly, don't say \"in the image\" or \"I see\"";
+"prompt.liveai" = "You are a RayBan Meta smart glasses AI assistant.\n\n[IMPORTANT] Always respond in English.\n\nKeep your answers concise and conversational, like chatting with a friend. The user is wearing glasses and can see their surroundings, provide quick and useful suggestions based on what they see. Be direct and to the point.";

@@ -8,11 +8,13 @@ import MWDATCore
 
 struct SettingsView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
+    @ObservedObject var languageManager = LanguageManager.shared
     let apiKey: String
 
     @State private var showAPIKeySettings = false
     @State private var showModelSettings = false
     @State private var showLanguageSettings = false
+    @State private var showAppLanguageSettings = false
     @State private var showQualitySettings = false
     @State private var selectedModel = "qwen3-omni-flash-realtime"
     @State private var selectedLanguage = "zh-CN" // 默认中文
@@ -44,7 +46,7 @@ struct SettingsView: View {
                             Text("Ray-Ban Meta")
                                 .font(AppTypography.headline)
                                 .foregroundColor(AppColors.textPrimary)
-                            Text(streamViewModel.hasActiveDevice ? "已连接" : "未连接")
+                            Text(streamViewModel.hasActiveDevice ? "settings.device.connected".localized : "settings.device.notconnected".localized)
                                 .font(AppTypography.caption)
                                 .foregroundColor(streamViewModel.hasActiveDevice ? .green : AppColors.textSecondary)
                         }
@@ -60,12 +62,12 @@ struct SettingsView: View {
 
                     // 设备信息
                     if streamViewModel.hasActiveDevice {
-                        InfoRow(title: "设备状态", value: "在线")
+                        InfoRow(title: "settings.device.status".localized, value: "settings.device.online".localized)
 
                         if streamViewModel.isStreaming {
-                            InfoRow(title: "视频流", value: "活跃")
+                            InfoRow(title: "settings.device.stream".localized, value: "settings.device.stream.active".localized)
                         } else {
-                            InfoRow(title: "视频流", value: "未启动")
+                            InfoRow(title: "settings.device.stream".localized, value: "settings.device.stream.inactive".localized)
                         }
 
                         // TODO: 从 SDK 获取更多设备信息
@@ -73,18 +75,36 @@ struct SettingsView: View {
                         // InfoRow(title: "固件版本", value: "v20.0")
                     }
                 } header: {
-                    Text("设备管理")
+                    Text("settings.device".localized)
                 }
 
                 // AI 设置
                 Section {
+                    Button {
+                        showAppLanguageSettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "globe.asia.australia.fill")
+                                .foregroundColor(AppColors.primary)
+                            Text("settings.applanguage".localized)
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Text(languageManager.currentLanguage.displayName)
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
+
                     Button {
                         showModelSettings = true
                     } label: {
                         HStack {
                             Image(systemName: "cpu")
                                 .foregroundColor(AppColors.accent)
-                            Text("模型设置")
+                            Text("settings.model".localized)
                                 .foregroundColor(AppColors.textPrimary)
                             Spacer()
                             Text(selectedModel)
@@ -102,7 +122,7 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "globe")
                                 .foregroundColor(AppColors.translate)
-                            Text("输出语言")
+                            Text("settings.language".localized)
                                 .foregroundColor(AppColors.textPrimary)
                             Spacer()
                             Text(languageDisplayName(selectedLanguage))
@@ -120,10 +140,10 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "key.fill")
                                 .foregroundColor(AppColors.wordLearn)
-                            Text("API Key 管理")
+                            Text("settings.apikey".localized)
                                 .foregroundColor(AppColors.textPrimary)
                             Spacer()
-                            Text(hasAPIKey ? "已配置" : "未配置")
+                            Text(hasAPIKey ? "settings.apikey.configured".localized : "settings.apikey.notconfigured".localized)
                                 .font(AppTypography.caption)
                                 .foregroundColor(hasAPIKey ? .green : .red)
                             Image(systemName: "chevron.right")
@@ -138,7 +158,7 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "video.fill")
                                 .foregroundColor(AppColors.liveStream)
-                            Text("视频画质")
+                            Text("settings.quality".localized)
                                 .foregroundColor(AppColors.textPrimary)
                             Spacer()
                             Text(qualityDisplayName(selectedQuality))
@@ -150,18 +170,18 @@ struct SettingsView: View {
                         }
                     }
                 } header: {
-                    Text("AI 设置")
+                    Text("settings.ai".localized)
                 }
 
                 // 关于
                 Section {
-                    InfoRow(title: "版本", value: "1.0.0")
-                    InfoRow(title: "SDK 版本", value: "0.3.0")
+                    InfoRow(title: "settings.version".localized, value: "1.0.0")
+                    InfoRow(title: "settings.sdkversion".localized, value: "0.3.0")
                 } header: {
-                    Text("关于")
+                    Text("settings.about".localized)
                 }
             }
-            .navigationTitle("我的")
+            .navigationTitle("settings.title".localized)
             .sheet(isPresented: $showAPIKeySettings) {
                 APIKeySettingsView()
             }
@@ -179,6 +199,9 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showQualitySettings) {
                 VideoQualitySettingsView(selectedQuality: $selectedQuality)
+            }
+            .sheet(isPresented: $showAppLanguageSettings) {
+                AppLanguageSettingsView()
             }
             .onAppear {
                 // 视图出现时刷新 API Key 状态
@@ -433,11 +456,13 @@ struct VideoQualitySettingsView: View {
     @Binding var selectedQuality: String
     @Environment(\.dismiss) private var dismiss
 
-    let qualities = [
-        ("low", "低画质", "省电模式，适合长时间使用"),
-        ("medium", "中画质", "平衡模式（推荐）"),
-        ("high", "高画质", "最佳画质，耗电较快")
-    ]
+    var qualities: [(String, String, String)] {
+        [
+            ("low", "settings.quality.low".localized, "settings.quality.low.desc".localized),
+            ("medium", "settings.quality.medium".localized, "settings.quality.medium.desc".localized),
+            ("high", "settings.quality.high".localized, "settings.quality.high.desc".localized)
+        ]
+    }
 
     var body: some View {
         NavigationView {
@@ -465,19 +490,85 @@ struct VideoQualitySettingsView: View {
                         }
                     }
                 } header: {
-                    Text("选择视频画质")
+                    Text("settings.quality.select".localized)
                 } footer: {
-                    Text("更高的画质会消耗更多电量")
+                    Text("settings.quality.description".localized)
                 }
             }
-            .navigationTitle("视频画质")
+            .navigationTitle("settings.quality".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("完成") {
+                    Button("done".localized) {
                         dismiss()
                     }
                 }
+            }
+        }
+    }
+}
+
+// MARK: - App Language Settings
+
+struct AppLanguageSettingsView: View {
+    @ObservedObject var languageManager = LanguageManager.shared
+    @Environment(\.dismiss) private var dismiss
+    @State private var showRestartAlert = false
+    @State private var pendingLanguage: AppLanguage?
+
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    ForEach(AppLanguage.allCases, id: \.self) { language in
+                        Button {
+                            // 只有选择不同语言时才提示重启
+                            if languageManager.currentLanguage != language {
+                                pendingLanguage = language
+                                showRestartAlert = true
+                            }
+                        } label: {
+                            HStack {
+                                Text(language.displayName)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                if languageManager.currentLanguage == language {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text("settings.applanguage.select".localized)
+                } footer: {
+                    Text("settings.applanguage.description".localized)
+                }
+            }
+            .navigationTitle("settings.applanguage".localized)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("done".localized) {
+                        dismiss()
+                    }
+                }
+            }
+            .alert("settings.applanguage.restart.title".localized, isPresented: $showRestartAlert) {
+                Button("cancel".localized, role: .cancel) {
+                    pendingLanguage = nil
+                }
+                Button("settings.applanguage.restart.confirm".localized) {
+                    if let language = pendingLanguage {
+                        languageManager.currentLanguage = language
+                        // 延迟一点退出，确保设置已保存
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            exit(0)
+                        }
+                    }
+                }
+            } message: {
+                Text("settings.applanguage.restart.message".localized)
             }
         }
     }

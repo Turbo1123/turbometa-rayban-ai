@@ -15,7 +15,16 @@ class TTSService: NSObject, ObservableObject {
 
     private let baseURL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation"
     private let model = "qwen3-tts-flash"
-    private let voice = "Cherry"
+
+    // 根据当前语言设置获取语音
+    private var voice: String {
+        return LanguageManager.staticTtsVoice
+    }
+
+    // 根据当前语言设置获取语言类型
+    private var languageType: String {
+        return LanguageManager.staticApiLanguageCode
+    }
 
     // 使用和 OmniRealtimeService 一样的 AVAudioEngine 方式
     private var playbackEngine: AVAudioEngine?
@@ -172,7 +181,7 @@ class TTSService: NSObject, ObservableObject {
             input: TTSRequest.Input(
                 text: text,
                 voice: voice,
-                language_type: "Chinese"
+                language_type: languageType
             )
         )
 
@@ -320,7 +329,9 @@ class TTSService: NSObject, ObservableObject {
 
         let synthesizer = AVSpeechSynthesizer()
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")
+        // 根据当前语言设置选择系统语音
+        let voiceLanguage = LanguageManager.staticIsChinese ? "zh-CN" : "en-US"
+        utterance.voice = AVSpeechSynthesisVoice(language: voiceLanguage)
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 1.1
 
         synthesizer.speak(utterance)

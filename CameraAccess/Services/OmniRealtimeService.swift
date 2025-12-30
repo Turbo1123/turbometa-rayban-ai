@@ -181,16 +181,20 @@ class OmniRealtimeService: NSObject {
     // MARK: - Session Configuration
 
     private func configureSession() {
+        // 根据当前语言设置获取语音和提示词
+        let voice = LanguageManager.staticTtsVoice
+        let instructions = "prompt.liveai".localized
+
         let sessionConfig: [String: Any] = [
             "event_id": generateEventId(),
             "type": OmniClientEvent.sessionUpdate.rawValue,
             "session": [
                 "modalities": ["text", "audio"],
-                "voice": "Cherry",
+                "voice": voice,
                 "input_audio_format": "pcm16",
                 "output_audio_format": "pcm24",
                 "smooth_output": true,
-                "instructions": "你是RayBan Meta智能眼镜AI助手。\n\n【重要】必须始终用中文回答，无论用户说什么语言。\n\n回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。",
+                "instructions": instructions,
                 "turn_detection": [
                     "type": "server_vad",
                     "threshold": 0.5,

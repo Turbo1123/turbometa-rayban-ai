@@ -72,22 +72,8 @@ class QuickVisionService {
         let base64String = imageData.base64EncodedString()
         let dataURL = "data:image/jpeg;base64,\(base64String)"
 
-        // 默认提示词 - 要求简洁、适合语音播报
-        let prompt = customPrompt ?? """
-你是一个智能眼镜AI助手。请用简洁的中文描述图片内容，适合语音播报。
-
-要求：
-1. 用1-2句话描述主要内容
-2. 语言自然、口语化
-3. 不要使用标点符号过多
-4. 总字数控制在50字以内
-5. 直接描述，不要说"图片中"或"我看到"
-
-示例输出：
-- 这是一杯拿铁咖啡，旁边放着一块提拉米苏蛋糕
-- 前方是一条繁忙的马路，有很多行人正在过斑马线
-- 这是一本Python编程教材，封面是蓝色的
-"""
+        // 使用本地化的提示词
+        let prompt = customPrompt ?? "prompt.quickvision".localized
 
         // Create API request
         let request = ChatCompletionRequest(
