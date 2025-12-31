@@ -42,6 +42,8 @@
     <string name="feature_wordlearn_subtitle">Coming Soon</string>
     <string name="feature_livestream_title">Live Stream</string>
     <string name="feature_livestream_subtitle">Stream to Social Platforms</string>
+    <string name="feature_rtmp_title">RTMP Stream</string>
+    <string name="feature_rtmp_subtitle">Direct Push to RTMP Server (Experimental)</string>
 
     <!-- Connection States -->
     <string name="disconnected">Disconnected</string>

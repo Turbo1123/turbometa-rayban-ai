@@ -40,6 +40,8 @@
     <string name="feature_wordlearn_subtitle">单词学习</string>
     <string name="feature_livestream_title">直播</string>
     <string name="feature_livestream_subtitle">抖音 · 快手 · 小红书</string>
+    <string name="feature_rtmp_title">RTMP 推流</string>
+    <string name="feature_rtmp_subtitle">直接推流到 RTMP 服务器（实验性）</string>
 
     <!-- Connection States -->
     <string name="disconnected">未连接</string>
