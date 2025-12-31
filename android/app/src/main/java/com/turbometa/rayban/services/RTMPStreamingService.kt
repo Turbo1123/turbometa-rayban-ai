@@ -5,8 +5,8 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.util.Log
-import com.pedro.common.ConnectChecker
 import com.pedro.rtmp.rtmp.RtmpClient
+import com.pedro.rtmp.utils.ConnectCheckerRtmp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,7 +36,7 @@ class RTMPStreamingService(private val context: Context) {
         // Default encoding parameters
         private const val DEFAULT_BITRATE = 2_000_000 // 2 Mbps
         private const val DEFAULT_FPS = 24
-        private const val I_FRAME_INTERVAL = 2 // I-frame every 2 seconds
+        private const val I_FRAME_INTERVAL = 1 // I-frame every 1 second for faster recovery
 
         // MIME type for H.264
         private const val MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_AVC
@@ -121,39 +121,39 @@ class RTMPStreamingService(private val context: Context) {
             }
 
             // Initialize RTMP client
-            rtmpClient = RtmpClient(object : ConnectChecker {
-                override fun onConnectionStarted(url: String) {
-                    Log.d(TAG, "RTMP connection started: $url")
+            rtmpClient = RtmpClient(object : ConnectCheckerRtmp {
+                override fun onConnectionStartedRtmp(rtmpUrl: String) {
+                    Log.d(TAG, "RTMP connection started: $rtmpUrl")
                 }
 
-                override fun onConnectionSuccess() {
+                override fun onConnectionSuccessRtmp() {
                     Log.d(TAG, "RTMP connected successfully")
                     _state.value = StreamingState.Streaming
                     startTime = System.currentTimeMillis()
                 }
 
-                override fun onConnectionFailed(reason: String) {
+                override fun onConnectionFailedRtmp(reason: String) {
                     Log.e(TAG, "RTMP connection failed: $reason")
                     _state.value = StreamingState.Error(reason)
                     stopStreaming()
                 }
 
-                override fun onNewBitrate(bitrate: Long) {
+                override fun onNewBitrateRtmp(bitrate: Long) {
                     Log.d(TAG, "RTMP bitrate: $bitrate")
                     updateStats(bitrate = bitrate)
                 }
 
-                override fun onDisconnect() {
+                override fun onDisconnectRtmp() {
                     Log.d(TAG, "RTMP disconnected")
                     _state.value = StreamingState.Disconnected
                 }
 
-                override fun onAuthError() {
+                override fun onAuthErrorRtmp() {
                     Log.e(TAG, "RTMP auth error")
                     _state.value = StreamingState.Error("Authentication failed")
                 }
 
-                override fun onAuthSuccess() {
+                override fun onAuthSuccessRtmp() {
                     Log.d(TAG, "RTMP auth success")
                 }
             })
@@ -185,13 +185,14 @@ class RTMPStreamingService(private val context: Context) {
             // Find encoder for H.264
             encoder = MediaCodec.createEncoderByType(MIME_TYPE)
 
+            // Use YUV420Planar (I420) format to match DAT SDK output
             val format = MediaFormat.createVideoFormat(MIME_TYPE, width, height).apply {
                 setInteger(MediaFormat.KEY_BIT_RATE, bitrate)
                 setInteger(MediaFormat.KEY_FRAME_RATE, DEFAULT_FPS)
                 setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, I_FRAME_INTERVAL)
                 setInteger(
                     MediaFormat.KEY_COLOR_FORMAT,
-                    MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible
+                    MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar
                 )
                 // Lower latency encoding
                 setInteger(MediaFormat.KEY_LATENCY, 0)
@@ -200,7 +201,7 @@ class RTMPStreamingService(private val context: Context) {
             encoder?.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
             encoder?.start()
 
-            Log.d(TAG, "H.264 encoder initialized: ${width}x${height}")
+            Log.d(TAG, "H.264 encoder initialized: ${width}x${height} (I420/YUV420Planar)")
             return true
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize encoder: ${e.message}", e)
@@ -328,28 +329,72 @@ class RTMPStreamingService(private val context: Context) {
         }
     }
 
+    // Frame tracking
+    private var totalFrames = 0L
+    private var droppedFrames = 0L
+    private var lastLogTime = 0L
+
+    // Timestamp smoothing for consistent frame timing
+    private var baseTimestampUs = 0L
+    private var frameIndex = 0L
+    private val targetFrameDurationUs = 1_000_000L / DEFAULT_FPS // ~41666 us for 24fps
+
     /**
      * Feed a raw I420 frame from ByteBuffer (direct from DAT SDK VideoFrame)
+     * Directly passes I420 data to encoder configured with COLOR_FormatYUV420Planar
      */
     fun feedFrame(buffer: ByteBuffer, width: Int, height: Int, timestampUs: Long) {
         if (!isStreaming || encoder == null) return
 
+        totalFrames++
+
         try {
-            val inputIndex = encoder?.dequeueInputBuffer(0) ?: -1
+            // Use longer timeout to reduce frame drops
+            val inputIndex = encoder?.dequeueInputBuffer(10000) ?: -1
             if (inputIndex >= 0) {
                 val inputBuffer = encoder?.getInputBuffer(inputIndex)
                 inputBuffer?.clear()
 
-                // Copy data from source buffer
+                // Make a defensive copy to avoid race conditions
                 val position = buffer.position()
-                inputBuffer?.put(buffer)
+                val dataSize = buffer.remaining()
+
+                // Validate frame size (I420 = width * height * 1.5)
+                val expectedSize = width * height * 3 / 2
+                if (dataSize != expectedSize) {
+                    Log.w(TAG, "Frame size mismatch! Expected: $expectedSize, Got: $dataSize")
+                }
+
+                // Create a local copy of the data
+                val frameCopy = ByteArray(dataSize)
+                buffer.get(frameCopy)
                 buffer.position(position) // Restore position
 
-                val size = buffer.remaining()
-                encoder?.queueInputBuffer(inputIndex, 0, size, timestampUs, 0)
+                // Put the copied data into encoder
+                inputBuffer?.put(frameCopy)
+
+                // Use smoothed timestamp for consistent frame rate
+                // This prevents timing jitter from causing decoder issues
+                if (baseTimestampUs == 0L) {
+                    baseTimestampUs = timestampUs
+                }
+                val smoothedTimestamp = baseTimestampUs + (frameIndex * targetFrameDurationUs)
+                frameIndex++
+
+                encoder?.queueInputBuffer(inputIndex, 0, dataSize, smoothedTimestamp, 0)
+            } else {
+                droppedFrames++
+                Log.w(TAG, "Dropped frame - encoder queue full (total dropped: $droppedFrames)")
+            }
+
+            // Log stats every 5 seconds
+            val now = System.currentTimeMillis()
+            if (now - lastLogTime > 5000) {
+                Log.d(TAG, "Frame stats: total=$totalFrames, dropped=$droppedFrames, drop rate=${droppedFrames * 100 / maxOf(totalFrames, 1)}%")
+                lastLogTime = now
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error feeding frame from buffer: ${e.message}")
+            Log.e(TAG, "Error feeding frame from buffer: ${e.message}", e)
         }
     }
 
@@ -384,6 +429,13 @@ class RTMPStreamingService(private val context: Context) {
         // Clear SPS/PPS
         sps = null
         pps = null
+
+        // Reset frame counters and timestamp smoothing
+        totalFrames = 0
+        droppedFrames = 0
+        lastLogTime = 0
+        baseTimestampUs = 0
+        frameIndex = 0
 
         _state.value = StreamingState.Idle
         Log.d(TAG, "RTMP streaming stopped")

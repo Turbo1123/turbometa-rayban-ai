@@ -13,6 +13,7 @@ struct TurboMetaHomeView: View {
 
     @State private var showLiveAI = false
     @State private var showLiveStream = false
+    @State private var showRTMPStreaming = false
     @State private var showLeanEat = false
     @State private var showQuickVision = false
 
@@ -89,7 +90,18 @@ struct TurboMetaHomeView: View {
                                 }
                             }
 
-                            // Row 3 - Full width
+                            // Row 3 - RTMP Streaming (Experimental)
+                            FeatureCardWide(
+                                title: "home.rtmp.title".localized,
+                                subtitle: "home.rtmp.subtitle".localized,
+                                icon: "antenna.radiowaves.left.and.right",
+                                gradient: [Color.red, Color.orange],
+                                badge: "home.experimental".localized
+                            ) {
+                                showRTMPStreaming = true
+                            }
+
+                            // Row 4 - Screen Recording Stream
                             FeatureCardWide(
                                 title: "home.livestream.title".localized,
                                 subtitle: "home.livestream.subtitle".localized,
@@ -110,6 +122,9 @@ struct TurboMetaHomeView: View {
             }
             .fullScreenCover(isPresented: $showLiveStream) {
                 SimpleLiveStreamView(streamViewModel: streamViewModel)
+            }
+            .fullScreenCover(isPresented: $showRTMPStreaming) {
+                RTMPStreamingView(streamViewModel: streamViewModel)
             }
             .fullScreenCover(isPresented: $showLeanEat) {
                 StreamView(viewModel: streamViewModel, wearablesVM: wearablesViewModel)
@@ -198,6 +213,7 @@ struct FeatureCardWide: View {
     let subtitle: String
     let icon: String
     let gradient: [Color]
+    var badge: String? = nil
     let action: () -> Void
 
     var body: some View {
@@ -216,9 +232,22 @@ struct FeatureCardWide: View {
 
                 // Text
                 VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                    Text(title)
-                        .font(AppTypography.title2)
-                        .foregroundColor(.white)
+                    HStack(spacing: AppSpacing.sm) {
+                        Text(title)
+                            .font(AppTypography.title2)
+                            .foregroundColor(.white)
+
+                        if let badge = badge {
+                            Text(badge)
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.white.opacity(0.25))
+                                .cornerRadius(4)
+                        }
+                    }
 
                     Text(subtitle)
                         .font(AppTypography.subheadline)

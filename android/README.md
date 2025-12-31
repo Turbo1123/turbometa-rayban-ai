@@ -1,8 +1,14 @@
 # TurboMeta Ray-Ban AI - Android
 
-**Version 1.3.0** - Synced with iOS
+**Version 1.4.0**
 
 Ray-Ban Meta 智能眼镜 AI 助手 Android 版本。
+
+> **🎬 NEW: RTMP Live Streaming (Experimental) | RTMP 直播推流（实验性）**
+>
+> Push live video from Ray-Ban Meta glasses to **any RTMP-compatible platform** - YouTube Live, Twitch, Bilibili, Douyin, TikTok, Facebook Live, and more!
+>
+> 将 Ray-Ban Meta 眼镜的实时视频推送到**任意支持 RTMP 的直播平台** - YouTube Live、Twitch、B站、抖音、TikTok、Facebook Live 等！
 
 ## Features | 功能
 
@@ -23,6 +29,18 @@ Ray-Ban Meta 智能眼镜 AI 助手 Android 版本。
 - **Live AI**: Alibaba Qwen Omni / Google Gemini Live
 - **视觉 API**: 阿里云 Dashscope / OpenRouter (Gemini, Claude 等)
 - **实时 AI**: 阿里云通义千问 Omni / Google Gemini Live
+
+### 🎬 RTMP Live Streaming (Experimental) | RTMP 直播推流（实验性）
+- Stream first-person view from glasses to any RTMP server
+- Compatible with all major platforms: YouTube, Twitch, Bilibili, Douyin, TikTok, Facebook Live, etc.
+- H.264 hardware encoding for smooth streaming
+- Adjustable bitrate (1-4 Mbps)
+- Real-time preview on phone
+- 将眼镜的第一人称视角推流到任意 RTMP 服务器
+- 兼容所有主流直播平台：YouTube、Twitch、B站、抖音、TikTok、Facebook Live 等
+- H.264 硬件编码，流畅推流
+- 可调节码率（1-4 Mbps）
+- 手机实时预览
 
 ---
 
@@ -70,6 +88,35 @@ The wake word detection feature ("Jarvis") uses **Picovoice Porcupine**. To use 
 ---
 
 ## Release Notes | 更新日志
+
+### v1.4.0 (2024-12-31)
+
+#### New Features | 新功能
+
+- **🎬 RTMP Live Streaming (Experimental) | RTMP 直播推流（实验性）**
+  - Stream first-person view from Ray-Ban Meta glasses to any RTMP server
+  - Works with all major live streaming platforms worldwide
+  - H.264 hardware encoding with adjustable bitrate
+  - Real-time preview on phone while streaming
+  - Timestamp smoothing for stable frame rate
+  - 将 Ray-Ban Meta 眼镜的第一人称视角推流到任意 RTMP 服务器
+  - 兼容全球所有主流直播平台
+  - H.264 硬件编码，支持码率调节
+  - 推流时手机可实时预览
+  - 时间戳平滑处理，帧率稳定
+
+#### Supported Platforms | 支持的平台
+
+- YouTube Live
+- Twitch
+- Bilibili (B站)
+- Douyin (抖音)
+- TikTok
+- Facebook Live
+- Any RTMP-compatible server (MediaMTX, nginx-rtmp, etc.)
+- 任意支持 RTMP 的服务器（MediaMTX、nginx-rtmp 等）
+
+---
 
 ### v1.3.0 (2024-12-31)
 

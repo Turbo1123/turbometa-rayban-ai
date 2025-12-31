@@ -31,6 +31,9 @@
 "home.wordlearn.subtitle" = "单词学习";
 "home.livestream.title" = "直播";
 "home.livestream.subtitle" = "抖音 · 快手 · 小红书";
+"home.rtmp.title" = "RTMP 推流";
+"home.rtmp.subtitle" = "YouTube · Twitch · B站";
+"home.experimental" = "实验性";
 "home.comingsoon" = "敬请期待";
 
 // MARK: - Live AI
@@ -247,3 +250,28 @@
 // MARK: - AI Prompts
 "prompt.quickvision" = "你是一个智能眼镜AI助手。请用简洁的中文描述图片内容，适合语音播报。\n\n要求：\n1. 用1-2句话描述主要内容\n2. 语言自然、口语化\n3. 不要使用标点符号过多\n4. 总字数控制在50字以内\n5. 直接描述，不要说\"图片中\"或\"我看到\"";
 "prompt.liveai" = "你是RayBan Meta智能眼镜AI助手。\n\n【重要】必须始终用中文回答，无论用户说什么语言。\n\n回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。";
+
+// MARK: - RTMP 推流
+"rtmp.title" = "RTMP 推流";
+"rtmp.status.disconnected" = "未连接";
+"rtmp.status.connecting" = "连接中...";
+"rtmp.status.connected" = "已连接";
+"rtmp.status.streaming" = "推流中";
+"rtmp.connecting.video" = "正在连接视频流...";
+"rtmp.frames" = "帧数";
+"rtmp.time" = "时长";
+"rtmp.data" = "数据";
+"rtmp.start" = "开始推流";
+"rtmp.stop" = "停止推流";
+"rtmp.url.placeholder" = "RTMP 服务器地址";
+"rtmp.key.placeholder" = "推流密钥";
+"rtmp.settings" = "推流设置";
+"rtmp.settings.bitrate" = "码率";
+"rtmp.settings.bitrate.description" = "码率越高画质越好，但需要更多带宽";
+"rtmp.settings.platform" = "平台预设";
+"rtmp.settings.note" = "说明";
+"rtmp.settings.experimental" = "实验性功能";
+"rtmp.settings.experimental.description" = "RTMP 推流是实验性功能，部分平台可能需要额外配置。";
+"rtmp.recommended" = "推荐";
+"rtmp.platform.custom" = "自定义";
+"rtmp.error.invalidurl" = "请输入有效的 RTMP 地址";

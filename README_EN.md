@@ -20,15 +20,15 @@
 
 ---
 
-## 🎉 Major Update v1.3.0
+## 🎉 Major Update v1.4.0
 
 <div align="center">
 
-### 🌍 iOS & Android Now in Sync + Bilingual UI + Multi-Platform AI
+### 🎬 RTMP Live Streaming - Stream to Any Platform!
 
-**Quick Vision | Live AI | OpenRouter & Gemini Support**
+**Stream first-person view from Ray-Ban Meta glasses to YouTube, Twitch, Bilibili, Douyin, TikTok, Facebook Live, and more!**
 
-✅ **iOS v1.3.0** | ✅ **Android v1.3.0** - Feature parity achieved!
+✅ **iOS v1.4.0** | ✅ **Android v1.4.0**
 
 </div>
 
@@ -43,7 +43,8 @@
 ### 🌐 Multi-Language & Multi-Platform
 
 - 🌐 **Bilingual Interface**: Full English and Chinese UI support with easy switching
-- 🔌 **OpenRouter Support**: Access 500+ AI models including GPT-4, Claude, Gemini, and more
+- 🎬 **RTMP Live Streaming**: Stream to any RTMP platform - YouTube Live, Twitch, Bilibili, Douyin, TikTok, Facebook Live, and more
+- 🔌 **OpenRouter Support**: Access 500+ AI models including GPT-5, Claude 4.5, Gemini 3, and more
 - 🎙️ **Google Gemini Live**: Live AI now supports Google Gemini real-time voice chat (requires non-China network)
 - 🌏 **Alibaba Multi-Region**: Support for Beijing (China mainland) and Singapore (International) endpoints
 - 🔑 **Independent API Key Management**: Separate API keys for different providers and regions
@@ -135,7 +136,7 @@ Before using TurboMeta, you **MUST** enable developer mode in Meta AI App:
 
 ### 🍎 iOS (Recommended)
 
-> ✅ **Latest Version**: iOS updated to v1.3.0 with bilingual UI, OpenRouter, Gemini support
+> ✅ **Latest Version**: iOS updated to v1.4.0 with RTMP streaming, bilingual UI, OpenRouter, Gemini support
 
 👉 [**Go to Downloads**](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 
