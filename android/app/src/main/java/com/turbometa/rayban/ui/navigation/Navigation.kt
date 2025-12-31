@@ -32,6 +32,7 @@ sealed class Screen(val route: String) {
     object Records : Screen("records")
     object Gallery : Screen("gallery")
     object LiveStream : Screen("live_stream")
+    object RTMPStream : Screen("rtmp_stream")
 }
 
 sealed class BottomNavItem(
@@ -123,6 +124,9 @@ fun TurboMetaNavigation(
                     },
                     onNavigateToLiveStream = {
                         navController.navigate(Screen.LiveStream.route)
+                    },
+                    onNavigateToRTMPStream = {
+                        navController.navigate(Screen.RTMPStream.route)
                     }
                 )
             }
@@ -202,6 +206,14 @@ fun TurboMetaNavigation(
             composable(Screen.LiveStream.route) {
                 SimpleLiveStreamScreen(
                     wearablesViewModel = wearablesViewModel,
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(Screen.RTMPStream.route) {
+                RTMPStreamingScreen(
                     onBackClick = {
                         navController.popBackStack()
                     }

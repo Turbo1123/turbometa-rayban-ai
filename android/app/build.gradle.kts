@@ -127,4 +127,7 @@ dependencies {
 
     // Picovoice Wake Word Detection
     implementation(libs.picovoice.porcupine)
+
+    // RTMP Streaming (RootEncoder)
+    implementation(libs.rtmp.client)
 }

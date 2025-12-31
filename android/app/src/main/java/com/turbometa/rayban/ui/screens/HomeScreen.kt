@@ -48,7 +48,8 @@ fun HomeScreen(
     onNavigateToLeanEat: () -> Unit,
     onNavigateToVision: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToLiveStream: () -> Unit = {}
+    onNavigateToLiveStream: () -> Unit = {},
+    onNavigateToRTMPStream: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -360,6 +361,24 @@ fun HomeScreen(
                         }
                         // Check camera permission and navigate
                         checkCameraPermissionAndNavigate { onNavigateToLiveStream() }
+                    }
+                )
+
+                // Row 4: RTMP Streaming (wide card) - Experimental
+                FeatureCardWide(
+                    title = stringResource(R.string.feature_rtmp_title),
+                    subtitle = stringResource(R.string.feature_rtmp_subtitle),
+                    icon = Icons.Default.Stream,
+                    gradientColors = listOf(Color(0xFF9C27B0), Color(0xFF9C27B0).copy(alpha = 0.7f)),
+                    isLoading = isCheckingPermission,
+                    onClick = {
+                        // Check device connection first
+                        if (!hasActiveDevice) {
+                            showDeviceNotConnectedDialog = true
+                            return@FeatureCardWide
+                        }
+                        // Check camera permission and navigate
+                        checkCameraPermissionAndNavigate { onNavigateToRTMPStream() }
                     }
                 )
             }

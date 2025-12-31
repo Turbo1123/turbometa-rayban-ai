@@ -37,6 +37,8 @@ dependencyResolutionManagement {
                 password = localProperties.getProperty("github_token") ?: System.getenv("GITHUB_TOKEN") ?: ""
             }
         }
+        // JitPack for RootEncoder (RTMP streaming)
+        maven { url = uri("https://jitpack.io") }
     }
 }
 

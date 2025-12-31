@@ -31,6 +31,7 @@ class APIKeyManager(context: Context) {
         private const val KEY_AI_MODEL = "ai_model"
         private const val KEY_OUTPUT_LANGUAGE = "output_language"
         private const val KEY_VIDEO_QUALITY = "video_quality"
+        private const val KEY_RTMP_URL = "rtmp_url"
 
         @Volatile
         private var instance: APIKeyManager? = null
@@ -211,6 +212,15 @@ class APIKeyManager(context: Context) {
 
     fun getVideoQuality(): String {
         return sharedPreferences.getString(KEY_VIDEO_QUALITY, "MEDIUM") ?: "MEDIUM"
+    }
+
+    // RTMP URL
+    fun saveRtmpUrl(url: String) {
+        sharedPreferences.edit().putString(KEY_RTMP_URL, url).apply()
+    }
+
+    fun getRtmpUrl(): String? {
+        return sharedPreferences.getString(KEY_RTMP_URL, null)
     }
 }
 
