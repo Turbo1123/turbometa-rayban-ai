@@ -12,8 +12,8 @@ android {
         applicationId = "com.turbometa.rayban"
         minSdk = 31
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.3.0"
+        versionCode = 3
+        versionName = "1.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -128,6 +128,6 @@ dependencies {
     // Picovoice Wake Word Detection
     implementation(libs.picovoice.porcupine)
 
-    // RTMP Streaming (RootEncoder)
+    // RTMP Streaming (RootEncoder old version without Compose dependencies)
     implementation(libs.rtmp.client)
 }

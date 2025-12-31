@@ -187,10 +187,8 @@ class RTMPStreamingViewModel(application: Application) : AndroidViewModel(applic
 
                 when (state) {
                     StreamSessionState.STREAMING -> {
-                        // Camera is ready, now connect RTMP
-                        if (_uiState.value == UIState.Connecting && !rtmpService.isStreaming()) {
-                            connectRtmp()
-                        }
+                        // Camera is ready, RTMP will connect after first frame arrives
+                        Log.d(TAG, "Camera streaming, waiting for first frame...")
                     }
                     StreamSessionState.STOPPED -> {
                         if (rtmpService.isStreaming()) {
@@ -228,11 +226,17 @@ class RTMPStreamingViewModel(application: Application) : AndroidViewModel(applic
     }
 
     private fun handleVideoFrame(videoFrame: VideoFrame) {
-        // Set video dimensions on first frame
+        // Set video dimensions on first frame and connect RTMP
         if (videoWidth == 0 || videoHeight == 0) {
+            // Use original dimensions - modern MediaCodec handles alignment internally
             videoWidth = videoFrame.width
             videoHeight = videoFrame.height
             Log.d(TAG, "Video dimensions: ${videoWidth}x${videoHeight}")
+
+            // Now connect RTMP with proper dimensions
+            if (_uiState.value == UIState.Connecting && !rtmpService.isStreaming()) {
+                connectRtmp()
+            }
         }
 
         // Calculate timestamp

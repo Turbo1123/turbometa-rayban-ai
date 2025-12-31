@@ -31,6 +31,9 @@
 "home.wordlearn.subtitle" = "Vocabulary Learning";
 "home.livestream.title" = "Live Stream";
 "home.livestream.subtitle" = "Streaming Platforms";
+"home.rtmp.title" = "RTMP Streaming";
+"home.rtmp.subtitle" = "YouTube · Twitch · Bilibili";
+"home.experimental" = "Experimental";
 "home.comingsoon" = "Coming Soon";
 
 // MARK: - Live AI
@@ -247,3 +250,28 @@
 // MARK: - AI Prompts
 "prompt.quickvision" = "You are a smart glasses AI assistant. Please describe the image content concisely, suitable for voice announcement.\n\nRequirements:\n1. Describe the main content in 1-2 sentences\n2. Use natural, conversational language\n3. Don't use too many punctuation marks\n4. Keep the total under 50 words\n5. Describe directly, don't say \"in the image\" or \"I see\"";
 "prompt.liveai" = "You are a RayBan Meta smart glasses AI assistant.\n\n[IMPORTANT] Always respond in English.\n\nKeep your answers concise and conversational, like chatting with a friend. The user is wearing glasses and can see their surroundings, provide quick and useful suggestions based on what they see. Be direct and to the point.";
+
+// MARK: - RTMP Streaming
+"rtmp.title" = "RTMP Streaming";
+"rtmp.status.disconnected" = "Disconnected";
+"rtmp.status.connecting" = "Connecting...";
+"rtmp.status.connected" = "Connected";
+"rtmp.status.streaming" = "Streaming";
+"rtmp.connecting.video" = "Connecting to video stream...";
+"rtmp.frames" = "Frames";
+"rtmp.time" = "Time";
+"rtmp.data" = "Data";
+"rtmp.start" = "Start Streaming";
+"rtmp.stop" = "Stop Streaming";
+"rtmp.url.placeholder" = "RTMP Server URL";
+"rtmp.key.placeholder" = "Stream Key";
+"rtmp.settings" = "Streaming Settings";
+"rtmp.settings.bitrate" = "Bitrate";
+"rtmp.settings.bitrate.description" = "Higher bitrate = better quality, more bandwidth";
+"rtmp.settings.platform" = "Platform Presets";
+"rtmp.settings.note" = "Note";
+"rtmp.settings.experimental" = "Experimental Feature";
+"rtmp.settings.experimental.description" = "RTMP streaming is an experimental feature. Some platforms may require additional configuration.";
+"rtmp.recommended" = "Recommended";
+"rtmp.platform.custom" = "Custom";
+"rtmp.error.invalidurl" = "Please enter a valid RTMP URL";
