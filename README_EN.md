@@ -24,11 +24,15 @@
 
 <div align="center">
 
-### 🌍 Bilingual UI + Multi-Platform AI + Full Multimodal Interaction
+### 🌍 iOS & Android Now in Sync + Bilingual UI + Multi-Platform AI
 
 **Quick Vision | Live AI | OpenRouter & Gemini Support**
 
+✅ **iOS v1.3.0** | ✅ **Android v1.3.0** - Feature parity achieved!
+
 </div>
+
+> ☕ **Enjoying this project?** This is a passion project maintained in my spare time. If it's been helpful to you, consider [**buying me a coffee**](https://buymeacoffee.com/turbo1123) - it really helps keep the project going!
 
 ### 🆕 Core Features
 

@@ -10,6 +10,7 @@ import android.util.Base64
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.turbometa.rayban.managers.AlibabaEndpoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,18 +20,31 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.TimeUnit
 
+/**
+ * Alibaba Qwen Omni Realtime Service
+ * Supports multi-region endpoints (Beijing/Singapore)
+ * 1:1 port from iOS OmniRealtimeService.swift
+ */
 class OmniRealtimeService(
     private val apiKey: String,
     private val model: String = "qwen3-omni-flash-realtime",
-    private val outputLanguage: String = "zh-CN"
+    private val outputLanguage: String = "zh-CN",
+    private val endpoint: AlibabaEndpoint = AlibabaEndpoint.BEIJING
 ) {
     companion object {
         private const val TAG = "OmniRealtimeService"
-        private const val WS_BASE_URL = "wss://dashscope.aliyuncs.com/api-ws/v1/realtime"
+        private const val WS_BEIJING_URL = "wss://dashscope.aliyuncs.com/api-ws/v1/realtime"
+        private const val WS_SINGAPORE_URL = "wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime"
         private const val SAMPLE_RATE = 24000
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO
         private const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
     }
+
+    private val websocketURL: String
+        get() = when (endpoint) {
+            AlibabaEndpoint.BEIJING -> WS_BEIJING_URL
+            AlibabaEndpoint.SINGAPORE -> WS_SINGAPORE_URL
+        }
 
     // State
     private val _isConnected = MutableStateFlow(false)
@@ -64,7 +78,7 @@ class OmniRealtimeService(
     private var audioPlaybackJob: Job? = null
     private val audioQueue = mutableListOf<ByteArray>()
     private val gson = Gson()
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private var isFirstAudioSent = false
     private var pendingImageFrame: Bitmap? = null
@@ -76,7 +90,14 @@ class OmniRealtimeService(
     fun connect() {
         if (_isConnected.value) return
 
-        val url = "$WS_BASE_URL?model=$model"
+        // Reset scope if it was cancelled (after previous disconnect)
+        if (!scope.isActive) {
+            scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+            Log.d(TAG, "Scope was cancelled, created new scope")
+        }
+
+        val url = "$websocketURL?model=$model"
+        Log.d(TAG, "Connecting to endpoint: ${endpoint.displayName}")
         val request = Request.Builder()
             .url(url)
             .addHeader("Authorization", "Bearer $apiKey")
@@ -171,15 +192,8 @@ class OmniRealtimeService(
     }
 
     private fun sendSessionUpdate() {
-        val languageInstruction = when (outputLanguage) {
-            "zh-CN" -> "请用简洁的中文回答，保持口语化和自然的对话风格。"
-            "en-US" -> "Please respond in concise English with a conversational tone."
-            "ja-JP" -> "簡潔な日本語で、会話的なトーンで返答してください。"
-            "ko-KR" -> "간결한 한국어로 대화적인 톤으로 응답해 주세요."
-            "es-ES" -> "Por favor responde en español conciso con un tono conversacional."
-            "fr-FR" -> "Veuillez répondre en français concis avec un ton conversationnel."
-            else -> "请用简洁的中文回答，保持口语化和自然的对话风格。"
-        }
+        // Matching iOS Live AI prompts exactly
+        val instructions = getLiveAIPrompt(outputLanguage)
 
         val sessionConfig = mapOf(
             "type" to "session.update",
@@ -189,11 +203,7 @@ class OmniRealtimeService(
                 "input_audio_format" to "pcm16",
                 "output_audio_format" to "pcm16",  // PCM16 works better with Android AudioTrack
                 "smooth_output" to true,
-                "instructions" to """
-                    你是RayBan Meta智能眼镜AI助手。$languageInstruction
-                    回答要简练，通常在1-3句话内完成。
-                    如果用户询问你看到了什么，请描述视觉画面中的内容。
-                """.trimIndent(),
+                "instructions" to instructions,
                 "turn_detection" to mapOf(
                     "type" to "server_vad",
                     "threshold" to 0.5,
@@ -204,6 +214,43 @@ class OmniRealtimeService(
 
         val json = gson.toJson(sessionConfig)
         webSocket?.send(json)
+    }
+
+    /**
+     * Get localized Live AI prompt matching iOS implementation
+     */
+    private fun getLiveAIPrompt(language: String): String {
+        return when (language) {
+            "zh-CN" -> """
+                你是RayBan Meta智能眼镜AI助手。
+
+                【重要】必须始终用中文回答，无论用户说什么语言。
+
+                回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。
+            """.trimIndent()
+            "en-US" -> """
+                You are a RayBan Meta smart glasses AI assistant.
+
+                [IMPORTANT] Always respond in English.
+
+                Keep your answers concise and conversational, like chatting with a friend. The user is wearing glasses and can see their surroundings, provide quick and useful suggestions based on what they see. Be direct and to the point.
+            """.trimIndent()
+            "ja-JP" -> """
+                あなたはRayBan Metaスマートグラスのアシスタントです。
+
+                【重要】常に日本語で回答してください。
+
+                回答は簡潔で会話的に、友達とチャットするように。ユーザーは眼鏡をかけて周囲を見ています。見えるものに基づいて素早く有用なアドバイスを。要点を直接伝えてください。
+            """.trimIndent()
+            "ko-KR" -> """
+                당신은 RayBan Meta 스마트 안경 AI 어시스턴트입니다.
+
+                【중요】항상 한국어로 응답하세요.
+
+                친구와 대화하듯이 간결하고 대화적으로 답변하세요. 사용자는 안경을 착용하고 주변을 볼 수 있습니다. 보이는 것에 따라 빠르고 유용한 조언을 제공하세요. 요점만 말하세요.
+            """.trimIndent()
+            else -> getLiveAIPrompt("en-US")
+        }
     }
 
     private fun sendAudioData(audioData: ByteArray) {

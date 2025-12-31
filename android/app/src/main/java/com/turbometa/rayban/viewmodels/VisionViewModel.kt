@@ -8,6 +8,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.turbometa.rayban.managers.APIProviderManager
 import com.turbometa.rayban.services.VisionAPIService
 import com.turbometa.rayban.utils.APIKeyManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,7 @@ import java.io.IOException
 class VisionViewModel(application: Application) : AndroidViewModel(application) {
 
     private val apiKeyManager = APIKeyManager.getInstance(application)
+    private val providerManager = APIProviderManager.getInstance(application)
     private var visionService: VisionAPIService? = null
 
     // State
@@ -65,9 +67,8 @@ class VisionViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private fun initializeService() {
-        val apiKey = apiKeyManager.getAPIKey()
-        if (!apiKey.isNullOrBlank()) {
-            visionService = VisionAPIService(apiKey)
+        if (providerManager.hasAPIKey(apiKeyManager)) {
+            visionService = VisionAPIService(apiKeyManager, providerManager)
         }
     }
 
@@ -89,13 +90,12 @@ class VisionViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         if (visionService == null) {
-            val apiKey = apiKeyManager.getAPIKey()
-            if (apiKey.isNullOrBlank()) {
+            if (!providerManager.hasAPIKey(apiKeyManager)) {
                 _errorMessage.value = "API Key not configured"
                 _viewState.value = ViewState.Error("API Key not configured")
                 return
             }
-            visionService = VisionAPIService(apiKey)
+            visionService = VisionAPIService(apiKeyManager, providerManager)
         }
 
         val analysisPrompt = prompt ?: _customPrompt.value.ifBlank { DEFAULT_PROMPTS[0] }

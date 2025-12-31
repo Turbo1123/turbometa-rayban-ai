@@ -32,6 +32,8 @@
     <!-- Feature Cards -->
     <string name="feature_liveai_title">Live AI</string>
     <string name="feature_liveai_subtitle">Real-time AI Conversation</string>
+    <string name="feature_quickvision_title">Quick Vision</string>
+    <string name="feature_quickvision_subtitle">Say \"Jarvis\" to Identify</string>
     <string name="feature_translate_title">Real-time Translation</string>
     <string name="feature_translate_subtitle">Coming Soon</string>
     <string name="feature_leaneat_title">LeanEat</string>
@@ -116,6 +118,8 @@
     <string name="analyzing_image">Analyzing image…</string>
     <string name="analysis_result">Analysis Result</string>
     <string name="reanalyze">Reanalyze</string>
+    <string name="capture_failed">Failed to capture photo</string>
+    <string name="analysis_failed">Image analysis failed</string>
 
     <!-- Quick Prompts -->
     <string name="prompt_describe_scene">What is depicted in this image?</string>
@@ -134,7 +138,7 @@
     <string name="records_delete">Delete</string>
     <string name="records_messages">%d messages</string>
     <string name="conversation_records">Conversation Records</string>
-    <string name="records">对话记录</string>
+    <string name="records">Records</string>
     <string name="gallery">Gallery</string>
     <string name="messages">messages</string>
     <string name="no_records">No conversation records</string>
@@ -169,6 +173,10 @@
     <string name="delete_api_key">Delete API Key</string>
     <string name="ai_model">AI Model</string>
     <string name="select_model">Select Model</string>
+    <string name="vision_model">Vision Model</string>
+    <string name="select_vision_model">Select Vision Model</string>
+    <string name="search_models">Search models…</string>
+    <string name="vision_capable_only">Vision capable only</string>
     <string name="output_language">Output Language</string>
     <string name="select_language">Select Language</string>
     <string name="data">Data</string>
@@ -204,7 +212,21 @@
     <string name="close">Close</string>
     <string name="back">Back</string>
 
+    <!-- Dialogs -->
+    <string name="api_key_required">API Key Required</string>
+    <string name="api_key_required_desc">Please get your API Key from Alibaba Cloud Dashscope console and configure it in Settings.</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="device_required">Device Required</string>
+    <string name="device_required_desc">Please connect your Ray-Ban Meta glasses first before using this feature.</string>
+    <string name="connect_device">Connect Device</string>
+    <string name="glasses_not_connected">Glasses not connected</string>
+    <string name="glasses_not_connected_desc">Glasses not connected, please connect first</string>
+    <string name="stream_failed">Stream failed, please check connection</string>
+    <string name="please_connect_glasses">Please connect glasses first</string>
+
     <!-- Streaming -->
+    <string name="stream_live">Live</string>
+    <string name="stream_no_video">No Video</string>
     <string name="stream_start">Start Streaming</string>
     <string name="stream_stop">Stop Streaming</string>
     <string name="stream_capture">Capture Photo</string>
@@ -220,9 +242,61 @@
     <string name="permission_microphone">Microphone permission is required for AI conversation</string>
     <string name="permission_bluetooth">Bluetooth permission is required to connect to glasses</string>
     <string name="permission_grant">Grant Permission</string>
+    <string name="permission_all_required">Please grant all permissions (Bluetooth, Network, Microphone)</string>
     <string name="camera_permission_denied">Camera permission was denied. Please grant camera permission in the Meta AI app to use this feature.</string>
 
     <!-- Video Quality -->
     <string name="video_quality">Video Quality</string>
     <string name="select_quality">Select Quality</string>
+
+    <!-- App Language -->
+    <string name="settings_applanguage">App Language</string>
+    <string name="select_applanguage">Select App Language</string>
+    <string name="applanguage_system">System Default</string>
+    <string name="applanguage_chinese">Chinese</string>
+    <string name="applanguage_english">English</string>
+
+    <!-- API Provider Settings -->
+    <string name="settings_provider">Vision API Provider</string>
+    <string name="settings_endpoint">Service Region</string>
+    <string name="settings_liveai_provider">Live AI Provider</string>
+    <string name="provider_alibaba">Alibaba Dashscope</string>
+    <string name="provider_openrouter">OpenRouter</string>
+    <string name="provider_google">Google Gemini</string>
+    <string name="endpoint_beijing">Beijing (China)</string>
+    <string name="endpoint_singapore">Singapore (International)</string>
+    <string name="liveai_alibaba">Alibaba Qwen Omni</string>
+    <string name="liveai_google">Google Gemini Live</string>
+
+    <!-- API Key Types -->
+    <string name="apikey_alibaba_beijing">Alibaba Beijing API Key</string>
+    <string name="apikey_alibaba_singapore">Alibaba Singapore API Key</string>
+    <string name="apikey_openrouter">OpenRouter API Key</string>
+    <string name="apikey_google">Google AI Studio API Key</string>
+    <string name="apikey_get_alibaba">Get key from Alibaba Cloud</string>
+    <string name="apikey_get_openrouter">Get key from OpenRouter</string>
+    <string name="apikey_get_google">Get key from Google AI Studio</string>
+
+    <!-- Picovoice / Quick Vision -->
+    <string name="settings_quickvision">Quick Vision</string>
+    <string name="settings_picovoice">Picovoice Wake Word</string>
+    <string name="picovoice_accesskey">Picovoice Access Key</string>
+    <string name="picovoice_accesskey_hint">Enter your Picovoice Access Key</string>
+    <string name="picovoice_enabled">Wake Word Enabled</string>
+    <string name="picovoice_disabled">Wake Word Disabled</string>
+    <string name="picovoice_start">Start Listening</string>
+    <string name="picovoice_stop">Stop Listening</string>
+    <string name="picovoice_get_key">Get free key from Picovoice Console</string>
+    <string name="picovoice_description">Say \"Jarvis\" to trigger Quick Vision image recognition</string>
+    <string name="picovoice_not_configured">Access Key not configured</string>
+    <string name="picovoice_configured">Access Key configured</string>
+    <string name="wakeword_detection">Wake Word Detection</string>
+    <string name="wakeword_enabled_desc">Say "Jarvis" to trigger Quick Vision</string>
+    <string name="wakeword_disabled_desc">Wake word detection is off</string>
+    <string name="background_running">Background Running</string>
+    <string name="background_running_desc">Allow app to run in background</string>
+
+    <!-- AI Prompts (for services to use based on language) -->
+    <string name="prompt_quickvision">You are a smart glasses AI assistant. Please describe the image content concisely, suitable for voice announcement.\n\nRequirements:\n1. Describe the main content in 1-2 sentences\n2. Use natural, conversational language\n3. Don\'t use too many punctuation marks\n4. Keep the total under 50 words\n5. Describe directly, don\'t say \"in the image\" or \"I see\"</string>
+    <string name="prompt_liveai">You are a RayBan Meta smart glasses AI assistant.\n\n[IMPORTANT] Always respond in English.\n\nKeep your answers concise and conversational, like chatting with a friend. The user is wearing glasses and can see their surroundings, provide quick and useful suggestions based on what they see. Be direct and to the point.</string>
 </resources>

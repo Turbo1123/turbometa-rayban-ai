@@ -489,7 +489,7 @@ private fun ControlPanel(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = if (isStreaming) "Live" else "No Video",
+                            text = stringResource(if (isStreaming) R.string.stream_live else R.string.stream_no_video),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White.copy(alpha = 0.7f)
                         )
@@ -564,7 +564,7 @@ private fun getStatusText(
 ): String {
     val streamText = when (streamState) {
         is WearablesViewModel.StreamState.Streaming -> "📹"
-        is WearablesViewModel.StreamState.Starting -> "⏳"
+        is WearablesViewModel.StreamState.Waiting -> "⏳"
         else -> ""
     }
     val aiText = when (state) {
@@ -599,7 +599,7 @@ private fun getInstructionText(
     hasActiveDevice: Boolean
 ): String {
     return when {
-        !hasActiveDevice -> "请先连接眼镜"
+        !hasActiveDevice -> stringResource(R.string.please_connect_glasses)
         !isConnected -> stringResource(R.string.tap_connect_to_start)
         isRecording -> stringResource(R.string.speak_now)
         state == OmniRealtimeViewModel.ViewState.Processing -> stringResource(R.string.processing_response)

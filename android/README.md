@@ -1,129 +1,192 @@
-# TurboMeta Android
+# TurboMeta Ray-Ban AI - Android
 
-Ray-Ban Meta 智能眼镜 AI 助手 Android 版
+**Version 1.3.0** - Synced with iOS
 
-## 功能特性
+Ray-Ban Meta 智能眼镜 AI 助手 Android 版本。
 
-### Live AI
-- 实时语音对话，支持阿里云百炼 API
-- 眼镜摄像头实时画面传输
-- 多轮对话记录保存
+## Features | 功能
 
-### LeanEat
-- 食物拍照识别
-- 卡路里和营养成分分析
-- 健康评分和饮食建议
+### Live AI | 实时 AI 对话
+- Real-time voice conversation with AI through Ray-Ban Meta glasses
+- Supports Alibaba Qwen Omni and Google Gemini Live
+- 通过 Ray-Ban Meta 眼镜与 AI 进行实时语音对话
+- 支持阿里云通义千问 Omni 和 Google Gemini Live
 
-### 直播
-- 眼镜摄像头实时预览
-- 支持推流到抖音、快手、小红书等平台（开发中）
+### Quick Vision | 快速识图
+- Take photos with glasses and get AI analysis
+- Wake word detection: Say "Jarvis" to trigger Quick Vision
+- 用眼镜拍照并获取 AI 分析
+- 唤醒词检测：说 "Jarvis" 触发快速识图
 
-### 实时翻译（开发中）
-- 语音实时翻译
+### Multi-Provider Support | 多提供商支持
+- **Vision API**: Alibaba Dashscope / OpenRouter (Gemini, Claude, etc.)
+- **Live AI**: Alibaba Qwen Omni / Google Gemini Live
+- **视觉 API**: 阿里云 Dashscope / OpenRouter (Gemini, Claude 等)
+- **实时 AI**: 阿里云通义千问 Omni / Google Gemini Live
 
-### WordLearn（开发中）
-- 单词学习功能
+---
 
-## 系统要求
+## ⚠️ Important Notes | 重要说明
 
+### Wake Word Detection (Picovoice) | 唤醒词检测
+
+The wake word detection feature ("Jarvis") uses **Picovoice Porcupine**. To use this feature:
+
+唤醒词检测功能（"Jarvis"）使用 **Picovoice Porcupine**。使用此功能需要：
+
+1. **Register at Picovoice Console | 注册 Picovoice 账号**
+   - Go to https://console.picovoice.ai/
+   - Create a free account
+   - 访问 https://console.picovoice.ai/
+   - 创建免费账号
+
+2. **Get Access Key | 获取 Access Key**
+   - After registration, get your Access Key from the console
+   - 注册后，从控制台获取 Access Key
+
+3. **Configure in App | 在 App 中配置**
+   - Go to Settings → Quick Vision → Picovoice Access Key
+   - Enter your Access Key
+   - 进入 设置 → 快速识图 → Picovoice Access Key
+   - 输入你的 Access Key
+
+4. **⚠️ Microphone Always On | 麦克风常开**
+   - Wake word detection requires the microphone to be always listening
+   - This runs as a foreground service with a notification
+   - Battery optimization should be disabled for best performance
+   - 唤醒词检测需要麦克风一直处于监听状态
+   - 这会作为前台服务运行，并显示通知
+   - 建议关闭电池优化以获得最佳体验
+
+### Google Gemini Live | Google Gemini Live
+
+⚠️ **Not Fully Tested | 未完全测试**
+
+- Google Gemini Live has not been fully tested due to limited access
+- If you encounter issues, please provide feedback
+- Google Gemini Live 由于条件限制未能完全测试
+- 如遇问题，请反馈
+
+---
+
+## Release Notes | 更新日志
+
+### v1.3.0 (2024-12-31)
+
+#### New Features | 新功能
+
+- **Wake Word Detection | 唤醒词检测**
+  - Say "Jarvis" to trigger Quick Vision without touching the phone
+  - Powered by Picovoice Porcupine
+  - 说 "Jarvis" 触发快速识图，无需触摸手机
+  - 基于 Picovoice Porcupine
+
+- **Vision Model Selection | 视觉模型选择**
+  - Choose from multiple vision models
+  - Alibaba: Qwen VL Flash/Plus/Max, Qwen 2.5 VL 72B
+  - OpenRouter: Search and select from all available models
+  - Filter by vision-capable models
+  - 支持选择多种视觉模型
+  - 阿里云: Qwen VL Flash/Plus/Max, Qwen 2.5 VL 72B
+  - OpenRouter: 搜索并选择所有可用模型
+  - 可筛选仅显示视觉模型
+
+- **App Language | 应用语言**
+  - Switch app interface language (System/Chinese/English)
+  - Auto-syncs output language when switching
+  - 切换应用界面语言（跟随系统/中文/英文）
+  - 切换时自动同步输出语言
+
+#### Improvements | 改进
+
+- **Quick Vision Flow | 快速识图流程**
+  - Optimized capture flow: TTS → Start stream → Capture → Stop stream → Analyze → TTS result
+  - Added debounce for wake word (prevents multiple triggers)
+  - 优化拍照流程：TTS → 启动流 → 拍照 → 停止流 → 分析 → TTS 结果
+  - 添加唤醒词防抖（防止多次触发）
+
+- **Bilingual Support | 双语支持**
+  - Full English/Chinese translation for all UI elements
+  - AI prompts follow output language setting
+  - 所有界面元素支持中英文
+  - AI 提示词跟随输出语言设置
+
+- **Default Models | 默认模型**
+  - Alibaba: qwen-vl-flash (fast response)
+  - OpenRouter: google/gemini-2.0-flash-001
+  - 阿里云: qwen-vl-flash（快速响应）
+  - OpenRouter: google/gemini-2.0-flash-001
+
+#### Bug Fixes | 修复
+
+- Fixed language switching not taking effect
+- Fixed hardcoded Chinese strings in various screens
+- Fixed Live AI reconnection issues
+- 修复语言切换不生效的问题
+- 修复多处界面硬编码中文
+- 修复 Live AI 重连问题
+
+---
+
+## Setup | 配置
+
+### API Keys | API 密钥
+
+1. **Alibaba Dashscope** (for Vision & Live AI)
+   - Get API Key: https://help.aliyun.com/zh/model-studio/get-api-key
+
+2. **OpenRouter** (for Vision with various models)
+   - Get API Key: https://openrouter.ai/keys
+
+3. **Google AI Studio** (for Gemini Live)
+   - Get API Key: https://aistudio.google.com/apikey
+
+4. **Picovoice** (for Wake Word Detection)
+   - Get Access Key: https://console.picovoice.ai/
+
+---
+
+## Requirements | 要求
+
+- Android 8.0 (API 26) or higher
+- Ray-Ban Meta glasses paired via Meta View app
 - Android 8.0 (API 26) 或更高版本
-- 需要安装 Meta AI 应用并完成眼镜配对
-- 需要阿里云百炼 API Key（用于 Live AI 功能）
+- 通过 Meta View 应用配对的 Ray-Ban Meta 眼镜
 
-## 安装
+---
 
-1. 下载 APK 文件
-2. 在 Android 设备上安装 APK
-3. 授予必要权限（蓝牙、麦克风）
-4. 打开 Meta AI 应用完成眼镜注册
-
-## 使用说明
-
-### 首次使用
-
-1. 确保 Ray-Ban Meta 眼镜已通过 Meta AI 应用配对
-2. 打开 TurboMeta 应用
-3. 点击首页的"连接眼镜"按钮
-4. 应用会自动跳转到 Meta AI 进行设备注册
-
-### 配置 API Key
-
-1. 进入设置页面
-2. 点击"API Key"
-3. 输入阿里云百炼 API Key
-4. 保存
-
-获取 API Key: https://bailian.console.aliyun.com/?apiKey=1
-
-### 使用 Live AI
-
-1. 确保眼镜已连接且 API Key 已配置
-2. 点击首页"Live AI"卡片
-3. 应用会请求眼镜摄像头权限（首次使用）
-4. 开始与 AI 对话
-
-### 使用 LeanEat
-
-1. 确保眼镜已连接
-2. 点击首页"LeanEat"卡片
-3. 对准食物拍照
-4. 等待 AI 分析营养成分
-
-## 技术架构
-
-- **UI 框架**: Jetpack Compose + Material 3
-- **架构模式**: MVVM
-- **眼镜 SDK**: Meta Wearables DAT SDK v0.3.0
-- **AI 接口**: 阿里云百炼 Omni Realtime API
-- **本地存储**: Room Database
-
-## 权限说明
-
-| 权限 | 用途 |
-|------|------|
-| BLUETOOTH | 连接 Ray-Ban Meta 眼镜 |
-| BLUETOOTH_CONNECT | 蓝牙设备连接 |
-| BLUETOOTH_SCAN | 扫描蓝牙设备 |
-| RECORD_AUDIO | 语音对话录音 |
-| INTERNET | API 通信 |
-
-## 构建
+## Build | 构建
 
 ```bash
-# Debug 构建
+# Debug build
 ./gradlew assembleDebug
 
-# 安装到设备
+# Release build
+./gradlew assembleRelease
+
+# Install to device
 ./gradlew installDebug
 ```
 
-## 项目结构
+---
 
-```
-app/src/main/java/com/turbometa/rayban/
-├── MainActivity.kt           # 主入口
-├── ui/
-│   ├── navigation/          # 导航配置
-│   ├── screens/             # 各功能页面
-│   └── theme/               # 主题配置
-├── viewmodels/
-│   ├── WearablesViewModel   # 眼镜连接和流管理
-│   └── OmniRealtimeViewModel # AI 对话管理
-├── data/
-│   ├── database/            # Room 数据库
-│   └── models/              # 数据模型
-└── utils/                   # 工具类
-```
+## Feedback | 反馈
 
-## 版本历史
+If you encounter any issues, especially with:
+- Google Gemini Live (not fully tested)
+- Wake word detection
+- Language switching
 
-### v1.0.0
-- 首个发布版本
-- Live AI 实时语音对话
-- LeanEat 营养分析
-- 直播预览功能
-- 对话记录保存
-- 中英文本地化
+Please report issues or provide feedback.
+
+如遇到任何问题，特别是：
+- Google Gemini Live（未完全测试）
+- 唤醒词检测
+- 语言切换
+
+请反馈问题或提供建议。
+
+---
 
 ## License
 
