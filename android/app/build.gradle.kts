@@ -12,8 +12,8 @@ android {
         applicationId = "com.turbometa.rayban"
         minSdk = 31
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -87,6 +87,7 @@ dependencies {
 
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.exifinterface)
 
@@ -123,4 +124,7 @@ dependencies {
 
     // Collections
     implementation(libs.kotlinx.collections.immutable)
+
+    // Picovoice Wake Word Detection
+    implementation(libs.picovoice.porcupine)
 }

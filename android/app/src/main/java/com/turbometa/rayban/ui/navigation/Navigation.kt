@@ -27,6 +27,7 @@ sealed class Screen(val route: String) {
     object LiveAI : Screen("live_ai")
     object LeanEat : Screen("lean_eat")
     object Vision : Screen("vision")
+    object QuickVision : Screen("quick_vision")
     object Settings : Screen("settings")
     object Records : Screen("records")
     object Gallery : Screen("gallery")
@@ -115,7 +116,7 @@ fun TurboMetaNavigation(
                         navController.navigate(Screen.LeanEat.route)
                     },
                     onNavigateToVision = {
-                        navController.navigate(Screen.Vision.route)
+                        navController.navigate(Screen.QuickVision.route)
                     },
                     onNavigateToSettings = {
                         navController.navigate(Screen.Settings.route)
@@ -158,6 +159,15 @@ fun TurboMetaNavigation(
                     },
                     onTakePhoto = {
                         wearablesViewModel.takePhoto()
+                    }
+                )
+            }
+
+            composable(Screen.QuickVision.route) {
+                QuickVisionScreen(
+                    wearablesViewModel = wearablesViewModel,
+                    onBackClick = {
+                        navController.popBackStack()
                     }
                 )
             }

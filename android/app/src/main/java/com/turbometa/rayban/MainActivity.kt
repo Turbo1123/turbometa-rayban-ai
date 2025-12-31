@@ -3,11 +3,11 @@ package com.turbometa.rayban
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import com.meta.wearable.dat.core.Wearables
 import com.meta.wearable.dat.core.types.Permission
 import com.meta.wearable.dat.core.types.PermissionStatus
+import com.turbometa.rayban.managers.LanguageManager
 import com.turbometa.rayban.ui.navigation.TurboMetaNavigation
 import com.turbometa.rayban.ui.theme.TurboMetaTheme
 import com.turbometa.rayban.viewmodels.WearablesViewModel
@@ -25,7 +26,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     companion object {
         // Required Android permissions for the DAT SDK
@@ -51,7 +52,7 @@ class MainActivity : ComponentActivity() {
         if (granted) {
             initializeSDK()
         } else {
-            wearablesViewModel.setError("请授予所有权限（蓝牙、网络、录音）")
+            wearablesViewModel.setError(getString(R.string.permission_all_required))
         }
     }
 
@@ -78,6 +79,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Initialize Language Manager (for app language switching)
+        LanguageManager.init(this)
 
         // Check and request permissions
         checkAndRequestPermissions()

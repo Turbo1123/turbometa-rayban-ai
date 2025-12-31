@@ -116,6 +116,8 @@
     <string name="analyzing_image">正在分析图片…</string>
     <string name="analysis_result">分析结果</string>
     <string name="reanalyze">重新分析</string>
+    <string name="capture_failed">拍照失败，请重试</string>
+    <string name="analysis_failed">图像分析失败</string>
 
     <!-- Quick Prompts -->
     <string name="prompt_describe_scene">图中描绘的是什么景象?</string>
@@ -169,6 +171,10 @@
     <string name="delete_api_key">删除API密钥</string>
     <string name="ai_model">AI模型</string>
     <string name="select_model">选择模型</string>
+    <string name="vision_model">视觉模型</string>
+    <string name="select_vision_model">选择视觉模型</string>
+    <string name="search_models">搜索模型…</string>
+    <string name="vision_capable_only">仅显示视觉模型</string>
     <string name="output_language">输出语言</string>
     <string name="select_language">选择语言</string>
     <string name="data">数据</string>
@@ -204,7 +210,21 @@
     <string name="close">关闭</string>
     <string name="back">返回</string>
 
+    <!-- Dialogs -->
+    <string name="api_key_required">需要配置 API Key</string>
+    <string name="api_key_required_desc">请前往阿里云百炼控制台获取 API Key，然后在设置中配置。</string>
+    <string name="go_to_settings">去设置</string>
+    <string name="device_required">需要连接设备</string>
+    <string name="device_required_desc">请先连接 Ray-Ban Meta 眼镜后再使用此功能。</string>
+    <string name="connect_device">连接设备</string>
+    <string name="glasses_not_connected">眼镜未连接</string>
+    <string name="glasses_not_connected_desc">眼镜未连接，请先连接眼镜</string>
+    <string name="stream_failed">视频流启动失败，请检查眼镜连接</string>
+    <string name="please_connect_glasses">请先连接眼镜</string>
+
     <!-- Streaming -->
+    <string name="stream_live">直播中</string>
+    <string name="stream_no_video">无视频</string>
     <string name="stream_start">开始推流</string>
     <string name="stream_stop">停止推流</string>
     <string name="stream_capture">拍照</string>
@@ -220,9 +240,63 @@
     <string name="permission_microphone">AI 对话需要麦克风权限</string>
     <string name="permission_bluetooth">连接眼镜需要蓝牙权限</string>
     <string name="permission_grant">授予权限</string>
+    <string name="permission_all_required">请授予所有权限（蓝牙、网络、录音）</string>
     <string name="camera_permission_denied">相机权限被拒绝。请在 Meta AI 应用中授予相机权限以使用此功能。</string>
 
     <!-- Video Quality -->
     <string name="video_quality">视频画质</string>
     <string name="select_quality">选择画质</string>
+
+    <!-- App Language -->
+    <string name="settings_applanguage">应用语言</string>
+    <string name="select_applanguage">选择应用语言</string>
+    <string name="applanguage_system">跟随系统</string>
+    <string name="applanguage_chinese">中文</string>
+    <string name="applanguage_english">English</string>
+
+    <!-- API Provider Settings -->
+    <string name="settings_provider">Vision API 提供商</string>
+    <string name="settings_endpoint">服务区域</string>
+    <string name="settings_liveai_provider">Live AI 提供商</string>
+    <string name="provider_alibaba">阿里云 Dashscope</string>
+    <string name="provider_openrouter">OpenRouter</string>
+    <string name="provider_google">Google Gemini</string>
+    <string name="endpoint_beijing">北京 (中国)</string>
+    <string name="endpoint_singapore">新加坡 (国际)</string>
+    <string name="liveai_alibaba">阿里云 通义千问 Omni</string>
+    <string name="liveai_google">Google Gemini Live</string>
+
+    <!-- API Key Types -->
+    <string name="apikey_alibaba_beijing">阿里云北京 API Key</string>
+    <string name="apikey_alibaba_singapore">阿里云新加坡 API Key</string>
+    <string name="apikey_openrouter">OpenRouter API Key</string>
+    <string name="apikey_google">Google AI Studio API Key</string>
+    <string name="apikey_get_alibaba">前往阿里云获取</string>
+    <string name="apikey_get_openrouter">前往 OpenRouter 获取</string>
+    <string name="apikey_get_google">前往 Google AI Studio 获取</string>
+
+    <!-- Picovoice / Quick Vision -->
+    <string name="settings_quickvision">快速识图</string>
+    <string name="settings_picovoice">Picovoice 唤醒词</string>
+    <string name="picovoice_accesskey">Picovoice Access Key</string>
+    <string name="picovoice_accesskey_hint">输入您的 Picovoice Access Key</string>
+    <string name="picovoice_enabled">唤醒词已启用</string>
+    <string name="picovoice_disabled">唤醒词已禁用</string>
+    <string name="picovoice_start">开始监听</string>
+    <string name="picovoice_stop">停止监听</string>
+    <string name="picovoice_get_key">从 Picovoice Console 获取免费密钥</string>
+    <string name="picovoice_description">说 \"Jarvis\" 触发快速识图</string>
+    <string name="picovoice_not_configured">Access Key 未配置</string>
+    <string name="picovoice_configured">Access Key 已配置</string>
+    <string name="wakeword_detection">唤醒词检测</string>
+    <string name="wakeword_enabled_desc">说 \"Jarvis\" 触发快速识图</string>
+    <string name="wakeword_disabled_desc">唤醒词检测已关闭</string>
+    <string name="background_running">后台运行</string>
+    <string name="background_running_desc">允许应用在后台运行</string>
+    <string name="feature_quickvision_title">快速识图</string>
+    <string name="feature_quickvision_subtitle">说 \"Jarvis\" 快速识图</string>
+
+    <!-- AI Prompts (for services to use based on language) -->
+    <string name="prompt_quickvision">你是一个智能眼镜AI助手。请用简洁的中文描述图片内容，适合语音播报。\n\n要求：\n1. 用1-2句话描述主要内容\n2. 语言自然、口语化\n3. 不要使用标点符号过多\n4. 总字数控制在50字以内\n5. 直接描述，不要说\"图片中\"或\"我看到\"</string>
+    <string name="prompt_liveai">你是RayBan Meta智能眼镜AI助手。\n\n【重要】必须始终用中文回答，无论用户说什么语言。\n\n回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。</string>
 </resources>

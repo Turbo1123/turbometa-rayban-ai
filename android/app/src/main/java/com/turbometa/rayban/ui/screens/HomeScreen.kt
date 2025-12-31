@@ -109,20 +109,12 @@ fun HomeScreen(
             },
             title = {
                 Text(
-                    text = "需要配置 API Key",
+                    text = stringResource(R.string.api_key_required),
                     fontWeight = FontWeight.SemiBold
                 )
             },
             text = {
-                Column {
-                    Text("使用 Live AI 功能需要先配置阿里云 API Key。")
-                    Spacer(modifier = Modifier.height(AppSpacing.small))
-                    Text(
-                        text = "请前往阿里云百炼控制台获取 API Key，然后在设置中配置。",
-                        color = TextSecondaryLight,
-                        fontSize = 14.sp
-                    )
-                }
+                Text(stringResource(R.string.api_key_required_desc))
             },
             confirmButton = {
                 Button(
@@ -132,7 +124,7 @@ fun HomeScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Primary)
                 ) {
-                    Text("获取 API Key")
+                    Text(stringResource(R.string.apikey_get_key))
                 }
             },
             dismissButton = {
@@ -142,7 +134,7 @@ fun HomeScreen(
                         onNavigateToSettings()
                     }
                 ) {
-                    Text("去设置")
+                    Text(stringResource(R.string.go_to_settings))
                 }
             }
         )
@@ -161,12 +153,12 @@ fun HomeScreen(
             },
             title = {
                 Text(
-                    text = "需要连接设备",
+                    text = stringResource(R.string.device_required),
                     fontWeight = FontWeight.SemiBold
                 )
             },
             text = {
-                Text("请先连接 Ray-Ban Meta 眼镜后再使用此功能。")
+                Text(stringResource(R.string.device_required_desc))
             },
             confirmButton = {
                 Button(
@@ -176,7 +168,7 @@ fun HomeScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Primary)
                 ) {
-                    Text("连接设备")
+                    Text(stringResource(R.string.connect_device))
                 }
             },
             dismissButton = {
@@ -274,7 +266,7 @@ fun HomeScreen(
                     .padding(horizontal = AppSpacing.large),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
             ) {
-                // Row 1: LiveAI + Translate
+                // Row 1: LiveAI + Quick Vision
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(AppSpacing.medium)
@@ -305,12 +297,26 @@ fun HomeScreen(
 
                     FeatureCard(
                         modifier = Modifier.weight(1f),
-                        title = stringResource(R.string.feature_translate_title),
-                        subtitle = stringResource(R.string.feature_translate_subtitle),
-                        icon = Icons.AutoMirrored.Filled.Chat,
-                        gradientColors = listOf(TranslateColor, TranslateColor.copy(alpha = 0.7f)),
-                        isPlaceholder = true,
-                        onClick = {}
+                        title = stringResource(R.string.feature_quickvision_title),
+                        subtitle = stringResource(R.string.feature_quickvision_subtitle),
+                        icon = Icons.Default.Visibility,
+                        gradientColors = listOf(QuickVisionColor, QuickVisionColor.copy(alpha = 0.7f)),
+                        isLoading = isCheckingPermission,
+                        onClick = {
+                            // Check device connection first
+                            if (!hasActiveDevice) {
+                                showDeviceNotConnectedDialog = true
+                                return@FeatureCard
+                            }
+                            // Check API key
+                            val apiKey = apiKeyManager.getAPIKey()
+                            if (apiKey.isNullOrBlank()) {
+                                showApiKeyDialog = true
+                                return@FeatureCard
+                            }
+                            // Navigate to Vision (Quick Vision)
+                            checkCameraPermissionAndNavigate { onNavigateToVision() }
+                        }
                     )
                 }
 
@@ -556,9 +562,16 @@ private fun DeviceStatusCard(
     onDisconnect: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // iOS doesn't distinguish between Registered and Connected on home screen
+    // Both states mean the device is available - show as "Connected"
     val isConnected = connectionState is WearablesViewModel.ConnectionState.Connected
+    val isRegistered = connectionState is WearablesViewModel.ConnectionState.Registered
     val isSearching = connectionState is WearablesViewModel.ConnectionState.Searching
     val isConnecting = connectionState is WearablesViewModel.ConnectionState.Connecting
+    val hasDevice = isConnected || isRegistered
+
+    // Treat both Registered and Connected as "connected" for UI purposes (matching iOS)
+    val showAsConnected = hasDevice
 
     var showDisconnectDialog by remember { mutableStateOf(false) }
 
@@ -592,7 +605,7 @@ private fun DeviceStatusCard(
         colors = CardDefaults.cardColors(
             containerColor = CardBackgroundLight
         ),
-        onClick = if (isConnected) { { showDisconnectDialog = true } } else { {} }
+        onClick = if (hasDevice) { { showDisconnectDialog = true } } else { {} }
     ) {
         Row(
             modifier = Modifier
@@ -606,7 +619,7 @@ private fun DeviceStatusCard(
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(
-                        if (isConnected) Success.copy(alpha = 0.1f)
+                        if (showAsConnected) Success.copy(alpha = 0.1f)
                         else Primary.copy(alpha = 0.1f)
                     ),
                 contentAlignment = Alignment.Center
@@ -614,7 +627,7 @@ private fun DeviceStatusCard(
                 Icon(
                     imageVector = Icons.Default.Bluetooth,
                     contentDescription = null,
-                    tint = if (isConnected) Success else Primary,
+                    tint = if (showAsConnected) Success else Primary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -630,48 +643,52 @@ private fun DeviceStatusCard(
                     color = TextPrimaryLight
                 )
                 Text(
-                    text = when (connectionState) {
-                        is WearablesViewModel.ConnectionState.Connected -> stringResource(R.string.connected)
-                        is WearablesViewModel.ConnectionState.Searching -> stringResource(R.string.searching)
-                        is WearablesViewModel.ConnectionState.Connecting -> stringResource(R.string.connecting)
-                        is WearablesViewModel.ConnectionState.Error -> connectionState.message
+                    text = when {
+                        showAsConnected -> stringResource(R.string.connected)
+                        isSearching -> stringResource(R.string.searching)
+                        isConnecting -> stringResource(R.string.connecting)
+                        connectionState is WearablesViewModel.ConnectionState.Error -> connectionState.message
                         else -> stringResource(R.string.disconnected)
                     },
                     fontSize = 14.sp,
-                    color = if (isConnected) Success else TextSecondaryLight
+                    color = if (showAsConnected) Success else TextSecondaryLight
                 )
             }
 
             // Connect Button or Status
-            if (isConnected) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(AppRadius.small))
-                        .background(Success.copy(alpha = 0.1f))
-                        .padding(horizontal = AppSpacing.medium, vertical = AppSpacing.small)
-                ) {
-                    Text(
-                        text = stringResource(R.string.connected),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Success
+            when {
+                showAsConnected -> {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(AppRadius.small))
+                            .background(Success.copy(alpha = 0.1f))
+                            .padding(horizontal = AppSpacing.medium, vertical = AppSpacing.small)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.connected),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Success
+                        )
+                    }
+                }
+                isSearching || isConnecting -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = Primary
                     )
                 }
-            } else if (isSearching || isConnecting) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp,
-                    color = Primary
-                )
-            } else {
-                Button(
-                    onClick = onConnect,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Primary
-                    ),
-                    shape = RoundedCornerShape(AppRadius.small)
-                ) {
-                    Text(stringResource(R.string.connect_glasses))
+                else -> {
+                    Button(
+                        onClick = onConnect,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Primary
+                        ),
+                        shape = RoundedCornerShape(AppRadius.small)
+                    ) {
+                        Text(stringResource(R.string.connect_glasses))
+                    }
                 }
             }
         }

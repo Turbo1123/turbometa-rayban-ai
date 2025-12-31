@@ -28,9 +28,11 @@
 
 <div align="center">
 
-### 🌍 中英文双语 + 多平台 AI + 全模态交互
+### 🌍 iOS & Android 双平台同步 + 中英文双语 + 多平台 AI
 
 **Quick Vision 快速识图 | Live AI 实时对话 | OpenRouter & Gemini 支持**
+
+✅ **iOS v1.3.0** | ✅ **Android v1.3.0** - 功能完全同步
 
 </div>
 
@@ -120,7 +122,7 @@
 
 ### 📱 Android
 
-> ⚠️ **注意**：Android 版本目前为 v1.0.0，暂未更新最新功能
+**v1.3.0** - 已与 iOS 版本同步
 
 👉 [**前往下载页面**](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 
