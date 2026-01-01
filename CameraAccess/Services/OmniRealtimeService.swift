@@ -45,7 +45,10 @@ class OmniRealtimeService: NSObject {
     // Configuration
     private let apiKey: String
     private let model = "qwen3-omni-flash-realtime"
-    private let baseURL = "wss://dashscope.aliyuncs.com/api-ws/v1/realtime"
+    // 根据用户设置的区域动态获取 WebSocket URL（北京/新加坡）
+    private var baseURL: String {
+        return APIProviderManager.staticLiveAIWebsocketURL
+    }
 
     // Audio Engine (for recording)
     private var audioEngine: AVAudioEngine?

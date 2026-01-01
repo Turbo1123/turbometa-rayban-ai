@@ -280,6 +280,7 @@ Quick steps:
 1. Visit [Alibaba Cloud Model Studio](https://www.alibabacloud.com/zh/product/modelstudio) to register
 2. Login to [Model Studio Console](https://bailian.console.alibabacloud.com/) → API-KEY Management → Create API Key
 3. Enter your API Key in App "Settings" → "API Key Management"
+4. **International users**: Select **Singapore** region in "Settings" for better connectivity
 
 ### Step 3: Build the Project
 
@@ -335,6 +336,8 @@ ios-deploy --bundle YourApp.app
 - Speak clearly and maintain appropriate distance
 - Ask "What do you see?" to have AI describe the scene
 - AI responds in concise Chinese
+
+> ⚠️ **International Users**: In Settings → API Key Management, select **Singapore** region for Live AI. This uses the international WebSocket endpoint (`wss://dashscope-intl.aliyuncs.com`) for better connectivity outside China mainland.
 
 ### LeanEat Nutrition Analysis
 

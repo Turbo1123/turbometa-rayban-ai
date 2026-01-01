@@ -402,4 +402,8 @@ extension APIProviderManager {
         }
         return APIKeyManager.shared.getAPIKey(for: staticCurrentProvider) ?? ""
     }
+
+    nonisolated static var staticLiveAIWebsocketURL: String {
+        return staticLiveAIProvider.websocketURL(endpoint: staticAlibabaEndpoint)
+    }
 }
