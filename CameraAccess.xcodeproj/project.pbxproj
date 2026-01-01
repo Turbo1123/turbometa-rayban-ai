@@ -603,7 +603,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = TKJG96WQZT;
+				DEVELOPMENT_TEAM = B9L9HM4KD5;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = CameraAccess/Info.plist;
@@ -614,7 +614,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.4.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meta.wearables.external.CameraAccesssunshuo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.meta.wearables.external.CameraAccess;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -633,7 +633,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = TKJG96WQZT;
+				DEVELOPMENT_TEAM = B9L9HM4KD5;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = CameraAccess/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = " TurboMeta";
@@ -643,7 +643,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.4.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meta.wearables.external.CameraAccesssunshuo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.meta.wearables.external.CameraAccess;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
