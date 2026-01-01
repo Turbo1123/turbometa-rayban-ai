@@ -32,7 +32,7 @@
 
 **博物馆讲解、盲人辅助、阅读朗读、实时翻译 - 一副眼镜，多种场景！**
 
-✅ **iOS v1.5.0** | 🚧 **Android 稍后更新**
+✅ **iOS v1.5.0** | 📱 **Android v1.4.0** [点击下载](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 
 ☕ **喜欢这个项目？** [**请我喝杯咖啡**](#-请我喝杯咖啡) 支持开发！
 

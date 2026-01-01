@@ -167,7 +167,7 @@
 		4BA57AF22EF823ED002EC214 /* PermissionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsManager.swift; sourceTree = "<group>"; };
 		4BA57AF52EF82400002EC214 /* PermissionsRequestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsRequestView.swift; sourceTree = "<group>"; };
 		4BB5DFEE2F06C05E00AF7BD0 /* LiveAIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveAIModels.swift; sourceTree = "<group>"; };
-		4BB5DFF02F06C06D00AF7BD0 /* LiveAIModeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveAIModeManager.swift; sourceTree = "<group>"; };
+		4BB5DFF02F06C06D00AF7BD0 /* LiveAIModeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveAIModeManager.swift; path = Managers/LiveAIModeManager.swift; sourceTree = "<group>"; };
 		4BB5DFF22F06C07A00AF7BD0 /* LiveAISettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveAISettingsView.swift; sourceTree = "<group>"; };
 		51A08DC107E5A57DDE6036C3 /* QuickVisionModeManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickVisionModeManager.swift; path = Managers/QuickVisionModeManager.swift; sourceTree = "<group>"; };
 		568E19B82D2116C7FE3B1829 /* QuickVisionIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickVisionIntent.swift; sourceTree = "<group>"; };
