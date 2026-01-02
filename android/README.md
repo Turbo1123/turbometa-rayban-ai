@@ -1,16 +1,10 @@
 # TurboMeta Ray-Ban AI - Android
 
-**Version 1.5.0**
+**Version 1.4.0**
 
 Ray-Ban Meta 智能眼镜 AI 助手 Android 版本。
 
-> **🆕 NEW: Quick Vision Modes & Records | 快速识图模式与记录**
->
-> Multiple recognition modes (Standard, Health, Accessibility, Reading, Translate, Encyclopedia, Custom) with local record storage and thumbnails!
->
-> 多种识图模式（标准、健康、盲人、阅读、翻译、百科、自定义）支持本地记录保存和缩略图！
-
-> **🎬 RTMP Live Streaming (Experimental) | RTMP 直播推流（实验性）**
+> **🎬 NEW: RTMP Live Streaming (Experimental) | RTMP 直播推流（实验性）**
 >
 > Push live video from Ray-Ban Meta glasses to **any RTMP-compatible platform** - YouTube Live, Twitch, Bilibili, Douyin, TikTok, Facebook Live, and more!
 >
@@ -94,53 +88,6 @@ The wake word detection feature ("Jarvis") uses **Picovoice Porcupine**. To use 
 ---
 
 ## Release Notes | 更新日志
-
-### v1.5.0 (2025-01-02)
-
-#### New Features | 新功能
-
-- **Quick Vision Modes | 快速识图模式**
-  - 7 recognition modes: Standard, Health, Accessibility, Reading, Translate, Encyclopedia, Custom
-  - Each mode has specialized AI prompts for different scenarios
-  - Translate mode supports 10 target languages
-  - Custom mode allows user-defined prompts
-  - 7 种识图模式：标准、健康、盲人、阅读、翻译、百科、自定义
-  - 每种模式有针对不同场景的专用 AI 提示词
-  - 翻译模式支持 10 种目标语言
-  - 自定义模式支持用户自定义提示词
-
-- **Live AI Modes | 实时 AI 模式**
-  - 6 conversation modes: Standard, Museum Guide, Accessibility, Reading Assistant, Translator, Custom
-  - Different system prompts for different use cases
-  - 6 种对话模式：标准、博物馆讲解、盲人、阅读助手、翻译助手、自定义
-  - 不同使用场景的系统提示词
-
-- **Quick Vision Records | 快速识图记录**
-  - Save all Quick Vision analyses with thumbnails
-  - View records in Records screen with tab switching (Live AI / Quick Vision)
-  - View full image and analysis result in detail screen
-  - 保存所有快速识图分析结果和缩略图
-  - 在记录页面通过标签页切换（Live AI / 快速识图）
-  - 详情页查看完整图片和分析结果
-
-- **About Section Links | 关于页面链接**
-  - GitHub project link
-  - Download latest version link
-  - Buy Me a Coffee donation link
-  - GitHub 项目链接
-  - 下载最新版本链接
-  - 请我喝杯咖啡捐赠链接
-
-#### Improvements | 改进
-
-- Default vision model changed to `qwen-vl-plus` for better quality
-- Live AI now sends video frames every 500ms for continuous context
-- TTS now uses correct language for status messages vs AI responses
-- 默认视觉模型改为 `qwen-vl-plus` 以获得更好质量
-- Live AI 现在每 500ms 发送视频帧以保持上下文连续
-- TTS 现在正确区分状态消息和 AI 回复的语言
-
----
 
 ### v1.4.0 (2024-12-31)
 
