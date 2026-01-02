@@ -33,6 +33,8 @@ sealed class Screen(val route: String) {
     object Gallery : Screen("gallery")
     object LiveStream : Screen("live_stream")
     object RTMPStream : Screen("rtmp_stream")
+    object QuickVisionMode : Screen("quick_vision_mode")
+    object LiveAIMode : Screen("live_ai_mode")
 }
 
 sealed class BottomNavItem(
@@ -183,6 +185,12 @@ fun TurboMetaNavigation(
                     },
                     onNavigateToRecords = {
                         navController.navigate(Screen.Records.route)
+                    },
+                    onNavigateToQuickVisionMode = {
+                        navController.navigate(Screen.QuickVisionMode.route)
+                    },
+                    onNavigateToLiveAIMode = {
+                        navController.navigate(Screen.LiveAIMode.route)
                     }
                 )
             }
@@ -214,6 +222,22 @@ fun TurboMetaNavigation(
 
             composable(Screen.RTMPStream.route) {
                 RTMPStreamingScreen(
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(Screen.QuickVisionMode.route) {
+                QuickVisionModeScreen(
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(Screen.LiveAIMode.route) {
+                LiveAIModeScreen(
                     onBackClick = {
                         navController.popBackStack()
                     }

@@ -82,6 +82,11 @@
 		A5C50340AFD334B459151AF1 /* QuickVisionIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568E19B82D2116C7FE3B1829 /* QuickVisionIntent.swift */; };
 		B3F7AF9C18583263BE4D96A1 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0080AFEB87FC4CF85E53FE97 /* LanguageManager.swift */; };
 		D83E4BD577765733E71A0068 /* QuickVisionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B037E0156E90DE2314A9F47 /* QuickVisionView.swift */; };
+		LT0001000100010001 /* LiveTranslateModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = LT1001000100010001 /* LiveTranslateModels.swift */; };
+		LT0002000200020002 /* LiveTranslateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = LT1002000200020002 /* LiveTranslateService.swift */; };
+		LT0003000300030003 /* LiveTranslateViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = LT1003000300030003 /* LiveTranslateViewModel.swift */; };
+		LT0004000400040004 /* LiveTranslateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LT1004000400040004 /* LiveTranslateView.swift */; };
+		LT0005000500050005 /* LiveTranslateSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LT1005000500050005 /* LiveTranslateSettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -182,6 +187,11 @@
 		CA3E36CE337855A7F17F2AC8 /* QuickVisionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickVisionService.swift; sourceTree = "<group>"; };
 		DC72379319F7F8AAF8019018 /* LiveAIManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LiveAIManager.swift; path = Managers/LiveAIManager.swift; sourceTree = "<group>"; };
 		E699CC952E8150670052C240 /* CameraAccessTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CameraAccessTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		LT1001000100010001 /* LiveTranslateModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranslateModels.swift; sourceTree = "<group>"; };
+		LT1002000200020002 /* LiveTranslateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranslateService.swift; sourceTree = "<group>"; };
+		LT1003000300030003 /* LiveTranslateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranslateViewModel.swift; sourceTree = "<group>"; };
+		LT1004000400040004 /* LiveTranslateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranslateView.swift; sourceTree = "<group>"; };
+		LT1005000500050005 /* LiveTranslateSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranslateSettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -240,6 +250,7 @@
 				4BA57A8A2EF8227E002EC214 /* ConversationRecord.swift */,
 				4BA57A8B2EF8227E002EC214 /* FoodNutritionModel.swift */,
 				414A2AC7E8B825BC1B4DB93F /* QuickVisionModels.swift */,
+				LT1001000100010001 /* LiveTranslateModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -257,6 +268,7 @@
 				CA3E36CE337855A7F17F2AC8 /* QuickVisionService.swift */,
 				63EB4C91D8E0C8AC944DF95A /* GeminiLiveService.swift */,
 				C7F490219E64EC144DAF8A8C /* QuickVisionStorage.swift */,
+				LT1002000200020002 /* LiveTranslateService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -299,6 +311,7 @@
 				4BA57A9E2EF8227E002EC214 /* StreamSessionViewModel.swift */,
 				4BA57A9F2EF8227E002EC214 /* VisionRecognitionViewModel.swift */,
 				4BA57AA02EF8227E002EC214 /* WearablesViewModel.swift */,
+				LT1003000300030003 /* LiveTranslateViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -354,6 +367,8 @@
 				4BA57ABE2EF8227E002EC214 /* VisionRecognitionView.swift */,
 				6B037E0156E90DE2314A9F47 /* QuickVisionView.swift */,
 				330AF93394A09D97C504F568 /* QuickVisionSettingsView.swift */,
+				LT1004000400040004 /* LiveTranslateView.swift */,
+				LT1005000500050005 /* LiveTranslateSettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -588,6 +603,11 @@
 				3121D19C06DC68008799365A /* LiveAIIntent.swift in Sources */,
 				4BB5DFF12F06C06D00AF7BD0 /* LiveAIModeManager.swift in Sources */,
 				759D8C3F84F44478678CA613 /* LiveAIManager.swift in Sources */,
+				LT0001000100010001 /* LiveTranslateModels.swift in Sources */,
+				LT0002000200020002 /* LiveTranslateService.swift in Sources */,
+				LT0003000300030003 /* LiveTranslateViewModel.swift in Sources */,
+				LT0004000400040004 /* LiveTranslateView.swift in Sources */,
+				LT0005000500050005 /* LiveTranslateSettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

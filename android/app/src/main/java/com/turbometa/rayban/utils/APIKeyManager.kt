@@ -244,8 +244,8 @@ enum class OutputLanguage(val code: String, val displayName: String, val nativeN
 }
 
 // Video quality options
-enum class StreamQuality(val id: String, val displayName: String, val description: String) {
-    LOW("LOW", "\u4f4e\u753b\u8d28", "\u7701\u7535\u6a21\u5f0f\uff0c\u9002\u5408\u957f\u65f6\u95f4\u4f7f\u7528"),
-    MEDIUM("MEDIUM", "\u4e2d\u753b\u8d28", "\u5e73\u8861\u6a21\u5f0f\uff08\u63a8\u8350\uff09"),
-    HIGH("HIGH", "\u9ad8\u753b\u8d28", "\u6700\u4f73\u753b\u8d28\uff0c\u8017\u7535\u8f83\u5feb")
+enum class StreamQuality(val id: String, val displayNameResId: Int, val descriptionResId: Int) {
+    LOW("LOW", com.smartview.glassai.R.string.quality_low, com.smartview.glassai.R.string.quality_low_desc),
+    MEDIUM("MEDIUM", com.smartview.glassai.R.string.quality_medium, com.smartview.glassai.R.string.quality_medium_desc),
+    HIGH("HIGH", com.smartview.glassai.R.string.quality_high, com.smartview.glassai.R.string.quality_high_desc)
 }

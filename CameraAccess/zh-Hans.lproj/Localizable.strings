@@ -344,3 +344,83 @@
 "rtmp.recommended" = "推荐";
 "rtmp.platform.custom" = "自定义";
 "rtmp.error.invalidurl" = "请输入有效的 RTMP 地址";
+
+// MARK: - Live Translate 实时翻译
+"livetranslate.title" = "实时翻译";
+"livetranslate.connected" = "已连接";
+"livetranslate.connecting" = "连接中...";
+"livetranslate.recording" = "录音中";
+"livetranslate.placeholder" = "按住录音按钮开始说话";
+"livetranslate.source" = "源语言";
+"livetranslate.target" = "目标语言";
+"livetranslate.clear" = "清除";
+
+// Live Translate Settings
+"livetranslate.settings.title" = "翻译设置";
+"livetranslate.settings.sourceLanguage" = "源语言";
+"livetranslate.settings.targetLanguage" = "目标语言";
+"livetranslate.settings.targetLanguage.footer" = "目标语言支持语音输出";
+"livetranslate.settings.voice" = "音色";
+"livetranslate.settings.voice.footer" = "不同音色支持不同的语种";
+"livetranslate.settings.output" = "输出设置";
+"livetranslate.settings.audioOutput" = "语音输出";
+"livetranslate.settings.imageEnhance" = "视觉增强";
+"livetranslate.settings.imageEnhance.footer" = "启用视觉增强可提高同音异义词的翻译准确性";
+"livetranslate.settings.history" = "翻译历史";
+"livetranslate.settings.clearHistory" = "清空历史";
+"livetranslate.settings.historyCount" = "共 %d 条翻译记录";
+"common.done" = "完成";
+"common.ok" = "确定";
+
+// Live Translate Languages
+"livetranslate.lang.en" = "英语";
+"livetranslate.lang.zh" = "中文";
+"livetranslate.lang.ja" = "日语";
+"livetranslate.lang.ko" = "韩语";
+"livetranslate.lang.fr" = "法语";
+"livetranslate.lang.de" = "德语";
+"livetranslate.lang.ru" = "俄语";
+"livetranslate.lang.es" = "西班牙语";
+"livetranslate.lang.pt" = "葡萄牙语";
+"livetranslate.lang.it" = "意大利语";
+"livetranslate.lang.yue" = "粤语";
+"livetranslate.lang.id" = "印尼语";
+"livetranslate.lang.vi" = "越南语";
+"livetranslate.lang.th" = "泰语";
+"livetranslate.lang.ar" = "阿拉伯语";
+"livetranslate.lang.hi" = "印地语";
+"livetranslate.lang.el" = "希腊语";
+"livetranslate.lang.tr" = "土耳其语";
+
+// Live Translate Voices
+"livetranslate.voice.cherry" = "Cherry";
+"livetranslate.voice.nofish" = "Nofish";
+"livetranslate.voice.jada" = "Jada";
+"livetranslate.voice.dylan" = "Dylan";
+"livetranslate.voice.sunny" = "Sunny";
+"livetranslate.voice.peter" = "Peter";
+"livetranslate.voice.kiki" = "Kiki";
+"livetranslate.voice.eric" = "Eric";
+
+"livetranslate.voice.cherry.desc" = "温暖女声，支持多语种";
+"livetranslate.voice.nofish.desc" = "自然女声，支持多语种";
+"livetranslate.voice.jada.desc" = "活泼女声，仅支持中文";
+"livetranslate.voice.dylan.desc" = "磁性男声，仅支持中文";
+"livetranslate.voice.sunny.desc" = "阳光女声，仅支持中文";
+"livetranslate.voice.peter.desc" = "稳重男声，仅支持中文";
+"livetranslate.voice.kiki.desc" = "粤语女声，仅支持粤语";
+"livetranslate.voice.eric.desc" = "成熟男声，仅支持中文";
+
+// Live Translate Errors
+"livetranslate.error.title" = "翻译错误";
+"livetranslate.error.noApiKey" = "请先在设置中配置 API Key";
+"livetranslate.error.cannotSwap" = "当前语言组合不支持交换";
+
+// Live Translate Microphone
+"livetranslate.settings.microphone" = "麦克风";
+"livetranslate.settings.usePhoneMic" = "使用 iPhone 麦克风";
+"livetranslate.settings.microphone.footer" = "开启后使用 iPhone 麦克风录音，适合翻译对方说的话；关闭则使用眼镜麦克风，适合翻译自己说的话";
+
+// Live Translate Home Card
+"home.translate.title" = "实时翻译";
+"home.translate.subtitle" = "18种语言互译";

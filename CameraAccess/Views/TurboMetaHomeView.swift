@@ -17,6 +17,7 @@ struct TurboMetaHomeView: View {
     @State private var showRTMPStreaming = false
     @State private var showLeanEat = false
     @State private var showQuickVision = false
+    @State private var showLiveTranslate = false
 
     var body: some View {
         NavigationView {
@@ -72,22 +73,21 @@ struct TurboMetaHomeView: View {
                             // Row 2
                             HStack(spacing: AppSpacing.md) {
                                 FeatureCard(
+                                    title: "home.translate.title".localized,
+                                    subtitle: "home.translate.subtitle".localized,
+                                    icon: "globe",
+                                    gradient: [Color.teal, Color.teal.opacity(0.7)]
+                                ) {
+                                    showLiveTranslate = true
+                                }
+
+                                FeatureCard(
                                     title: "home.leaneat.title".localized,
                                     subtitle: "home.leaneat.subtitle".localized,
                                     icon: "chart.bar.fill",
                                     gradient: [AppColors.leanEat, AppColors.leanEat.opacity(0.7)]
                                 ) {
                                     showLeanEat = true
-                                }
-
-                                FeatureCard(
-                                    title: "home.wordlearn.title".localized,
-                                    subtitle: "home.wordlearn.subtitle".localized,
-                                    icon: "book.closed.fill",
-                                    gradient: [AppColors.wordLearn, AppColors.wordLearn.opacity(0.7)],
-                                    isPlaceholder: true
-                                ) {
-                                    // Placeholder
                                 }
                             }
 
@@ -132,6 +132,9 @@ struct TurboMetaHomeView: View {
             }
             .fullScreenCover(isPresented: $showQuickVision) {
                 QuickVisionView(streamViewModel: streamViewModel, apiKey: apiKey)
+            }
+            .fullScreenCover(isPresented: $showLiveTranslate) {
+                LiveTranslateView(streamViewModel: streamViewModel)
             }
         }
         .onAppear {

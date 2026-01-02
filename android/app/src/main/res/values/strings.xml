@@ -148,6 +148,11 @@
     <string name="conversation_detail">Conversation Detail</string>
     <string name="delete_conversation">Delete Conversation</string>
     <string name="delete_conversation_confirm">Are you sure you want to delete this conversation?</string>
+    <string name="quick_vision">Quick Vision</string>
+    <string name="no_quick_vision_records">No Quick Vision records</string>
+    <string name="quick_vision_detail">Quick Vision Detail</string>
+    <string name="delete_record">Delete Record</string>
+    <string name="delete_record_confirm">Are you sure you want to delete this record?</string>
 
     <!-- Gallery -->
     <string name="gallery_empty">No photos yet</string>
@@ -186,6 +191,13 @@
     <string name="clear_records_desc">Delete all conversation history</string>
     <string name="about">About</string>
     <string name="version">Version</string>
+    <string name="github_project">GitHub Project</string>
+    <string name="github_project_url">https://github.com/Turbo1123/turbometa-rayban-ai</string>
+    <string name="download_latest">Download Latest Version</string>
+    <string name="download_latest_desc">Get the latest release from GitHub</string>
+    <string name="support_development">Support Development</string>
+    <string name="buy_me_coffee">Buy Me a Coffee</string>
+    <string name="buy_me_coffee_url">https://buymeacoffee.com/turbo1123</string>
     <string name="delete_all">Delete All</string>
     <string name="delete_confirm_message">Are you sure you want to delete all conversation records? This action cannot be undone.</string>
     <string name="delete">Delete</string>
@@ -250,6 +262,12 @@
     <!-- Video Quality -->
     <string name="video_quality">Video Quality</string>
     <string name="select_quality">Select Quality</string>
+    <string name="quality_low">Low</string>
+    <string name="quality_low_desc">Power saving mode, suitable for long use</string>
+    <string name="quality_medium">Medium</string>
+    <string name="quality_medium_desc">Balanced mode (Recommended)</string>
+    <string name="quality_high">High</string>
+    <string name="quality_high_desc">Best quality, drains battery faster</string>
 
     <!-- App Language -->
     <string name="settings_applanguage">App Language</string>
@@ -298,7 +316,70 @@
     <string name="background_running">Background Running</string>
     <string name="background_running_desc">Allow app to run in background</string>
 
+    <!-- Quick Vision Mode Settings -->
+    <string name="quickvision_mode_settings">Quick Vision Settings</string>
+    <string name="quickvision_mode_section">Recognition Mode</string>
+    <string name="quickvision_target_language">Target Language</string>
+    <string name="quickvision_custom_prompt">Custom Prompt</string>
+    <string name="quickvision_custom_hint">Enter your custom prompt here…</string>
+    <string name="quickvision_custom_default">Please describe what you see in the image.</string>
+
+    <!-- Quick Vision Modes -->
+    <string name="quickvision_mode_standard">Standard</string>
+    <string name="quickvision_mode_standard_desc">General image description</string>
+    <string name="quickvision_mode_health">Health</string>
+    <string name="quickvision_mode_health_desc">Analyze food nutrition and health</string>
+    <string name="quickvision_mode_blind">Accessibility</string>
+    <string name="quickvision_mode_blind_desc">Detailed environment description for visually impaired</string>
+    <string name="quickvision_mode_reading">Reading</string>
+    <string name="quickvision_mode_reading_desc">Read and recognize text in images</string>
+    <string name="quickvision_mode_translate">Translate</string>
+    <string name="quickvision_mode_translate_desc">Recognize and translate text</string>
+    <string name="quickvision_mode_encyclopedia">Encyclopedia</string>
+    <string name="quickvision_mode_encyclopedia_desc">Identify objects and provide knowledge</string>
+    <string name="quickvision_mode_custom">Custom</string>
+    <string name="quickvision_mode_custom_desc">Use your own custom prompt</string>
+
+    <!-- Live AI Mode Settings -->
+    <string name="liveai_mode_settings">Live AI Settings</string>
+    <string name="liveai_mode_section">Conversation Mode</string>
+    <string name="liveai_mode_footer">Different modes provide different AI assistant experiences</string>
+    <string name="liveai_target_language">Target Language</string>
+    <string name="liveai_custom_prompt">Custom System Prompt</string>
+    <string name="liveai_custom_hint">Enter your custom system prompt here…</string>
+    <string name="liveai_custom_footer">The system prompt defines the AI assistant\'s behavior and personality</string>
+    <string name="liveai_custom_default">You are a helpful AI assistant.</string>
+
+    <!-- Live AI Modes -->
+    <string name="liveai_mode_standard">Standard</string>
+    <string name="liveai_mode_standard_desc">Free conversation with AI</string>
+    <string name="liveai_mode_museum">Museum Guide</string>
+    <string name="liveai_mode_museum_desc">Professional museum exhibition guide</string>
+    <string name="liveai_mode_blind">Accessibility</string>
+    <string name="liveai_mode_blind_desc">Environment description for visually impaired</string>
+    <string name="liveai_mode_reading">Reading Assistant</string>
+    <string name="liveai_mode_reading_desc">Help read and understand text</string>
+    <string name="liveai_mode_translate">Translator</string>
+    <string name="liveai_mode_translate_desc">Real-time translation assistant</string>
+    <string name="liveai_mode_custom">Custom</string>
+    <string name="liveai_mode_custom_desc">Use your own custom system prompt</string>
+
     <!-- AI Prompts (for services to use based on language) -->
     <string name="prompt_quickvision">You are a smart glasses AI assistant. Please describe the image content concisely, suitable for voice announcement.\n\nRequirements:\n1. Describe the main content in 1-2 sentences\n2. Use natural, conversational language\n3. Don\'t use too many punctuation marks\n4. Keep the total under 50 words\n5. Describe directly, don\'t say \"in the image\" or \"I see\"</string>
     <string name="prompt_liveai">You are a RayBan Meta smart glasses AI assistant.\n\n[IMPORTANT] Always respond in English.\n\nKeep your answers concise and conversational, like chatting with a friend. The user is wearing glasses and can see their surroundings, provide quick and useful suggestions based on what they see. Be direct and to the point.</string>
+
+    <!-- Quick Vision Mode Prompts -->
+    <string name="prompt_quickvision_standard">You are a smart glasses AI assistant. Please describe the image content concisely, suitable for voice announcement.\n\nRequirements:\n1. Describe the main content in 1-2 sentences\n2. Use natural, conversational language\n3. Don\'t use too many punctuation marks\n4. Keep the total under 50 words\n5. Describe directly, don\'t say \"in the image\" or \"I see\"</string>
+    <string name="prompt_quickvision_health">Analyze the health aspects of this food/beverage. Provide scientific analysis from these perspectives:\n1. Is the nutrition balanced?\n2. Additives and preservatives\n3. Sugar/salt/fat content\n4. Potential health effects\n5. Health recommendations\n\nAnswer concisely, suitable for voice, under 100 words.</string>
+    <string name="prompt_quickvision_blind">Describe the environment in detail for a visually impaired user, including:\n1. Objects and people around\n2. Approximate distances and directions\n3. Obstacles or dangers\n4. Overall atmosphere (indoor/outdoor, lighting)\n5. Important details\n\nBe clear and specific, use directional words (ahead, left side, etc.), under 80 words.</string>
+    <string name="prompt_quickvision_reading">Recognize and read the text in the image. Requirements:\n1. Accurately identify all visible text\n2. Organize content in reading order\n3. If it\'s a menu/sign, describe its type\n4. If text is unclear, mention it\n\nRead the text directly without extra explanation.</string>
+    <string name="prompt_quickvision_translate">Recognize the text in the image and translate it to {LANGUAGE}. Requirements:\n1. Accurately identify all visible text\n2. Translation should be accurate and natural\n3. Translate multiple paragraphs separately\n4. Just give the translation, no need to show original\n\nSuitable for voice, under 100 words.</string>
+    <string name="prompt_quickvision_encyclopedia">Identify the object, building, artwork, or creature in the image and provide encyclopedia knowledge. Include:\n1. Name and classification\n2. Historical background or origin\n3. Interesting facts\n4. Cultural significance\n\nBe engaging like a museum guide, suitable for voice, under 100 words.</string>
+
+    <!-- Live AI Mode Prompts -->
+    <string name="prompt_liveai_standard">You are a RayBan Meta smart glasses AI assistant.\n\n[IMPORTANT] Always respond in English.\n\nKeep your answers concise and conversational, like chatting with a friend. The user is wearing glasses and can see their surroundings, provide quick and useful suggestions based on what they see. Be direct and to the point.</string>
+    <string name="prompt_liveai_museum">You are a professional museum guide AI assistant.\n\n[IMPORTANT] Always respond in English.\n\nWhen the user looks at an exhibit, provide:\n1. Name and basic information\n2. Historical background and cultural significance\n3. Interesting stories or facts\n4. Connections to other exhibits\n\nBe knowledgeable and engaging, like a professional guide.</string>
+    <string name="prompt_liveai_blind">You are an AI assistant for visually impaired users wearing smart glasses.\n\n[IMPORTANT] Always respond in English.\n\nYour task is to help users understand their surroundings:\n1. Describe objects, people, and environment in detail\n2. Use clear directional words (ahead, left, behind right, etc.)\n3. Point out obstacles or dangers\n4. Read signs, menus, and other text\n5. Provide safe, practical navigation advice\n\nSpeak clearly and prioritize the most important information.</string>
+    <string name="prompt_liveai_reading">You are a reading assistant AI.\n\n[IMPORTANT] Always respond in English.\n\nYour task is to help users read visible text:\n1. Accurately recognize and read all visible text\n2. Organize content in correct reading order\n3. For documents, explain the structure\n4. For foreign languages, read first then translate\n\nSpeak at moderate pace, clearly, like a professional reader.</string>
+    <string name="prompt_liveai_translate">You are a real-time translation AI assistant.\n\n[IMPORTANT] Translation results must be in {LANGUAGE}.\n\nYour task is to help users understand foreign language content:\n1. Recognize text in the image\n2. Translate to {LANGUAGE}\n3. For menus or signs, explain their purpose\n4. Provide simple explanations for technical terms\n\nTranslations should be accurate, natural, and idiomatic.</string>
 </resources>

@@ -59,7 +59,9 @@ import com.smartview.glassai.viewmodels.SettingsViewModel
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
     onBackClick: () -> Unit,
-    onNavigateToRecords: () -> Unit
+    onNavigateToRecords: () -> Unit,
+    onNavigateToQuickVisionMode: () -> Unit = {},
+    onNavigateToLiveAIMode: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -272,6 +274,16 @@ fun SettingsScreen(
 
             // Live AI Settings Section
             SettingsSection(title = stringResource(R.string.settings_liveai_provider)) {
+                // Live AI Mode Settings
+                SettingsItem(
+                    icon = Icons.Default.Psychology,
+                    title = stringResource(R.string.liveai_mode_settings),
+                    subtitle = stringResource(R.string.liveai_mode_section),
+                    onClick = onNavigateToLiveAIMode
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = AppSpacing.medium))
+
                 SettingsItem(
                     icon = Icons.Default.RecordVoiceOver,
                     title = stringResource(R.string.settings_liveai_provider),
@@ -302,6 +314,16 @@ fun SettingsScreen(
 
             // Quick Vision / Picovoice Section
             SettingsSection(title = stringResource(R.string.settings_quickvision)) {
+                // Quick Vision Mode Settings
+                SettingsItem(
+                    icon = Icons.Default.Visibility,
+                    title = stringResource(R.string.quickvision_mode_settings),
+                    subtitle = stringResource(R.string.quickvision_mode_section),
+                    onClick = onNavigateToQuickVisionMode
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = AppSpacing.medium))
+
                 // Wake Word Toggle
                 SettingsToggleItem(
                     icon = Icons.Default.RecordVoiceOver,
@@ -368,7 +390,7 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Default.HighQuality,
                     title = stringResource(R.string.video_quality),
-                    subtitle = viewModel.getSelectedQualityDisplayName(),
+                    subtitle = stringResource(viewModel.getSelectedQuality().displayNameResId),
                     onClick = { viewModel.showQualityDialog() }
                 )
             }
@@ -398,8 +420,44 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Default.Info,
                     title = stringResource(R.string.version),
-                    subtitle = "1.3.0",
+                    subtitle = "1.5.0",
                     onClick = {}
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = AppSpacing.medium))
+
+                SettingsItem(
+                    icon = Icons.Default.Code,
+                    title = stringResource(R.string.github_project),
+                    subtitle = "turbometa-rayban-ai",
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Turbo1123/turbometa-rayban-ai"))
+                        context.startActivity(intent)
+                    }
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = AppSpacing.medium))
+
+                SettingsItem(
+                    icon = Icons.Default.Download,
+                    title = stringResource(R.string.download_latest),
+                    subtitle = stringResource(R.string.download_latest_desc),
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Turbo1123/turbometa-rayban-ai/releases"))
+                        context.startActivity(intent)
+                    }
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = AppSpacing.medium))
+
+                SettingsItem(
+                    icon = Icons.Default.Coffee,
+                    title = stringResource(R.string.support_development),
+                    subtitle = stringResource(R.string.buy_me_coffee),
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://buymeacoffee.com/turbo1123"))
+                        context.startActivity(intent)
+                    }
                 )
             }
 
@@ -1122,9 +1180,9 @@ private fun QualitySelectionDialog(
                         )
                         Spacer(modifier = Modifier.width(AppSpacing.small))
                         Column {
-                            Text(text = quality.displayName, style = MaterialTheme.typography.bodyLarge)
+                            Text(text = stringResource(quality.displayNameResId), style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                text = quality.description,
+                                text = stringResource(quality.descriptionResId),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )

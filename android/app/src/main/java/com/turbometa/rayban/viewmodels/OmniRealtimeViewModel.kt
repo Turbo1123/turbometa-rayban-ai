@@ -126,7 +126,7 @@ class OmniRealtimeViewModel(application: Application) : AndroidViewModel(applica
         val model = providerManager.liveAIModel.value
         val endpoint = providerManager.alibabaEndpoint.value
 
-        omniService = OmniRealtimeService(apiKey, model, language, endpoint).apply {
+        omniService = OmniRealtimeService(apiKey, model, language, endpoint, getApplication()).apply {
             onTranscriptDelta = { delta ->
                 _currentTranscript.value += delta
             }

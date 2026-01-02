@@ -1,5 +1,6 @@
 package com.smartview.glassai.services
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.AudioFormat
@@ -12,6 +13,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.smartview.glassai.managers.AlibabaEndpoint
+import com.smartview.glassai.managers.LiveAIModeManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +32,8 @@ class OmniRealtimeService(
     private val apiKey: String,
     private val model: String = "qwen3-omni-flash-realtime",
     private val outputLanguage: String = "zh-CN",
-    private val endpoint: AlibabaEndpoint = AlibabaEndpoint.BEIJING
+    private val endpoint: AlibabaEndpoint = AlibabaEndpoint.BEIJING,
+    private val context: Context? = null
 ) {
     companion object {
         private const val TAG = "OmniRealtimeService"
@@ -81,8 +84,9 @@ class OmniRealtimeService(
     private val gson = Gson()
     private var scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private var isFirstAudioSent = false
     private var pendingImageFrame: Bitmap? = null
+    private var lastImageSentTime = 0L
+    private val imageSendIntervalMs = 500L  // 发送图片的间隔（毫秒）
 
     private val client = OkHttpClient.Builder()
         .readTimeout(0, TimeUnit.MILLISECONDS)
@@ -160,7 +164,7 @@ class OmniRealtimeService(
 
             audioRecord?.startRecording()
             _isRecording.value = true
-            isFirstAudioSent = false
+            lastImageSentTime = 0  // 重置，确保立即发送第一张图片
 
             recordingJob = scope.launch {
                 val buffer = ByteArray(bufferSize)
@@ -193,8 +197,11 @@ class OmniRealtimeService(
     }
 
     private fun sendSessionUpdate() {
-        // Matching iOS Live AI prompts exactly
-        val instructions = getLiveAIPrompt(outputLanguage)
+        // Use mode manager if context is available, otherwise fall back to language-based prompt
+        val instructions = context?.let {
+            val modeManager = LiveAIModeManager.getInstance(it)
+            modeManager.getSystemPrompt()
+        } ?: getLiveAIPrompt(outputLanguage)
 
         val sessionConfig = mapOf(
             "type" to "session.update",
@@ -265,9 +272,10 @@ class OmniRealtimeService(
 
         webSocket?.send(gson.toJson(message))
 
-        // Send image on first audio if available
-        if (!isFirstAudioSent && pendingImageFrame != null) {
-            isFirstAudioSent = true
+        // 定期发送图片（每 500ms 发送一次）
+        val currentTime = System.currentTimeMillis()
+        if (pendingImageFrame != null && (currentTime - lastImageSentTime >= imageSendIntervalMs)) {
+            lastImageSentTime = currentTime
             sendImageFrame(pendingImageFrame!!)
         }
     }

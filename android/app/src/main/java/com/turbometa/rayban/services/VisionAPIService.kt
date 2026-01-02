@@ -1,5 +1,6 @@
 package com.smartview.glassai.services
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Base64
 import android.util.Log
@@ -8,6 +9,7 @@ import com.google.gson.JsonObject
 import com.smartview.glassai.managers.AlibabaEndpoint
 import com.smartview.glassai.managers.APIProvider
 import com.smartview.glassai.managers.APIProviderManager
+import com.smartview.glassai.managers.QuickVisionModeManager
 import com.smartview.glassai.utils.APIKeyManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -25,7 +27,8 @@ import java.util.concurrent.TimeUnit
  */
 class VisionAPIService(
     private val apiKeyManager: APIKeyManager,
-    private val providerManager: APIProviderManager
+    private val providerManager: APIProviderManager,
+    private val context: Context? = null
 ) {
     companion object {
         private const val TAG = "VisionAPIService"
@@ -36,7 +39,7 @@ class VisionAPIService(
         const val OPENROUTER_URL = "https://openrouter.ai/api/v1"
 
         // Default Models
-        const val DEFAULT_ALIBABA_MODEL = "qwen3-vl-plus"
+        const val DEFAULT_ALIBABA_MODEL = "qwen-vl-plus"
         const val DEFAULT_OPENROUTER_MODEL = "google/gemini-3-flash-preview"
     }
 
@@ -130,10 +133,19 @@ class VisionAPIService(
     }
 
     // MARK: - Quick Vision (for background recognition)
-    // Matching iOS QuickVision prompts exactly
+    // Uses QuickVisionModeManager to get the prompt based on selected mode
 
     suspend fun quickVision(image: Bitmap, language: String = "zh-CN"): Result<String> {
-        val prompt = getQuickVisionPrompt(language)
+        // Use mode manager if context is available, otherwise fall back to language-based prompt
+        val prompt = context?.let {
+            val modeManager = QuickVisionModeManager.getInstance(it)
+            val currentMode = modeManager.currentMode.value
+            val modePrompt = modeManager.getPrompt()
+            Log.d(TAG, "QuickVision using mode: ${currentMode.id}, prompt length: ${modePrompt.length}")
+            Log.d(TAG, "QuickVision prompt: ${modePrompt.take(100)}...")
+            modePrompt
+        } ?: getQuickVisionPrompt(language)
+
         return analyzeImage(image, prompt)
     }
 

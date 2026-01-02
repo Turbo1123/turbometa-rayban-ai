@@ -344,3 +344,83 @@
 "rtmp.recommended" = "Recommended";
 "rtmp.platform.custom" = "Custom";
 "rtmp.error.invalidurl" = "Please enter a valid RTMP URL";
+
+// MARK: - Live Translate
+"livetranslate.title" = "Live Translate";
+"livetranslate.connected" = "Connected";
+"livetranslate.connecting" = "Connecting...";
+"livetranslate.recording" = "Recording";
+"livetranslate.placeholder" = "Press the record button to start speaking";
+"livetranslate.source" = "Source";
+"livetranslate.target" = "Target";
+"livetranslate.clear" = "Clear";
+
+// Live Translate Settings
+"livetranslate.settings.title" = "Translation Settings";
+"livetranslate.settings.sourceLanguage" = "Source Language";
+"livetranslate.settings.targetLanguage" = "Target Language";
+"livetranslate.settings.targetLanguage.footer" = "Target language supports audio output";
+"livetranslate.settings.voice" = "Voice";
+"livetranslate.settings.voice.footer" = "Different voices support different languages";
+"livetranslate.settings.output" = "Output Settings";
+"livetranslate.settings.audioOutput" = "Audio Output";
+"livetranslate.settings.imageEnhance" = "Visual Enhancement";
+"livetranslate.settings.imageEnhance.footer" = "Enable visual enhancement to improve translation accuracy for homophones";
+"livetranslate.settings.history" = "Translation History";
+"livetranslate.settings.clearHistory" = "Clear History";
+"livetranslate.settings.historyCount" = "%d translation records";
+"common.done" = "Done";
+"common.ok" = "OK";
+
+// Live Translate Languages
+"livetranslate.lang.en" = "English";
+"livetranslate.lang.zh" = "Chinese";
+"livetranslate.lang.ja" = "Japanese";
+"livetranslate.lang.ko" = "Korean";
+"livetranslate.lang.fr" = "French";
+"livetranslate.lang.de" = "German";
+"livetranslate.lang.ru" = "Russian";
+"livetranslate.lang.es" = "Spanish";
+"livetranslate.lang.pt" = "Portuguese";
+"livetranslate.lang.it" = "Italian";
+"livetranslate.lang.yue" = "Cantonese";
+"livetranslate.lang.id" = "Indonesian";
+"livetranslate.lang.vi" = "Vietnamese";
+"livetranslate.lang.th" = "Thai";
+"livetranslate.lang.ar" = "Arabic";
+"livetranslate.lang.hi" = "Hindi";
+"livetranslate.lang.el" = "Greek";
+"livetranslate.lang.tr" = "Turkish";
+
+// Live Translate Voices
+"livetranslate.voice.cherry" = "Cherry";
+"livetranslate.voice.nofish" = "Nofish";
+"livetranslate.voice.jada" = "Jada";
+"livetranslate.voice.dylan" = "Dylan";
+"livetranslate.voice.sunny" = "Sunny";
+"livetranslate.voice.peter" = "Peter";
+"livetranslate.voice.kiki" = "Kiki";
+"livetranslate.voice.eric" = "Eric";
+
+"livetranslate.voice.cherry.desc" = "Warm female, multilingual";
+"livetranslate.voice.nofish.desc" = "Natural female, multilingual";
+"livetranslate.voice.jada.desc" = "Lively female, Chinese only";
+"livetranslate.voice.dylan.desc" = "Charming male, Chinese only";
+"livetranslate.voice.sunny.desc" = "Bright female, Chinese only";
+"livetranslate.voice.peter.desc" = "Steady male, Chinese only";
+"livetranslate.voice.kiki.desc" = "Cantonese female, Cantonese only";
+"livetranslate.voice.eric.desc" = "Mature male, Chinese only";
+
+// Live Translate Errors
+"livetranslate.error.title" = "Translation Error";
+"livetranslate.error.noApiKey" = "Please configure API Key in Settings first";
+"livetranslate.error.cannotSwap" = "Current language combination cannot be swapped";
+
+// Live Translate Microphone
+"livetranslate.settings.microphone" = "Microphone";
+"livetranslate.settings.usePhoneMic" = "Use iPhone Microphone";
+"livetranslate.settings.microphone.footer" = "Enable to use iPhone mic for translating others; Disable to use glasses mic for translating yourself";
+
+// Live Translate Home Card
+"home.translate.title" = "Live Translate";
+"home.translate.subtitle" = "18 Languages";

@@ -460,12 +460,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         apiKeyManager.saveVideoQuality(quality.id)
         _selectedQuality.value = quality.id
         _showQualityDialog.value = false
-        _message.value = "Video quality changed to ${quality.displayName}"
+        _message.value = "Video quality changed"
     }
 
-    fun getSelectedQualityDisplayName(): String {
+    fun getSelectedQuality(): StreamQuality {
         val qualityId = _selectedQuality.value
-        return StreamQuality.entries.find { it.id == qualityId }?.displayName ?: qualityId
+        return StreamQuality.entries.find { it.id == qualityId } ?: StreamQuality.MEDIUM
     }
 
     // Conversation Management

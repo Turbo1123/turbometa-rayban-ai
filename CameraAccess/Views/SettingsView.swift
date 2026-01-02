@@ -22,6 +22,7 @@ struct SettingsView: View {
     @State private var showGoogleAPIKeySettings = false
     @State private var showQuickVisionSettings = false
     @State private var showLiveAISettings = false
+    @State private var showLiveTranslateSettings = false
     @ObservedObject var quickVisionModeManager = QuickVisionModeManager.shared
     @ObservedObject var liveAIModeManager = LiveAIModeManager.shared
     @State private var selectedModel = "qwen3-omni-flash-realtime"
@@ -282,6 +283,22 @@ struct SettingsView: View {
                                 .foregroundColor(AppColors.textTertiary)
                         }
                     }
+
+                    // Live Translate Settings
+                    Button {
+                        showLiveTranslateSettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "globe")
+                                .foregroundColor(AppColors.translate)
+                            Text("livetranslate.settings.title".localized)
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
                 } header: {
                     Text("settings.liveai".localized)
                 }
@@ -345,6 +362,9 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showLiveAISettings) {
                 LiveAISettingsView()
+            }
+            .sheet(isPresented: $showLiveTranslateSettings) {
+                LiveTranslateSettingsView(viewModel: LiveTranslateViewModel())
             }
             .onAppear {
                 // 视图出现时刷新 API Key 状态
