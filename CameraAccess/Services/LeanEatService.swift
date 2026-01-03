@@ -8,8 +8,8 @@ import UIKit
 
 class LeanEatService {
     private let apiKey: String
-    private let baseURL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    private let model = "qwen3-vl-plus"
+    private var baseURL: String { VisionAPIConfig.baseURL }
+    private var model: String { VisionAPIConfig.model }
 
     init(apiKey: String) {
         self.apiKey = apiKey

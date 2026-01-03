@@ -8,16 +8,15 @@ import SwiftUI
 struct TurboMetaHomeView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
     @ObservedObject var wearablesViewModel: WearablesViewModel
-    @StateObject private var quickVisionManager = QuickVisionManager.shared
-    @StateObject private var liveAIManager = LiveAIManager.shared
-    let apiKey: String
+    let visionApiKey: String
+    let realtimeApiKey: String
 
     @State private var showLiveAI = false
     @State private var showLiveStream = false
-    @State private var showRTMPStreaming = false
     @State private var showLeanEat = false
-    @State private var showQuickVision = false
-    @State private var showLiveTranslate = false
+    @State private var showGeminiGen = false
+    @State private var showAPIKeyMissingAlert = false
+    @State private var apiKeyMissingMessage = "请先在“我的”→“API Key 管理”中完成配置"
 
     var body: some View {
         NavigationView {
@@ -37,11 +36,11 @@ struct TurboMetaHomeView: View {
                     VStack(spacing: AppSpacing.lg) {
                         // Header
                         VStack(spacing: AppSpacing.sm) {
-                            Text("app.name".localized)
+                            Text(NSLocalizedString("app.name", comment: "App name"))
                                 .font(AppTypography.largeTitle)
                                 .foregroundColor(AppColors.textPrimary)
 
-                            Text("app.subtitle".localized)
+                            Text(NSLocalizedString("app.subtitle", comment: "App subtitle"))
                                 .font(AppTypography.callout)
                                 .foregroundColor(AppColors.textSecondary)
                         }
@@ -52,60 +51,65 @@ struct TurboMetaHomeView: View {
                             // Row 1
                             HStack(spacing: AppSpacing.md) {
                                 FeatureCard(
-                                    title: "home.liveai.title".localized,
-                                    subtitle: "home.liveai.subtitle".localized,
+                                    title: NSLocalizedString("home.liveai.title", comment: "Live AI title"),
+                                    subtitle: NSLocalizedString("home.liveai.subtitle", comment: "Live AI subtitle"),
                                     icon: "brain.head.profile",
                                     gradient: [AppColors.liveAI, AppColors.liveAI.opacity(0.7)]
                                 ) {
-                                    showLiveAI = true
+                                    if realtimeApiKey.isEmpty {
+                                        apiKeyMissingMessage = "请先在“我的”→“API Key 管理”中配置实时对话服务"
+                                        showAPIKeyMissingAlert = true
+                                    } else {
+                                        showLiveAI = true
+                                    }
                                 }
 
                                 FeatureCard(
-                                    title: "home.quickvision.title".localized,
-                                    subtitle: "home.quickvision.subtitle".localized,
-                                    icon: "eye.circle.fill",
-                                    gradient: [Color.purple, Color.purple.opacity(0.7)]
+                                    title: "AI 创意生成",
+                                    subtitle: "照片风格化与生成",
+                                    icon: "paintpalette.fill",
+                                    gradient: [AppColors.secondary, AppColors.secondary.opacity(0.7)]
                                 ) {
-                                    showQuickVision = true
+                                    if VisionAPIConfig.apiKey(for: VisionAPIConfig.activeImageGenProvider).isEmpty {
+                                        apiKeyMissingMessage = "请先在“我的”→“API Key 管理”中配置 Gemini 服务"
+                                        showAPIKeyMissingAlert = true
+                                    } else {
+                                        showGeminiGen = true
+                                    }
                                 }
                             }
 
                             // Row 2
                             HStack(spacing: AppSpacing.md) {
                                 FeatureCard(
-                                    title: "home.translate.title".localized,
-                                    subtitle: "home.translate.subtitle".localized,
-                                    icon: "globe",
-                                    gradient: [Color.teal, Color.teal.opacity(0.7)]
-                                ) {
-                                    showLiveTranslate = true
-                                }
-
-                                FeatureCard(
-                                    title: "home.leaneat.title".localized,
-                                    subtitle: "home.leaneat.subtitle".localized,
+                                    title: NSLocalizedString("home.leaneat.title", comment: "LeanEat title"),
+                                    subtitle: NSLocalizedString("home.leaneat.subtitle", comment: "LeanEat subtitle"),
                                     icon: "chart.bar.fill",
                                     gradient: [AppColors.leanEat, AppColors.leanEat.opacity(0.7)]
                                 ) {
-                                    showLeanEat = true
+                                    if visionApiKey.isEmpty {
+                                        apiKeyMissingMessage = "请先在“我的”→“API Key 管理”中配置视觉/营养服务"
+                                        showAPIKeyMissingAlert = true
+                                    } else {
+                                        showLeanEat = true
+                                    }
+                                }
+
+                                FeatureCard(
+                                    title: NSLocalizedString("home.wordlearn.title", comment: "WordLearn title"),
+                                    subtitle: NSLocalizedString("home.wordlearn.subtitle", comment: "WordLearn subtitle"),
+                                    icon: "book.closed.fill",
+                                    gradient: [AppColors.wordLearn, AppColors.wordLearn.opacity(0.7)],
+                                    isPlaceholder: true
+                                ) {
+                                    // Placeholder
                                 }
                             }
 
-                            // Row 3 - RTMP Streaming (Experimental)
+                            // Row 3 - Full width
                             FeatureCardWide(
-                                title: "home.rtmp.title".localized,
-                                subtitle: "home.rtmp.subtitle".localized,
-                                icon: "antenna.radiowaves.left.and.right",
-                                gradient: [Color.red, Color.orange],
-                                badge: "home.experimental".localized
-                            ) {
-                                showRTMPStreaming = true
-                            }
-
-                            // Row 4 - Screen Recording Stream
-                            FeatureCardWide(
-                                title: "home.livestream.title".localized,
-                                subtitle: "home.livestream.subtitle".localized,
+                                title: NSLocalizedString("home.livestream.title", comment: "Live Stream title"),
+                                subtitle: NSLocalizedString("home.livestream.subtitle", comment: "Live Stream subtitle"),
                                 icon: "video.fill",
                                 gradient: [AppColors.liveStream, AppColors.liveStream.opacity(0.7)]
                             ) {
@@ -119,33 +123,22 @@ struct TurboMetaHomeView: View {
             }
             .navigationBarHidden(true)
             .fullScreenCover(isPresented: $showLiveAI) {
-                LiveAIView(streamViewModel: streamViewModel, apiKey: apiKey)
+                LiveAIView(streamViewModel: streamViewModel, apiKey: realtimeApiKey)
             }
             .fullScreenCover(isPresented: $showLiveStream) {
                 SimpleLiveStreamView(streamViewModel: streamViewModel)
             }
-            .fullScreenCover(isPresented: $showRTMPStreaming) {
-                RTMPStreamingView(streamViewModel: streamViewModel)
-            }
             .fullScreenCover(isPresented: $showLeanEat) {
                 StreamView(viewModel: streamViewModel, wearablesVM: wearablesViewModel)
             }
-            .fullScreenCover(isPresented: $showQuickVision) {
-                QuickVisionView(streamViewModel: streamViewModel, apiKey: apiKey)
+            .fullScreenCover(isPresented: $showGeminiGen) {
+                GeminiGenView(streamViewModel: streamViewModel, apiKey: VisionAPIConfig.apiKey(for: VisionAPIConfig.activeImageGenProvider))
             }
-            .fullScreenCover(isPresented: $showLiveTranslate) {
-                LiveTranslateView(streamViewModel: streamViewModel)
+            .alert("需要配置 API Key", isPresented: $showAPIKeyMissingAlert) {
+                Button("知道了") {}
+            } message: {
+                Text(apiKeyMissingMessage)
             }
-        }
-        .onAppear {
-            // 确保 QuickVisionManager 有 streamViewModel 引用
-            quickVisionManager.setStreamViewModel(streamViewModel)
-            // 确保 LiveAIManager 有 streamViewModel 引用
-            liveAIManager.setStreamViewModel(streamViewModel)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .liveAITriggered)) { _ in
-            // 从快捷指令触发，自动打开 Live AI 界面
-            showLiveAI = true
         }
     }
 }
@@ -188,7 +181,7 @@ struct FeatureCard: View {
                 }
 
                 if isPlaceholder {
-                    Text("home.comingsoon".localized)
+                    Text(NSLocalizedString("home.comingsoon", comment: "Coming soon"))
                         .font(AppTypography.caption)
                         .foregroundColor(.white.opacity(0.9))
                         .padding(.horizontal, AppSpacing.md)
@@ -223,7 +216,6 @@ struct FeatureCardWide: View {
     let subtitle: String
     let icon: String
     let gradient: [Color]
-    var badge: String? = nil
     let action: () -> Void
 
     var body: some View {
@@ -242,22 +234,9 @@ struct FeatureCardWide: View {
 
                 // Text
                 VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                    HStack(spacing: AppSpacing.sm) {
-                        Text(title)
-                            .font(AppTypography.title2)
-                            .foregroundColor(.white)
-
-                        if let badge = badge {
-                            Text(badge)
-                                .font(.caption2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color.white.opacity(0.25))
-                                .cornerRadius(4)
-                        }
-                    }
+                    Text(title)
+                        .font(AppTypography.title2)
+                        .foregroundColor(.white)
 
                     Text(subtitle)
                         .font(AppTypography.subheadline)

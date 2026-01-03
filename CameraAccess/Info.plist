@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>TurboMeta</string>
+	<string>${PRODUCT_NAME}</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -54,8 +54,10 @@
 	<string>TurboMeta 需要访问麦克风以实现与智能眼镜的实时语音对话功能。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>TurboMeta 需要访问相册以保存从智能眼镜拍摄的照片。</string>
-	<key>NSSiriUsageDescription</key>
-	<string>TurboMeta 需要 Siri 权限以支持语音快捷指令触发快速识图功能。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>TurboMeta 需要访问相册以选择照片进行 AI 生成。</string>
+	<key>NSCameraUsageDescription</key>
+	<string>TurboMeta 需要访问相机以拍摄照片用于 AI 生成。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -65,10 +67,8 @@
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>bluetooth-central</string>
 		<string>bluetooth-peripheral</string>
 		<string>external-accessory</string>
-		<string>audio</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>

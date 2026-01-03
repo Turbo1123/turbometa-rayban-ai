@@ -1,7 +1,6 @@
 /*
- * Vision API Service
- * Provides image recognition using configurable providers
- * Supports Alibaba Cloud Dashscope and OpenRouter
+ * Vision API Service for Alibaba Cloud Dashscope
+ * Provides image recognition using Qwen3-VL-Plus model
  */
 
 import Foundation
@@ -10,25 +9,11 @@ import UIKit
 struct VisionAPIService {
     // API Configuration
     private let apiKey: String
-    private let baseURL: String
-    private let model: String
-    private let provider: APIProvider
+    private let baseURL = VisionAPIConfig.baseURL
+    private let model = VisionAPIConfig.model
 
-    /// Initialize with explicit configuration
-    init(apiKey: String, baseURL: String? = nil, model: String? = nil) {
+    init(apiKey: String) {
         self.apiKey = apiKey
-        self.provider = VisionAPIConfig.provider
-        self.baseURL = baseURL ?? VisionAPIConfig.baseURL
-        self.model = model ?? VisionAPIConfig.model
-    }
-
-    /// Initialize with current provider configuration
-    init() {
-        self.init(
-            apiKey: VisionAPIConfig.apiKey,
-            baseURL: VisionAPIConfig.baseURL,
-            model: VisionAPIConfig.model
-        )
     }
 
     // MARK: - API Request/Response Models
@@ -122,12 +107,8 @@ struct VisionAPIService {
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
-
-        // Set headers based on provider
-        let headers = VisionAPIConfig.headers(with: apiKey)
-        for (key, value) in headers {
-            urlRequest.setValue(value, forHTTPHeaderField: key)
-        }
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
 
         let encoder = JSONEncoder()
         urlRequest.httpBody = try encoder.encode(request)

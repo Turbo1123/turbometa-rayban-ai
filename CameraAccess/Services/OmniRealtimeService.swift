@@ -41,23 +41,26 @@ class OmniRealtimeService: NSObject {
     // WebSocket
     private var webSocket: URLSessionWebSocketTask?
     private var urlSession: URLSession?
+    private var isWebSocketConnected = false
+    private var pingTimer: Timer?
+    private var lastErrorMessage: String?
+    private var lastErrorTimestamp: Date?
+    private var audioFrameCount = 0
 
     // Configuration
     private let apiKey: String
-    private let model = "qwen3-omni-flash-realtime"
-    // 根据用户设置的区域动态获取 WebSocket URL（北京/新加坡）
-    private var baseURL: String {
-        return APIProviderManager.staticLiveAIWebsocketURL
-    }
+    private let model: String
+    private let baseURL: String
 
     // Audio Engine (for recording)
     private var audioEngine: AVAudioEngine?
+    private var audioConverter: AVAudioConverter?
+    private let targetSampleRate: Double = 24000
 
     // Audio Playback Engine (separate engine for playback)
     private var playbackEngine: AVAudioEngine?
     private var playerNode: AVAudioPlayerNode?
-    // 使用 Float32 标准格式，兼容 iOS 18
-    private let playbackFormat = AVAudioFormat(standardFormatWithSampleRate: 24000, channels: 1)
+    private let audioFormat = AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: 24000, channels: 1, interleaved: true)
 
     // Audio buffer management
     private var audioBuffer = Data()
@@ -78,16 +81,25 @@ class OmniRealtimeService: NSObject {
     var onError: ((String) -> Void)?
     var onConnected: (() -> Void)?
     var onFirstAudioSent: (() -> Void)?
+    var onAudioInputLevel: ((Float) -> Void)?
+    var onAudioRouteInfo: ((String) -> Void)?
+    var onAudioFrameStats: ((Int, Date) -> Void)?
 
     // State
     private var isRecording = false
     private var hasAudioBeenSent = false
     private var eventIdCounter = 0
+    private var shouldResumeRecording = false
+    private var lastAudioFrameAt: Date?
+    private var audioHealthTimer: DispatchSourceTimer?
 
     init(apiKey: String) {
         self.apiKey = apiKey
+        self.model = VisionAPIConfig.realtimeModel
+        self.baseURL = VisionAPIConfig.realtimeBaseURL(for: VisionAPIConfig.activeRealtimeProvider)
         super.init()
         setupAudioEngine()
+        observeAudioSessionEvents()
     }
 
     // MARK: - Audio Engine Setup
@@ -106,7 +118,7 @@ class OmniRealtimeService: NSObject {
 
         guard let playbackEngine = playbackEngine,
               let playerNode = playerNode,
-              let playbackFormat = playbackFormat else {
+              let audioFormat = audioFormat else {
             print("❌ [Omni] 无法初始化播放引擎")
             return
         }
@@ -114,11 +126,62 @@ class OmniRealtimeService: NSObject {
         // Attach player node
         playbackEngine.attach(playerNode)
 
-        // Connect player node to output with explicit format
-        playbackEngine.connect(playerNode, to: playbackEngine.mainMixerNode, format: playbackFormat)
-        playbackEngine.prepare()
+        // Connect player node to output
+        playbackEngine.connect(playerNode, to: playbackEngine.mainMixerNode, format: audioFormat)
 
-        print("✅ [Omni] 播放引擎初始化完成: Float32 @ 24kHz")
+        print("✅ [Omni] 播放引擎初始化完成: PCM16 @ 24kHz")
+    }
+
+    // MARK: - Audio Session Management
+
+    private func observeAudioSessionEvents() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAudioSessionInterruption(_:)),
+            name: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance()
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAudioRouteChange(_:)),
+            name: AVAudioSession.routeChangeNotification,
+            object: AVAudioSession.sharedInstance()
+        )
+    }
+
+    private func configureAudioSession() throws {
+        let audioSession = AVAudioSession.sharedInstance()
+        try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth])
+        try audioSession.setPreferredSampleRate(targetSampleRate)
+        try audioSession.setPreferredIOBufferDuration(0.02)
+        try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+
+        try ensurePreferredBluetoothInput()
+        logCurrentAudioRoute()
+    }
+
+    private func ensurePreferredBluetoothInput() throws {
+        let audioSession = AVAudioSession.sharedInstance()
+        guard let inputs = audioSession.availableInputs else { return }
+
+        if let bluetoothInput = inputs.first(where: { $0.portType == .bluetoothHFP }) {
+            if audioSession.preferredInput?.portType != .bluetoothHFP {
+                try audioSession.setPreferredInput(bluetoothInput)
+                print("🎧 [Omni] 已选择蓝牙麦克风输入: \(bluetoothInput.portName)")
+            }
+        }
+    }
+
+    private func logCurrentAudioRoute() {
+        let audioSession = AVAudioSession.sharedInstance()
+        let inputs = audioSession.currentRoute.inputs.map { "\($0.portType.rawValue)(\($0.portName))" }
+        let outputs = audioSession.currentRoute.outputs.map { "\($0.portType.rawValue)(\($0.portName))" }
+        let routeInfo = "输入: \(inputs.joined(separator: ", ")) | 输出: \(outputs.joined(separator: ", "))"
+        print("🎧 [Omni] 当前音频路由 - \(routeInfo)")
+        DispatchQueue.main.async { [weak self] in
+            self?.onAudioRouteInfo?(routeInfo)
+        }
     }
 
     private func startPlaybackEngine() {
@@ -147,6 +210,11 @@ class OmniRealtimeService: NSObject {
     // MARK: - WebSocket Connection
 
     func connect() {
+        if baseURL.isEmpty {
+            onError?("实时对话服务地址未配置")
+            return
+        }
+
         let urlString = "\(baseURL)?model=\(model)"
         print("🔌 [Omni] 准备连接 WebSocket: \(urlString)")
 
@@ -160,6 +228,18 @@ class OmniRealtimeService: NSObject {
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
 
         let configuration = URLSessionConfiguration.default
+        configuration.waitsForConnectivity = true
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 60
+        
+        // 根据用户设置决定是否绕过系统代理
+        let bypassProxy = UserDefaults.standard.bool(forKey: "bypassSystemProxy")
+        if bypassProxy {
+            print("🔌 [Omni] 已启用绕过系统代理模式")
+            // 使用空字典禁用所有代理
+            configuration.connectionProxyDictionary = [:]
+        }
+        
         urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue())
 
         webSocket = urlSession?.webSocketTask(with: request)
@@ -177,8 +257,12 @@ class OmniRealtimeService: NSObject {
 
     func disconnect() {
         print("🔌 [Omni] 断开 WebSocket 连接")
+        isWebSocketConnected = false
+        stopPingTimer()
         webSocket?.cancel(with: .goingAway, reason: nil)
         webSocket = nil
+        urlSession?.invalidateAndCancel()
+        urlSession = nil
         stopRecording()
         stopPlaybackEngine()
     }
@@ -186,20 +270,19 @@ class OmniRealtimeService: NSObject {
     // MARK: - Session Configuration
 
     private func configureSession() {
-        // 根据当前语言设置获取语音和提示词
-        let voice = LanguageManager.staticTtsVoice
-        let instructions = LiveAIModeManager.staticSystemPrompt
-
         let sessionConfig: [String: Any] = [
             "event_id": generateEventId(),
             "type": OmniClientEvent.sessionUpdate.rawValue,
             "session": [
                 "modalities": ["text", "audio"],
-                "voice": voice,
+                "voice": "Cherry",
                 "input_audio_format": "pcm16",
                 "output_audio_format": "pcm24",
                 "smooth_output": true,
-                "instructions": instructions,
+                "input_audio_transcription": [
+                    "language": VisionAPIConfig.realtimeInputLanguage
+                ],
+                "instructions": "你是RayBan Meta智能眼镜AI助手。\n\n【重要】必须始终用中文回答，无论用户说什么语言。\n【重要】语音识别默认按中文处理，若有歧义优先输出中文转写。\n\n回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。",
                 "turn_detection": [
                     "type": "server_vad",
                     "threshold": 0.5,
@@ -221,17 +304,35 @@ class OmniRealtimeService: NSObject {
         do {
             print("🎤 [Omni] 开始录音")
 
+            let audioSession = AVAudioSession.sharedInstance()
+            switch audioSession.recordPermission {
+            case .undetermined:
+                audioSession.requestRecordPermission { [weak self] granted in
+                    DispatchQueue.main.async {
+                        if granted {
+                            self?.startRecording()
+                        } else {
+                            self?.onError?("麦克风权限未授权")
+                        }
+                    }
+                }
+                return
+            case .denied:
+                onError?("麦克风权限被拒绝，请在系统设置中开启")
+                return
+            case .granted:
+                break
+            @unknown default:
+                break
+            }
+
             // Stop engine if already running and remove any existing taps
             if let engine = audioEngine, engine.isRunning {
                 engine.stop()
                 engine.inputNode.removeTap(onBus: 0)
             }
 
-            let audioSession = AVAudioSession.sharedInstance()
-
-            // Allow Bluetooth to use the glasses' microphone
-            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth, .allowBluetoothA2DP])
-            try audioSession.setActive(true)
+            try configureAudioSession()
 
             guard let engine = audioEngine else {
                 print("❌ [Omni] 音频引擎未初始化")
@@ -239,10 +340,20 @@ class OmniRealtimeService: NSObject {
             }
 
             let inputNode = engine.inputNode
-            let inputFormat = inputNode.outputFormat(forBus: 0)
+            let inputFormat = inputNode.inputFormat(forBus: 0)
+            let outputFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: targetSampleRate, channels: 1, interleaved: false)
+            if let outputFormat = outputFormat,
+               inputFormat.sampleRate != targetSampleRate ||
+                inputFormat.channelCount != 1 ||
+                inputFormat.commonFormat != .pcmFormatFloat32 ||
+                inputFormat.isInterleaved {
+                audioConverter = AVAudioConverter(from: inputFormat, to: outputFormat)
+            } else {
+                audioConverter = nil
+            }
 
             // Convert to PCM16 24kHz mono
-            inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, time in
+            inputNode.installTap(onBus: 0, bufferSize: 4096, format: nil) { [weak self] buffer, time in
                 self?.processAudioBuffer(buffer)
             }
 
@@ -250,6 +361,8 @@ class OmniRealtimeService: NSObject {
             try engine.start()
 
             isRecording = true
+            lastAudioFrameAt = Date()
+            startAudioHealthMonitor()
             print("✅ [Omni] 录音已启动")
 
         } catch {
@@ -268,29 +381,119 @@ class OmniRealtimeService: NSObject {
         audioEngine?.stop()
         isRecording = false
         hasAudioBeenSent = false
+        shouldResumeRecording = false
+        stopAudioHealthMonitor()
     }
 
-    private func processAudioBuffer(_ buffer: AVAudioPCMBuffer) {
-        // Convert Float32 audio to PCM16 format
-        guard let floatChannelData = buffer.floatChannelData else {
+    @objc private func handleAudioSessionInterruption(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
             return
         }
 
-        let frameLength = Int(buffer.frameLength)
-        let channel = floatChannelData.pointee
+        if type == .began {
+            if isRecording {
+                shouldResumeRecording = true
+                stopRecording()
+            }
+        } else if type == .ended {
+            if shouldResumeRecording {
+                startRecording()
+            }
+        }
+    }
 
-        // Convert Float32 (-1.0 to 1.0) to Int16 (-32768 to 32767)
-        var int16Data = [Int16](repeating: 0, count: frameLength)
-        for i in 0..<frameLength {
-            let sample = channel[i]
-            let clampedSample = max(-1.0, min(1.0, sample))
-            int16Data[i] = Int16(clampedSample * 32767.0)
+    @objc private func handleAudioRouteChange(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+              let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else {
+            return
         }
 
-        let data = Data(bytes: int16Data, count: frameLength * MemoryLayout<Int16>.size)
-        let base64Audio = data.base64EncodedString()
+        if reason == .oldDeviceUnavailable || reason == .newDeviceAvailable || reason == .routeConfigurationChange {
+            do {
+                try ensurePreferredBluetoothInput()
+                logCurrentAudioRoute()
+            } catch {
+                print("❌ [Omni] 设置蓝牙输入失败: \(error.localizedDescription)")
+            }
+            if isRecording {
+                print("🔄 [Omni] 音频路由变化，重新配置录音")
+                stopRecording()
+                startRecording()
+            }
+        }
+    }
 
-        sendAudioAppend(base64Audio)
+    private func processAudioBuffer(_ buffer: AVAudioPCMBuffer) {
+        lastAudioFrameAt = Date()
+        audioFrameCount += 1
+        if audioFrameCount % 20 == 0 {
+            DispatchQueue.main.async { [weak self] in
+                guard let self, let last = self.lastAudioFrameAt else { return }
+                self.onAudioFrameStats?(self.audioFrameCount, last)
+            }
+        }
+
+        var workingBuffer = buffer
+        if let converter = audioConverter {
+            let outputFormat = converter.outputFormat
+            let ratio = outputFormat.sampleRate / buffer.format.sampleRate
+            let capacity = max(1, AVAudioFrameCount(Double(buffer.frameLength) * ratio))
+            guard let convertedBuffer = AVAudioPCMBuffer(pcmFormat: outputFormat, frameCapacity: capacity) else {
+                return
+            }
+            var error: NSError?
+            let inputBlock: AVAudioConverterInputBlock = { _, outStatus in
+                outStatus.pointee = .haveData
+                return buffer
+            }
+            converter.convert(to: convertedBuffer, error: &error, withInputFrom: inputBlock)
+            if error == nil {
+                workingBuffer = convertedBuffer
+            } else {
+                return
+            }
+        }
+
+        let frameLength = Int(workingBuffer.frameLength)
+        if frameLength == 0 {
+            return
+        }
+
+        if let floatChannelData = workingBuffer.floatChannelData {
+            let channel = floatChannelData.pointee
+            var int16Data = [Int16](repeating: 0, count: frameLength)
+            var sumSquares: Float = 0
+            for i in 0..<frameLength {
+                let sample = channel[i]
+                let clampedSample = max(-1.0, min(1.0, sample))
+                int16Data[i] = Int16(clampedSample * 32767.0)
+                sumSquares += clampedSample * clampedSample
+            }
+
+            let rms = sqrt(sumSquares / Float(frameLength))
+            DispatchQueue.main.async { [weak self] in
+                self?.onAudioInputLevel?(rms)
+            }
+
+            let data = Data(bytes: int16Data, count: frameLength * MemoryLayout<Int16>.size)
+            let base64Audio = data.base64EncodedString()
+
+            sendAudioAppend(base64Audio)
+        } else if let int16ChannelData = workingBuffer.int16ChannelData {
+            let channel = int16ChannelData.pointee
+            let data = Data(bytes: channel, count: frameLength * MemoryLayout<Int16>.size)
+            let base64Audio = data.base64EncodedString()
+            DispatchQueue.main.async { [weak self] in
+                self?.onAudioInputLevel?(0)
+            }
+            sendAudioAppend(base64Audio)
+        } else {
+            print("⚠️ [Omni] 未获取到音频数据（float/int16 均为空）")
+            return
+        }
 
         // 通知第一次音频已发送
         if !hasAudioBeenSent {
@@ -302,9 +505,39 @@ class OmniRealtimeService: NSObject {
         }
     }
 
+    private func startAudioHealthMonitor() {
+        stopAudioHealthMonitor()
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + 2.0, repeating: 2.0)
+        timer.setEventHandler { [weak self] in
+            guard let self else { return }
+            guard self.isRecording else { return }
+            guard let lastFrameAt = self.lastAudioFrameAt else { return }
+
+            let interval = Date().timeIntervalSince(lastFrameAt)
+            if interval > 3.0 {
+                print("⚠️ [Omni] 长时间未收到音频帧，尝试重启录音")
+                self.stopRecording()
+                self.startRecording()
+            }
+        }
+        audioHealthTimer = timer
+        timer.resume()
+    }
+
+    private func stopAudioHealthMonitor() {
+        audioHealthTimer?.cancel()
+        audioHealthTimer = nil
+    }
+
     // MARK: - Send Events
 
     private func sendEvent(_ event: [String: Any]) {
+        guard isWebSocketConnected else {
+            reportError("WebSocket 未连接，可能与系统代理或网络环境有关")
+            return
+        }
+
         guard let jsonData = try? JSONSerialization.data(withJSONObject: event),
               let jsonString = String(data: jsonData, encoding: .utf8) else {
             print("❌ [Omni] 无法序列化事件")
@@ -315,7 +548,7 @@ class OmniRealtimeService: NSObject {
         webSocket?.send(message) { error in
             if let error = error {
                 print("❌ [Omni] 发送事件失败: \(error.localizedDescription)")
-                self.onError?("Send error: \(error.localizedDescription)")
+                self.reportError("发送失败: \(error.localizedDescription)")
             }
         }
     }
@@ -330,10 +563,35 @@ class OmniRealtimeService: NSObject {
     }
 
     func sendImageAppend(_ image: UIImage) {
-        guard let imageData = image.jpegData(compressionQuality: 0.6) else {
+        // 限制图片尺寸，避免超过 WebSocket 帧大小限制 (256KB)
+        let maxDimension: CGFloat = 512
+        let resizedImage: UIImage
+        
+        if image.size.width > maxDimension || image.size.height > maxDimension {
+            let scale = min(maxDimension / image.size.width, maxDimension / image.size.height)
+            let newSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+            
+            UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+            resizedImage = UIGraphicsGetImageFromCurrentImageContext() ?? image
+            UIGraphicsEndImageContext()
+        } else {
+            resizedImage = image
+        }
+        
+        // 使用较低的压缩质量确保在限制内
+        guard let imageData = resizedImage.jpegData(compressionQuality: 0.3) else {
             print("❌ [Omni] 无法压缩图片")
             return
         }
+        
+        // 检查大小是否在限制内 (预留一些空间给 JSON 包装)
+        let maxSize = 200000 // 200KB，预留空间
+        if imageData.count > maxSize {
+            print("⚠️ [Omni] 图片仍然太大 (\(imageData.count) bytes)，跳过发送")
+            return
+        }
+        
         let base64Image = imageData.base64EncodedString()
 
         print("📸 [Omni] 发送图片: \(imageData.count) bytes")
@@ -365,7 +623,9 @@ class OmniRealtimeService: NSObject {
 
             case .failure(let error):
                 print("❌ [Omni] 接收消息失败: \(error.localizedDescription)")
-                self?.onError?("Receive error: \(error.localizedDescription)")
+                self?.isWebSocketConnected = false
+                self?.stopPingTimer()
+                self?.reportError("接收失败: \(error.localizedDescription)")
             }
         }
     }
@@ -504,7 +764,7 @@ class OmniRealtimeService: NSObject {
 
     private func playAudio(_ audioData: Data) {
         guard let playerNode = playerNode,
-              let playbackFormat = playbackFormat else {
+              let audioFormat = audioFormat else {
             return
         }
 
@@ -519,8 +779,8 @@ class OmniRealtimeService: NSObject {
             }
         }
 
-        // Convert PCM16 Data to Float32 AVAudioPCMBuffer
-        guard let pcmBuffer = createPCMBuffer(from: audioData, format: playbackFormat) else {
+        // Convert PCM16 Data to AVAudioPCMBuffer
+        guard let pcmBuffer = createPCMBuffer(from: audioData, format: audioFormat) else {
             return
         }
 
@@ -529,26 +789,21 @@ class OmniRealtimeService: NSObject {
     }
 
     private func createPCMBuffer(from data: Data, format: AVAudioFormat) -> AVAudioPCMBuffer? {
-        // 服务器发送的是 PCM16 格式，每帧 2 字节
+        // Calculate frame count (each frame is 2 bytes for PCM16 mono)
         let frameCount = data.count / 2
-        guard frameCount > 0 else { return nil }
 
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frameCount)),
-              let channelData = buffer.floatChannelData else {
+              let channelData = buffer.int16ChannelData else {
             return nil
         }
 
         buffer.frameLength = AVAudioFrameCount(frameCount)
 
-        // 将 PCM16 转换为 Float32（兼容 iOS 18+）
+        // Copy PCM16 data directly to buffer
         data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
             guard let baseAddress = bytes.baseAddress else { return }
             let int16Pointer = baseAddress.assumingMemoryBound(to: Int16.self)
-            let floatData = channelData[0]
-            for i in 0..<frameCount {
-                // Int16 范围 -32768 到 32767，转换为 -1.0 到 1.0
-                floatData[i] = Float(int16Pointer[i]) / 32768.0
-            }
+            channelData[0].update(from: int16Pointer, count: frameCount)
         }
 
         return buffer
@@ -567,10 +822,52 @@ class OmniRealtimeService: NSObject {
 extension OmniRealtimeService: URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         print("✅ [Omni] WebSocket 连接已建立, protocol: \(`protocol` ?? "none")")
+        isWebSocketConnected = true
+        startPingTimer()
     }
 
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         let reasonString = reason.flatMap { String(data: $0, encoding: .utf8) } ?? "unknown"
         print("🔌 [Omni] WebSocket 已断开, closeCode: \(closeCode.rawValue), reason: \(reasonString)")
+        isWebSocketConnected = false
+        stopPingTimer()
+
+        if closeCode == .invalidFramePayloadData {
+            reportError("服务端断开连接：可能触发内容安全或数据格式问题。")
+        } else {
+            reportError("连接已断开：\(reasonString)")
+        }
+    }
+}
+
+// MARK: - WebSocket Helpers
+
+private extension OmniRealtimeService {
+    func startPingTimer() {
+        stopPingTimer()
+        pingTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
+            self?.webSocket?.sendPing { error in
+                if let error = error {
+                    self?.reportError("Ping 失败: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    func stopPingTimer() {
+        pingTimer?.invalidate()
+        pingTimer = nil
+    }
+
+    func reportError(_ message: String) {
+        let now = Date()
+        if lastErrorMessage == message,
+           let lastTime = lastErrorTimestamp,
+           now.timeIntervalSince(lastTime) < 2 {
+            return
+        }
+        lastErrorMessage = message
+        lastErrorTimestamp = now
+        onError?(message)
     }
 }

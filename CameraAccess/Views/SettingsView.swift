@@ -6,30 +6,74 @@
 import SwiftUI
 import MWDATCore
 
+// MARK: - Custom Model Manager
+/// 管理各服务提供商的自定义模型列表，支持增删改
+class CustomModelManager: ObservableObject {
+    static let shared = CustomModelManager()
+    
+    private let storageKey = "customModelsByProvider"
+    
+    /// 按提供商存储的自定义模型 [providerRawValue: [modelNames]]
+    @Published var modelsByProvider: [String: [String]] = [:]
+    
+    private init() {
+        loadModels()
+    }
+    
+    private func loadModels() {
+        if let data = UserDefaults.standard.dictionary(forKey: storageKey) as? [String: [String]] {
+            modelsByProvider = data
+        }
+    }
+    
+    private func saveModels() {
+        UserDefaults.standard.set(modelsByProvider, forKey: storageKey)
+    }
+    
+    func models(for provider: VisionAPIConfig.ModelProvider) -> [String] {
+        return modelsByProvider[provider.rawValue] ?? []
+    }
+    
+    func addModel(_ model: String, for provider: VisionAPIConfig.ModelProvider) {
+        let trimmed = model.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        
+        var providerModels = modelsByProvider[provider.rawValue] ?? []
+        if !providerModels.contains(trimmed) {
+            providerModels.insert(trimmed, at: 0)
+            modelsByProvider[provider.rawValue] = providerModels
+            saveModels()
+        }
+    }
+    
+    func removeModel(_ model: String, for provider: VisionAPIConfig.ModelProvider) {
+        var providerModels = modelsByProvider[provider.rawValue] ?? []
+        providerModels.removeAll { $0 == model }
+        modelsByProvider[provider.rawValue] = providerModels
+        saveModels()
+    }
+}
+
 struct SettingsView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
-    @ObservedObject var languageManager = LanguageManager.shared
-    @ObservedObject var providerManager = APIProviderManager.shared
     let apiKey: String
 
     @State private var showAPIKeySettings = false
-    @State private var showProviderSettings = false
     @State private var showModelSettings = false
+    @State private var showEndpointSettings = false
+    @State private var showRealtimeModelSettings = false
+    @State private var showRealtimeEndpointSettings = false
+    @State private var showImageGenModelSettings = false
+    @State private var showImageGenEndpointSettings = false
     @State private var showLanguageSettings = false
-    @State private var showAppLanguageSettings = false
-    @State private var showQualitySettings = false
-    @State private var showLiveAIProviderSettings = false
-    @State private var showGoogleAPIKeySettings = false
-    @State private var showQuickVisionSettings = false
-    @State private var showLiveAISettings = false
-    @State private var showLiveTranslateSettings = false
-    @ObservedObject var quickVisionModeManager = QuickVisionModeManager.shared
-    @ObservedObject var liveAIModeManager = LiveAIModeManager.shared
-    @State private var selectedModel = "qwen3-omni-flash-realtime"
-    @State private var selectedLanguage = "zh-CN" // 默认中文
-    @State private var selectedQuality = UserDefaults.standard.string(forKey: "video_quality") ?? "medium"
+    @AppStorage(VisionAPIConfig.modelKey) private var selectedModel = VisionAPIConfig.defaultModel
+    @AppStorage(VisionAPIConfig.realtimeModelKey) private var selectedRealtimeModel = VisionAPIConfig.defaultRealtimeModel
+    @AppStorage(VisionAPIConfig.imageGenModelKey) private var selectedImageGenModel = VisionAPIConfig.defaultImageGenModel
+    @AppStorage(VisionAPIConfig.providerKey) private var preferredProviderRaw = VisionAPIConfig.ModelProvider.qwen.rawValue
+    @AppStorage(VisionAPIConfig.realtimeInputLanguageKey) private var selectedLanguage = VisionAPIConfig.defaultRealtimeInputLanguage
     @State private var hasAPIKey = false // 改为 State 变量
-    @State private var hasGoogleAPIKey = false // Google API Key 状态
+    @State private var showModelEndpointAlert = false
+    @State private var modelEndpointAlertMessage = ""
 
     init(streamViewModel: StreamSessionViewModel, apiKey: String) {
         self.streamViewModel = streamViewModel
@@ -38,8 +82,32 @@ struct SettingsView: View {
 
     // 刷新 API Key 状态
     private func refreshAPIKeyStatus() {
-        hasAPIKey = providerManager.hasAPIKey
-        hasGoogleAPIKey = APIKeyManager.shared.hasGoogleAPIKey()
+        hasAPIKey = APIKeyManager.shared.hasAPIKey(provider: activeProvider)
+    }
+
+    private var preferredProvider: VisionAPIConfig.ModelProvider {
+        get {
+            VisionAPIConfig.ModelProvider(rawValue: preferredProviderRaw) ?? .qwen
+        }
+        set {
+            preferredProviderRaw = newValue.rawValue
+        }
+    }
+
+    private var activeProvider: VisionAPIConfig.ModelProvider {
+        VisionAPIConfig.provider(for: selectedModel) ?? preferredProvider
+    }
+
+    private var apiBaseURL: String {
+        VisionAPIConfig.baseURL(for: activeProvider)
+    }
+
+    private var realtimeBaseURL: String {
+        VisionAPIConfig.realtimeBaseURL(for: VisionAPIConfig.activeRealtimeProvider)
+    }
+
+    private var imageGenBaseURL: String {
+        VisionAPIConfig.baseURL(for: VisionAPIConfig.activeImageGenProvider)
     }
 
     var body: some View {
@@ -57,7 +125,7 @@ struct SettingsView: View {
                             Text("Ray-Ban Meta")
                                 .font(AppTypography.headline)
                                 .foregroundColor(AppColors.textPrimary)
-                            Text(streamViewModel.hasActiveDevice ? "settings.device.connected".localized : "settings.device.notconnected".localized)
+                            Text(streamViewModel.hasActiveDevice ? "已连接" : "未连接")
                                 .font(AppTypography.caption)
                                 .foregroundColor(streamViewModel.hasActiveDevice ? .green : AppColors.textSecondary)
                         }
@@ -73,12 +141,12 @@ struct SettingsView: View {
 
                     // 设备信息
                     if streamViewModel.hasActiveDevice {
-                        InfoRow(title: "settings.device.status".localized, value: "settings.device.online".localized)
+                        InfoRow(title: "设备状态", value: "在线")
 
                         if streamViewModel.isStreaming {
-                            InfoRow(title: "settings.device.stream".localized, value: "settings.device.stream.active".localized)
+                            InfoRow(title: "视频流", value: "活跃")
                         } else {
-                            InfoRow(title: "settings.device.stream".localized, value: "settings.device.stream.inactive".localized)
+                            InfoRow(title: "视频流", value: "未启动")
                         }
 
                         // TODO: 从 SDK 获取更多设备信息
@@ -86,61 +154,101 @@ struct SettingsView: View {
                         // InfoRow(title: "固件版本", value: "v20.0")
                     }
                 } header: {
-                    Text("settings.device".localized)
+                    Text("设备管理")
                 }
 
                 // AI 设置
                 Section {
-                    Button {
-                        showAppLanguageSettings = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "globe.asia.australia.fill")
-                                .foregroundColor(AppColors.primary)
-                            Text("settings.applanguage".localized)
-                                .foregroundColor(AppColors.textPrimary)
-                            Spacer()
-                            Text(languageManager.currentLanguage.displayName)
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textSecondary)
-                            Image(systemName: "chevron.right")
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textTertiary)
-                        }
-                    }
-
-                    // API Provider
-                    Button {
-                        showProviderSettings = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "server.rack")
-                                .foregroundColor(AppColors.accent)
-                            Text("settings.provider".localized)
-                                .foregroundColor(AppColors.textPrimary)
-                            Spacer()
-                            Text(providerManager.currentProvider.displayName)
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textSecondary)
-                            Image(systemName: "chevron.right")
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textTertiary)
-                        }
-                    }
-
                     Button {
                         showModelSettings = true
                     } label: {
                         HStack {
                             Image(systemName: "cpu")
                                 .foregroundColor(AppColors.accent)
-                            Text("settings.model".localized)
+                            Text("视觉/营养模型")
                                 .foregroundColor(AppColors.textPrimary)
                             Spacer()
-                            Text(providerManager.selectedModel)
+                            Text(selectedModel)
                                 .font(AppTypography.caption)
                                 .foregroundColor(AppColors.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
+
+                    Button {
+                        showRealtimeModelSettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "waveform")
+                                .foregroundColor(AppColors.liveAI)
+                            Text("实时对话模型")
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Text(selectedRealtimeModel)
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
+
+                    Button {
+                        showEndpointSettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "link")
+                                .foregroundColor(AppColors.liveAI)
+                            Text("视觉/营养服务地址")
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Text(apiBaseURL)
                                 .lineLimit(1)
+                                .truncationMode(.middle)
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
+
+                    Button {
+                        showRealtimeEndpointSettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "dot.radiowaves.left.and.right")
+                                .foregroundColor(AppColors.liveAI)
+                            Text("实时对话服务地址")
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Text(realtimeBaseURL)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
+
+                    Button {
+                        showImageGenEndpointSettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "network")
+                                .foregroundColor(AppColors.liveAI)
+                            Text("图片生成服务地址")
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Text(imageGenBaseURL)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
                             Image(systemName: "chevron.right")
                                 .font(AppTypography.caption)
                                 .foregroundColor(AppColors.textTertiary)
@@ -153,7 +261,7 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "globe")
                                 .foregroundColor(AppColors.translate)
-                            Text("settings.language".localized)
+                            Text("语音识别语言")
                                 .foregroundColor(AppColors.textPrimary)
                             Spacer()
                             Text(languageDisplayName(selectedLanguage))
@@ -171,10 +279,10 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "key.fill")
                                 .foregroundColor(AppColors.wordLearn)
-                            Text("settings.apikey".localized)
+                            Text("API Key 管理")
                                 .foregroundColor(AppColors.textPrimary)
                             Spacer()
-                            Text(hasAPIKey ? "settings.apikey.configured".localized : "settings.apikey.notconfigured".localized)
+                            Text(hasAPIKey ? "已配置" : "未配置")
                                 .font(AppTypography.caption)
                                 .foregroundColor(hasAPIKey ? .green : .red)
                             Image(systemName: "chevron.right")
@@ -182,142 +290,43 @@ struct SettingsView: View {
                                 .foregroundColor(AppColors.textTertiary)
                         }
                     }
-
-                    Button {
-                        showQualitySettings = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "video.fill")
-                                .foregroundColor(AppColors.liveStream)
-                            Text("settings.quality".localized)
-                                .foregroundColor(AppColors.textPrimary)
-                            Spacer()
-                            Text(qualityDisplayName(selectedQuality))
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textSecondary)
-                            Image(systemName: "chevron.right")
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textTertiary)
-                        }
-                    }
-
-                    // Quick Vision Settings
-                    Button {
-                        showQuickVisionSettings = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "eye.circle.fill")
-                                .foregroundColor(AppColors.quickVision)
-                            Text("quickvision.settings".localized)
-                                .foregroundColor(AppColors.textPrimary)
-                            Spacer()
-                            Text(quickVisionModeManager.currentMode.displayName)
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textSecondary)
-                            Image(systemName: "chevron.right")
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textTertiary)
-                        }
-                    }
                 } header: {
-                    Text("settings.ai".localized)
+                    Text("AI 设置")
                 }
 
-                // Live AI 设置
+                // 网络设置
                 Section {
-                    // Live AI Provider
-                    Button {
-                        showLiveAIProviderSettings = true
-                    } label: {
+                    Toggle(isOn: Binding(
+                        get: { UserDefaults.standard.bool(forKey: "bypassSystemProxy") },
+                        set: { UserDefaults.standard.set($0, forKey: "bypassSystemProxy") }
+                    )) {
                         HStack {
-                            Image(systemName: "waveform.circle.fill")
-                                .foregroundColor(AppColors.primary)
-                            Text("settings.liveai.provider".localized)
-                                .foregroundColor(AppColors.textPrimary)
-                            Spacer()
-                            Text(providerManager.liveAIProvider.displayName)
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textSecondary)
-                            Image(systemName: "chevron.right")
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textTertiary)
-                        }
-                    }
-
-                    // Google API Key (only show when Google is selected for Live AI)
-                    if providerManager.liveAIProvider == .google {
-                        Button {
-                            showGoogleAPIKeySettings = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "key.fill")
-                                    .foregroundColor(.orange)
-                                Text("Google API Key")
+                            Image(systemName: "network.slash")
+                                .foregroundColor(AppColors.liveAI)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("绕过系统代理")
                                     .foregroundColor(AppColors.textPrimary)
-                                Spacer()
-                                Text(hasGoogleAPIKey ? "settings.apikey.configured".localized : "settings.apikey.notconfigured".localized)
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(hasGoogleAPIKey ? .green : .red)
-                                Image(systemName: "chevron.right")
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(AppColors.textTertiary)
+                                Text("WebSocket 连接直连，避免代理导致的连接问题")
+                                    .font(.caption2)
+                                    .foregroundColor(AppColors.textSecondary)
                             }
                         }
                     }
-
-                    // Live AI Mode Settings
-                    Button {
-                        showLiveAISettings = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "brain.head.profile")
-                                .foregroundColor(AppColors.liveAI)
-                            Text("liveai.settings".localized)
-                                .foregroundColor(AppColors.textPrimary)
-                            Spacer()
-                            Text(liveAIModeManager.currentMode.displayName)
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textSecondary)
-                            Image(systemName: "chevron.right")
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textTertiary)
-                        }
-                    }
-
-                    // Live Translate Settings
-                    Button {
-                        showLiveTranslateSettings = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "globe")
-                                .foregroundColor(AppColors.translate)
-                            Text("livetranslate.settings.title".localized)
-                                .foregroundColor(AppColors.textPrimary)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(AppTypography.caption)
-                                .foregroundColor(AppColors.textTertiary)
-                        }
-                    }
                 } header: {
-                    Text("settings.liveai".localized)
+                    Text("网络设置")
                 }
 
                 // 关于
                 Section {
-                    InfoRow(title: "settings.version".localized, value: "1.5.0")
-                    InfoRow(title: "settings.sdkversion".localized, value: "0.3.0")
+                    InfoRow(title: "版本", value: "1.0.0")
+                    InfoRow(title: "SDK 版本", value: "0.3.0")
                 } header: {
-                    Text("settings.about".localized)
+                    Text("关于")
                 }
             }
-            .navigationTitle("settings.title".localized)
+            .navigationTitle("我的")
             .sheet(isPresented: $showAPIKeySettings) {
-                if providerManager.currentProvider == .alibaba {
-                    APIKeySettingsView(provider: providerManager.currentProvider, endpoint: providerManager.alibabaEndpoint)
-                } else {
-                    APIKeySettingsView(provider: providerManager.currentProvider)
-                }
+                APIKeySettingsView(selectedProviderRaw: $preferredProviderRaw)
             }
             .onChange(of: showAPIKeySettings) { isShowing in
                 // 当 API Key 设置界面关闭时，刷新状态
@@ -325,51 +334,143 @@ struct SettingsView: View {
                     refreshAPIKeyStatus()
                 }
             }
-            .sheet(isPresented: $showProviderSettings) {
-                APIProviderSettingsView()
+            .sheet(isPresented: $showModelSettings) {
+                ModelSettingsView(selectedModel: $selectedModel)
             }
-            .onChange(of: showProviderSettings) { isShowing in
+            .sheet(isPresented: $showRealtimeModelSettings) {
+                OmniRealtimeModelSettingsView(selectedModel: $selectedRealtimeModel)
+            }
+            .sheet(isPresented: $showEndpointSettings) {
+                APIEndpointSettingsView(selectedProviderRaw: $preferredProviderRaw)
+            }
+            .sheet(isPresented: $showRealtimeEndpointSettings) {
+                RealtimeEndpointSettingsView(selectedProviderRaw: $preferredProviderRaw)
+            }
+            .sheet(isPresented: $showImageGenModelSettings) {
+                ImageGenModelSettingsView(selectedModel: $selectedImageGenModel)
+            }
+            .sheet(isPresented: $showImageGenEndpointSettings) {
+                APIEndpointSettingsView(selectedProviderRaw: $preferredProviderRaw)
+            }
+            .onChange(of: showEndpointSettings) { isShowing in
                 if !isShowing {
                     refreshAPIKeyStatus()
+                    validateModelEndpointPair()
                 }
             }
-            .sheet(isPresented: $showModelSettings) {
-                VisionModelSettingsView()
+            .onChange(of: showRealtimeEndpointSettings) { isShowing in
+                if !isShowing {
+                    refreshAPIKeyStatus()
+                    validateRealtimeConfigPair()
+                }
             }
             .sheet(isPresented: $showLanguageSettings) {
                 LanguageSettingsView(selectedLanguage: $selectedLanguage)
             }
-            .sheet(isPresented: $showQualitySettings) {
-                VideoQualitySettingsView(selectedQuality: $selectedQuality)
-            }
-            .sheet(isPresented: $showAppLanguageSettings) {
-                AppLanguageSettingsView()
-            }
-            .sheet(isPresented: $showLiveAIProviderSettings) {
-                LiveAIProviderSettingsView()
-            }
-            .sheet(isPresented: $showGoogleAPIKeySettings) {
-                GoogleAPIKeySettingsView()
-            }
-            .onChange(of: showGoogleAPIKeySettings) { isShowing in
-                // 当 Google API Key 设置界面关闭时，刷新状态
-                if !isShowing {
-                    refreshAPIKeyStatus()
+            .onChange(of: selectedModel) { _ in
+                if let provider = VisionAPIConfig.provider(for: selectedModel) {
+                    preferredProviderRaw = provider.rawValue
                 }
+                refreshAPIKeyStatus()
+                validateModelEndpointPair()
             }
-            .sheet(isPresented: $showQuickVisionSettings) {
-                QuickVisionSettingsView()
+            .onChange(of: selectedRealtimeModel) { _ in
+                if let provider = VisionAPIConfig.provider(for: selectedRealtimeModel) {
+                    preferredProviderRaw = provider.rawValue
+                }
+                refreshAPIKeyStatus()
+                validateRealtimeConfigPair()
             }
-            .sheet(isPresented: $showLiveAISettings) {
-                LiveAISettingsView()
-            }
-            .sheet(isPresented: $showLiveTranslateSettings) {
-                LiveTranslateSettingsView(viewModel: LiveTranslateViewModel())
+            .onChange(of: preferredProviderRaw) { _ in
+                refreshAPIKeyStatus()
+                validateModelEndpointPair()
+                validateRealtimeConfigPair()
             }
             .onAppear {
                 // 视图出现时刷新 API Key 状态
                 refreshAPIKeyStatus()
+                validateModelEndpointPair()
+                validateRealtimeConfigPair()
             }
+            .alert("模型与服务地址不匹配", isPresented: $showModelEndpointAlert) {
+                Button("知道了") {}
+            } message: {
+                Text(modelEndpointAlertMessage)
+            }
+        }
+    }
+
+    // MARK: - Model / Endpoint Validation
+
+    private func validateModelEndpointPair() {
+        if apiBaseURL.isEmpty {
+            modelEndpointAlertMessage = "当前服务地址为空，请先配置 API 服务地址。"
+            showModelEndpointAlert = true
+            return
+        }
+
+        if VisionAPIConfig.apiKey(for: activeProvider).isEmpty {
+            modelEndpointAlertMessage = "当前服务未配置 API Key，请先在「API Key 管理」中设置。"
+            showModelEndpointAlert = true
+            return
+        }
+
+        let modelProvider = VisionAPIConfig.provider(for: selectedModel)
+        let endpointProvider = VisionAPIConfig.provider(forBaseURL: apiBaseURL)
+
+        if let modelProvider, let endpointProvider {
+            if modelProvider != endpointProvider {
+                modelEndpointAlertMessage = "当前模型与服务地址不匹配：模型为「\(modelProvider.displayName)」，服务地址为「\(endpointProvider.displayName)」。请调整其中一个。"
+                showModelEndpointAlert = true
+            }
+            return
+        }
+
+        if modelProvider != nil && endpointProvider == nil {
+            modelEndpointAlertMessage = "已识别模型提供方为「\(modelProvider!.displayName)」，但服务地址无法识别，请确认是否为对应厂商的 OpenAI 兼容地址。"
+            showModelEndpointAlert = true
+        } else if modelProvider == nil && endpointProvider != nil {
+            modelEndpointAlertMessage = "已识别服务地址为「\(endpointProvider!.displayName)」，但模型名称无法识别，请确认模型是否属于该厂商。"
+            showModelEndpointAlert = true
+        } else if modelProvider == nil && endpointProvider == nil {
+            modelEndpointAlertMessage = "模型与服务地址均无法识别，请确认是否为支持的服务，或使用自定义 OpenAI 兼容配置。"
+            showModelEndpointAlert = true
+        }
+    }
+
+    private func validateRealtimeConfigPair() {
+        if realtimeBaseURL.isEmpty {
+            modelEndpointAlertMessage = "当前实时对话服务地址为空，请先配置。"
+            showModelEndpointAlert = true
+            return
+        }
+
+        if VisionAPIConfig.apiKey(for: VisionAPIConfig.activeRealtimeProvider).isEmpty {
+            modelEndpointAlertMessage = "当前服务未配置 API Key，请先在「API Key 管理」中设置。"
+            showModelEndpointAlert = true
+            return
+        }
+
+        let modelProvider = VisionAPIConfig.provider(for: selectedRealtimeModel)
+        let endpointProvider = VisionAPIConfig.provider(forBaseURL: realtimeBaseURL)
+
+        if let modelProvider, let endpointProvider {
+            if modelProvider != endpointProvider {
+                modelEndpointAlertMessage = "当前实时对话模型与服务地址不匹配：模型为「\(modelProvider.displayName)」，服务地址为「\(endpointProvider.displayName)」。请调整其中一个。"
+                showModelEndpointAlert = true
+            }
+            return
+        }
+
+        if modelProvider != nil && endpointProvider == nil {
+            modelEndpointAlertMessage = "已识别实时对话模型提供方为「\(modelProvider!.displayName)」，但服务地址无法识别。"
+            showModelEndpointAlert = true
+        } else if modelProvider == nil && endpointProvider != nil {
+            modelEndpointAlertMessage = "已识别实时对话服务地址为「\(endpointProvider!.displayName)」，但模型名称无法识别。"
+            showModelEndpointAlert = true
+        } else if modelProvider == nil && endpointProvider == nil {
+            modelEndpointAlertMessage = "实时对话模型与服务地址均无法识别，请确认是否为支持的服务。"
+            showModelEndpointAlert = true
         }
     }
 
@@ -382,15 +483,6 @@ struct SettingsView: View {
         case "es-ES": return "Español"
         case "fr-FR": return "Français"
         default: return "中文"
-        }
-    }
-
-    private func qualityDisplayName(_ code: String) -> String {
-        switch code {
-        case "low": return "低画质"
-        case "medium": return "中画质"
-        case "high": return "高画质"
-        default: return "中画质"
         }
     }
 }
@@ -414,411 +506,576 @@ struct InfoRow: View {
     }
 }
 
-// MARK: - API Provider Settings
-
-struct APIProviderSettingsView: View {
-    @ObservedObject var providerManager = APIProviderManager.shared
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationView {
-            List {
-                Section {
-                    ForEach(APIProvider.allCases, id: \.self) { provider in
-                        Button {
-                            providerManager.currentProvider = provider
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(provider.displayName)
-                                        .foregroundColor(.primary)
-                                    Text(provider == .alibaba ? "settings.provider.alibaba.desc".localized : "settings.provider.openrouter.desc".localized)
-                                        .font(AppTypography.caption)
-                                        .foregroundColor(AppColors.textSecondary)
-                                }
-                                Spacer()
-                                if providerManager.currentProvider == provider {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                        }
-                    }
-                } header: {
-                    Text("settings.provider.select".localized)
-                } footer: {
-                    Text("settings.provider.description".localized)
-                }
-
-                // Alibaba endpoint selection (only show when Alibaba is selected)
-                if providerManager.currentProvider == .alibaba {
-                    Section {
-                        ForEach(AlibabaEndpoint.allCases, id: \.self) { endpoint in
-                            Button {
-                                providerManager.alibabaEndpoint = endpoint
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(endpoint.displayName)
-                                            .foregroundColor(.primary)
-                                        Text(endpoint == .beijing ? "settings.endpoint.beijing.desc".localized : "settings.endpoint.singapore.desc".localized)
-                                            .font(AppTypography.caption)
-                                            .foregroundColor(AppColors.textSecondary)
-                                    }
-                                    Spacer()
-                                    if providerManager.alibabaEndpoint == endpoint {
-                                        Image(systemName: "checkmark")
-                                            .foregroundColor(.blue)
-                                    }
-                                }
-                            }
-                        }
-                    } header: {
-                        Text("settings.endpoint".localized)
-                    } footer: {
-                        Text("settings.endpoint.description".localized)
-                    }
-                }
-
-                // API Key status for current provider
-                Section {
-                    HStack {
-                        Text("settings.apikey.status".localized)
-                        Spacer()
-                        if providerManager.hasAPIKey {
-                            HStack(spacing: 4) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                Text("settings.apikey.configured".localized)
-                                    .foregroundColor(.green)
-                            }
-                        } else {
-                            HStack(spacing: 4) {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundColor(.red)
-                                Text("settings.apikey.notconfigured".localized)
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    }
-
-                    Link(destination: URL(string: providerManager.currentProvider.apiKeyHelpURL)!) {
-                        HStack {
-                            Text("settings.provider.getapikey".localized)
-                            Spacer()
-                            Image(systemName: "arrow.up.right.square")
-                        }
-                    }
-                } header: {
-                    if providerManager.currentProvider == .alibaba {
-                        Text("\(providerManager.currentProvider.displayName) (\(providerManager.alibabaEndpoint.displayName)) API Key")
-                    } else {
-                        Text("\(providerManager.currentProvider.displayName) API Key")
-                    }
-                }
-            }
-            .navigationTitle("settings.provider".localized)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("done".localized) {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
-
 // MARK: - API Key Settings
 
 struct APIKeySettingsView: View {
-    let provider: APIProvider
-    var endpoint: AlibabaEndpoint? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var apiKey: String = ""
     @State private var showSaveSuccess = false
     @State private var showError = false
     @State private var errorMessage = ""
-
-    private var displayTitle: String {
-        if provider == .alibaba, let endpoint = endpoint {
-            return "\(provider.displayName) (\(endpoint.displayName))"
-        }
-        return provider.displayName
-    }
+    @Binding var selectedProviderRaw: String
+    @State private var selectedProvider: VisionAPIConfig.ModelProvider = .qwen
 
     var body: some View {
         NavigationView {
             Form {
                 Section {
-                    SecureField("settings.apikey.placeholder".localized, text: $apiKey)
+                    Picker("模型服务", selection: $selectedProvider) {
+                        ForEach(VisionAPIConfig.ModelProvider.allCases) { provider in
+                            Text(provider.displayName).tag(provider)
+                        }
+                    }
+
+                    SecureField("请输入 API Key", text: $apiKey)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                 } header: {
-                    Text("\(displayTitle) API Key")
+                    Text("\(selectedProvider.displayName) API Key")
                 } footer: {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(provider == .alibaba ? "settings.apikey.alibaba.help".localized : "settings.apikey.openrouter.help".localized)
-                        Link("settings.apikey.get".localized, destination: URL(string: provider.apiKeyHelpURL)!)
-                            .font(.caption)
+                        Text("请前往对应厂商控制台获取 API Key")
                     }
                 }
 
                 Section {
-                    Button("save".localized) {
+                    Button("保存") {
                         saveAPIKey()
                     }
                     .frame(maxWidth: .infinity)
                     .disabled(apiKey.isEmpty)
 
-                    if APIKeyManager.shared.hasAPIKey(for: provider, endpoint: endpoint) {
-                        Button("settings.apikey.delete".localized, role: .destructive) {
+                    if APIKeyManager.shared.hasAPIKey(provider: selectedProvider) {
+                        Button("删除 API Key", role: .destructive) {
                             deleteAPIKey()
                         }
                         .frame(maxWidth: .infinity)
                     }
                 }
             }
-            .navigationTitle("settings.apikey.manage".localized)
+            .navigationTitle("API Key 管理")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("done".localized) {
+                    Button("完成") {
                         dismiss()
                     }
                 }
             }
-            .alert("settings.apikey.saved".localized, isPresented: $showSaveSuccess) {
-                Button("ok".localized) {
+            .alert("保存成功", isPresented: $showSaveSuccess) {
+                Button("确定") {
                     dismiss()
                 }
             } message: {
-                Text("settings.apikey.saved.message".localized)
+                Text("API Key 已安全保存")
             }
-            .alert("error".localized, isPresented: $showError) {
-                Button("ok".localized) {}
+            .alert("错误", isPresented: $showError) {
+                Button("确定") {}
             } message: {
                 Text(errorMessage)
             }
             .onAppear {
-                // Load existing key if available
-                if let existingKey = APIKeyManager.shared.getAPIKey(for: provider, endpoint: endpoint) {
+                // 加载当前服务的 API Key
+                selectedProvider = VisionAPIConfig.ModelProvider(rawValue: selectedProviderRaw) ?? .qwen
+                if let existingKey = APIKeyManager.shared.getAPIKey(provider: selectedProvider) {
                     apiKey = existingKey
                 }
+            }
+            .onChange(of: selectedProvider) { provider in
+                selectedProviderRaw = provider.rawValue
+                apiKey = APIKeyManager.shared.getAPIKey(provider: provider) ?? ""
             }
         }
     }
 
     private func saveAPIKey() {
         guard !apiKey.isEmpty else {
-            errorMessage = "settings.apikey.empty".localized
+            errorMessage = "API Key 不能为空"
             showError = true
             return
         }
 
-        if APIKeyManager.shared.saveAPIKey(apiKey, for: provider, endpoint: endpoint) {
+        if APIKeyManager.shared.saveAPIKey(apiKey, provider: selectedProvider) {
             showSaveSuccess = true
         } else {
-            errorMessage = "settings.apikey.savefailed".localized
+            errorMessage = "保存失败，请重试"
             showError = true
         }
     }
 
     private func deleteAPIKey() {
-        if APIKeyManager.shared.deleteAPIKey(for: provider, endpoint: endpoint) {
+        if APIKeyManager.shared.deleteAPIKey(provider: selectedProvider) {
             apiKey = ""
             dismiss()
         } else {
-            errorMessage = "settings.apikey.deletefailed".localized
+            errorMessage = "删除失败，请重试"
             showError = true
         }
     }
 }
 
-// MARK: - Vision Model Settings
+// MARK: - Model Settings
 
-struct VisionModelSettingsView: View {
-    @ObservedObject var providerManager = APIProviderManager.shared
+struct ModelSettingsView: View {
+    @Binding var selectedModel: String
     @Environment(\.dismiss) private var dismiss
-    @State private var searchText = ""
-    @State private var showVisionOnly = true
+    @StateObject private var modelManager = CustomModelManager.shared
+
+    @State private var newModelName = ""
+    @State private var addingForProvider: VisionAPIConfig.ModelProvider?
+
+    let presetModels: [(provider: VisionAPIConfig.ModelProvider, models: [String])] = [
+        (.qwen, ["qwen3-vl-plus", "qwen2.5-vl", "qwen-vl-plus"]),
+        (.doubao, ["doubao-1-5-vision-pro", "doubao-1-5-vision-lite"]),
+        (.stepfun, ["step-1.5v-turbo", "step-1.5v-mini"]),
+        (.openai, []),
+        (.gemini, ["gemini-2.0-flash-exp"]),
+        (.geminiCompatible, [])
+    ]
 
     var body: some View {
         NavigationView {
-            Group {
-                if providerManager.currentProvider == .alibaba {
-                    alibabaModelList
-                } else {
-                    openRouterModelList
+            List {
+                // 当前模型
+                Section {
+                    HStack {
+                        Text("当前选择")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(selectedModel)
+                            .foregroundColor(.primary)
+                            .fontWeight(.medium)
+                    }
+                }
+                
+                // 每个提供商一个 Section
+                ForEach(presetModels, id: \.provider.rawValue) { item in
+                    providerSection(provider: item.provider, presets: item.models)
                 }
             }
-            .navigationTitle("settings.model".localized)
+            .navigationTitle("模型设置")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("done".localized) {
+                    Button("完成") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert("添加自定义模型", isPresented: Binding(
+                get: { addingForProvider != nil },
+                set: { if !$0 { addingForProvider = nil } }
+            )) {
+                TextField("模型名称", text: $newModelName)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled(true)
+                Button("取消", role: .cancel) {
+                    newModelName = ""
+                    addingForProvider = nil
+                }
+                Button("添加") {
+                    if !newModelName.isEmpty, let provider = addingForProvider {
+                        modelManager.addModel(newModelName, for: provider)
+                        selectedModel = newModelName
+                        newModelName = ""
+                        addingForProvider = nil
+                    }
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func providerSection(provider: VisionAPIConfig.ModelProvider, presets: [String]) -> some View {
+        Section {
+            // 预设模型
+            ForEach(presets, id: \.self) { model in
+                modelRow(model)
+            }
+            
+            // 自定义模型（可删除）
+            ForEach(modelManager.models(for: provider), id: \.self) { model in
+                modelRow(model)
+            }
+            .onDelete { indexSet in
+                let customModels = modelManager.models(for: provider)
+                for index in indexSet {
+                    modelManager.removeModel(customModels[index], for: provider)
+                }
+            }
+            
+            // 添加按钮
+            Button {
+                addingForProvider = provider
+            } label: {
+                HStack {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.green)
+                    Text("添加模型")
+                        .foregroundColor(.blue)
+                }
+            }
+        } header: {
+            Text(provider.displayName)
+        } footer: {
+            if !modelManager.models(for: provider).isEmpty {
+                Text("左滑可删除自定义模型")
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func modelRow(_ model: String) -> some View {
+        Button {
+            selectedModel = model
+        } label: {
+            HStack {
+                Text(model)
+                    .foregroundColor(.primary)
+                Spacer()
+                if selectedModel == model {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.blue)
+                }
+            }
+        }
+    }
+}
+
+struct OmniRealtimeModelSettingsView: View {
+    @Binding var selectedModel: String
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var modelManager = CustomModelManager.shared
+
+    @State private var newModelName = ""
+    @State private var addingForProvider: VisionAPIConfig.ModelProvider?
+
+    let presetModels: [(provider: VisionAPIConfig.ModelProvider, models: [String])] = [
+        (.qwen, ["qwen3-omni-flash-realtime", "qwen3-omni-standard-realtime"]),
+        (.doubao, ["doubao-1-5-voice-pro", "doubao-1-5-voice-lite"]),
+        (.stepfun, ["step-1.5v-turbo", "step-1.5v-mini"]),
+        (.openai, [])
+    ]
+
+    var body: some View {
+        NavigationView {
+            List {
+                // 当前模型
+                Section {
+                    HStack {
+                        Text("当前选择")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(selectedModel)
+                            .foregroundColor(.primary)
+                            .fontWeight(.medium)
+                    }
+                }
+                
+                // 每个提供商一个 Section
+                ForEach(presetModels, id: \.provider.rawValue) { item in
+                    providerSection(provider: item.provider, presets: item.models)
+                }
+            }
+            .navigationTitle("实时对话模型")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("完成") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert("添加自定义模型", isPresented: Binding(
+                get: { addingForProvider != nil },
+                set: { if !$0 { addingForProvider = nil } }
+            )) {
+                TextField("模型名称", text: $newModelName)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled(true)
+                Button("取消", role: .cancel) {
+                    newModelName = ""
+                    addingForProvider = nil
+                }
+                Button("添加") {
+                    if !newModelName.isEmpty, let provider = addingForProvider {
+                        modelManager.addModel(newModelName, for: provider)
+                        selectedModel = newModelName
+                        newModelName = ""
+                        addingForProvider = nil
+                    }
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func providerSection(provider: VisionAPIConfig.ModelProvider, presets: [String]) -> some View {
+        Section {
+            ForEach(presets, id: \.self) { model in
+                modelRow(model)
+            }
+            
+            ForEach(modelManager.models(for: provider), id: \.self) { model in
+                modelRow(model)
+            }
+            .onDelete { indexSet in
+                let customModels = modelManager.models(for: provider)
+                for index in indexSet {
+                    modelManager.removeModel(customModels[index], for: provider)
+                }
+            }
+            
+            Button {
+                addingForProvider = provider
+            } label: {
+                HStack {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.green)
+                    Text("添加模型")
+                        .foregroundColor(.blue)
+                }
+            }
+        } header: {
+            Text(provider.displayName)
+        } footer: {
+            if !modelManager.models(for: provider).isEmpty {
+                Text("左滑可删除自定义模型")
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func modelRow(_ model: String) -> some View {
+        Button {
+            selectedModel = model
+        } label: {
+            HStack {
+                Text(model)
+                    .foregroundColor(.primary)
+                Spacer()
+                if selectedModel == model {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.blue)
+                }
+            }
+        }
+    }
+}
+
+struct APIEndpointSettingsView: View {
+    @Binding var selectedProviderRaw: String
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var selectedProvider: VisionAPIConfig.ModelProvider = .qwen
+    @State private var customBaseURL = ""
+
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    Picker("模型服务", selection: $selectedProvider) {
+                        ForEach(VisionAPIConfig.ModelProvider.allCases) { provider in
+                            Text(provider.displayName).tag(provider)
+                        }
+                    }
+                } header: {
+                    Text("选择服务")
+                }
+
+                Section {
+                    ForEach(providerEndpoints, id: \.name) { endpoint in
+                        Button {
+                            if !endpoint.url.isEmpty {
+                                VisionAPIConfig.setBaseURL(endpoint.url, for: selectedProvider)
+                                customBaseURL = ""
+                                selectedProviderRaw = selectedProvider.rawValue
+                            }
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(endpoint.name)
+                                        .foregroundColor(.primary)
+                                    if !endpoint.url.isEmpty {
+                                        Text(endpoint.url)
+                                            .font(AppTypography.caption)
+                                            .foregroundColor(AppColors.textSecondary)
+                                    }
+                                }
+                                Spacer()
+                                if !endpoint.url.isEmpty && VisionAPIConfig.baseURL(for: selectedProvider) == endpoint.url {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                        .disabled(endpoint.url.isEmpty)
+                    }
+                } header: {
+                    Text("服务地址预设")
+                }
+
+                Section {
+                    TextField("自定义 API Base URL", text: $customBaseURL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
+
+                    Button("使用自定义地址") {
+                        if !customBaseURL.isEmpty {
+                            VisionAPIConfig.setBaseURL(customBaseURL, for: selectedProvider)
+                            selectedProviderRaw = selectedProvider.rawValue
+                        }
+                    }
+                    .disabled(customBaseURL.isEmpty)
+                } header: {
+                    Text("自定义")
+                } footer: {
+                    Text("当前使用: \(VisionAPIConfig.baseURL(for: selectedProvider))")
+                }
+            }
+            .navigationTitle("API 服务地址")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("完成") {
                         dismiss()
                     }
                 }
             }
         }
-    }
-
-    private var alibabaModelList: some View {
-        let models = [
-            ("qwen3-vl-plus", "Qwen3 VL Plus", "settings.model.qwen3vlplus.desc".localized),
-            ("qwen3-vl-max", "Qwen3 VL Max", "settings.model.qwen3vlmax.desc".localized)
-        ]
-
-        return List {
-            Section {
-                ForEach(models, id: \.0) { model in
-                    Button {
-                        providerManager.selectedModel = model.0
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(model.1)
-                                    .foregroundColor(.primary)
-                                Text(model.2)
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(AppColors.textSecondary)
-                            }
-                            Spacer()
-                            if providerManager.selectedModel == model.0 {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                    }
-                }
-            } header: {
-                Text("settings.model.alibaba".localized)
-            } footer: {
-                Text("settings.model.current".localized + ": \(providerManager.selectedModel)")
-            }
+        .onAppear {
+            selectedProvider = VisionAPIConfig.ModelProvider(rawValue: selectedProviderRaw) ?? .qwen
+            customBaseURL = VisionAPIConfig.baseURL(for: selectedProvider)
+        }
+        .onChange(of: selectedProvider) { provider in
+            selectedProviderRaw = provider.rawValue
+            customBaseURL = VisionAPIConfig.baseURL(for: provider)
         }
     }
 
-    private var openRouterModelList: some View {
-        VStack {
-            // Search bar
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                TextField("settings.model.search".localized, text: $searchText)
-                    .textInputAutocapitalization(.never)
-                if !searchText.isEmpty {
-                    Button {
-                        searchText = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
-                    }
-                }
-            }
-            .padding(8)
-            .background(Color(.systemGray6))
-            .cornerRadius(8)
-            .padding(.horizontal)
-            .padding(.top, 8)
+    private var providerEndpoints: [(name: String, url: String)] {
+        switch selectedProvider {
+        case .qwen:
+            return [("通义千问（默认）", VisionAPIConfig.ModelProvider.qwen.defaultBaseURL)]
+        case .doubao:
+            return [("豆包（火山引擎 Ark）", VisionAPIConfig.ModelProvider.doubao.defaultBaseURL)]
+        case .stepfun:
+            return [("阶越星辰", VisionAPIConfig.ModelProvider.stepfun.defaultBaseURL)]
+        case .openai:
+            return [("OpenAI 兼容（自定义）", "")]
+        case .gemini:
+            return [("Gemini (Google/Vertex)", VisionAPIConfig.ModelProvider.gemini.defaultBaseURL)]
+        case .geminiCompatible:
+            return [("Gemini 兼容（自定义）", "")]
+        }
+    }
+}
 
-            // Vision only toggle
-            Toggle("settings.model.visiononly".localized, isOn: $showVisionOnly)
-                .padding(.horizontal)
-                .padding(.vertical, 4)
+struct RealtimeEndpointSettingsView: View {
+    @Binding var selectedProviderRaw: String
+    @Environment(\.dismiss) private var dismiss
 
-            if providerManager.isLoadingModels {
-                Spacer()
-                ProgressView("settings.model.loading".localized)
-                Spacer()
-            } else if let error = providerManager.modelsError {
-                Spacer()
-                VStack(spacing: 12) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.largeTitle)
-                        .foregroundColor(.orange)
-                    Text(error)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                    Button("settings.model.retry".localized) {
-                        Task {
-                            await providerManager.fetchOpenRouterModels()
+    @State private var selectedProvider: VisionAPIConfig.ModelProvider = .qwen
+    @State private var customBaseURL = ""
+
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    Picker("模型服务", selection: $selectedProvider) {
+                        ForEach(VisionAPIConfig.ModelProvider.allCases) { provider in
+                            Text(provider.displayName).tag(provider)
                         }
                     }
-                    .buttonStyle(.bordered)
+                } header: {
+                    Text("选择服务")
                 }
-                .padding()
-                Spacer()
-            } else {
-                List {
-                    let filteredModels = getFilteredModels()
 
-                    if filteredModels.isEmpty {
-                        Text("settings.model.notfound".localized)
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(filteredModels) { model in
-                            Button {
-                                providerManager.selectedModel = model.id
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        HStack {
-                                            Text(model.displayName)
-                                                .foregroundColor(.primary)
-                                                .lineLimit(1)
-                                            if model.isVisionCapable {
-                                                Image(systemName: "eye.fill")
-                                                    .font(.caption)
-                                                    .foregroundColor(.purple)
-                                            }
-                                        }
-                                        Text(model.id)
+                Section {
+                    ForEach(providerEndpoints, id: \.name) { endpoint in
+                        Button {
+                            if !endpoint.url.isEmpty {
+                                VisionAPIConfig.setRealtimeBaseURL(endpoint.url, for: selectedProvider)
+                                customBaseURL = ""
+                                selectedProviderRaw = selectedProvider.rawValue
+                            }
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(endpoint.name)
+                                        .foregroundColor(.primary)
+                                    if !endpoint.url.isEmpty {
+                                        Text(endpoint.url)
                                             .font(AppTypography.caption)
                                             .foregroundColor(AppColors.textSecondary)
-                                            .lineLimit(1)
-                                        if !model.priceDisplay.isEmpty {
-                                            Text(model.priceDisplay)
-                                                .font(.caption2)
-                                                .foregroundColor(.green)
-                                        }
                                     }
-                                    Spacer()
-                                    if providerManager.selectedModel == model.id {
-                                        Image(systemName: "checkmark")
-                                            .foregroundColor(.blue)
-                                    }
+                                }
+                                Spacer()
+                                if !endpoint.url.isEmpty && VisionAPIConfig.realtimeBaseURL(for: selectedProvider) == endpoint.url {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
                                 }
                             }
                         }
+                        .disabled(endpoint.url.isEmpty)
+                    }
+                } header: {
+                    Text("服务地址预设")
+                }
+
+                Section {
+                    TextField("自定义实时对话 Base URL", text: $customBaseURL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
+
+                    Button("使用自定义地址") {
+                        if !customBaseURL.isEmpty {
+                            VisionAPIConfig.setRealtimeBaseURL(customBaseURL, for: selectedProvider)
+                            selectedProviderRaw = selectedProvider.rawValue
+                        }
+                    }
+                    .disabled(customBaseURL.isEmpty)
+                } header: {
+                    Text("自定义")
+                } footer: {
+                    Text("当前使用: \(VisionAPIConfig.realtimeBaseURL(for: selectedProvider))")
+                }
+            }
+            .navigationTitle("实时对话服务地址")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("完成") {
+                        dismiss()
                     }
                 }
             }
         }
-        .task {
-            if providerManager.openRouterModels.isEmpty {
-                await providerManager.fetchOpenRouterModels()
-            }
+        .onAppear {
+            selectedProvider = VisionAPIConfig.ModelProvider(rawValue: selectedProviderRaw) ?? .qwen
+            customBaseURL = VisionAPIConfig.realtimeBaseURL(for: selectedProvider)
+        }
+        .onChange(of: selectedProvider) { provider in
+            selectedProviderRaw = provider.rawValue
+            customBaseURL = VisionAPIConfig.realtimeBaseURL(for: provider)
         }
     }
 
-    private func getFilteredModels() -> [OpenRouterModel] {
-        var models = providerManager.openRouterModels
-
-        if showVisionOnly {
-            models = models.filter { $0.isVisionCapable }
+    private var providerEndpoints: [(name: String, url: String)] {
+        switch selectedProvider {
+        case .qwen:
+            return [("通义千问（默认）", VisionAPIConfig.ModelProvider.qwen.defaultRealtimeBaseURL)]
+        case .doubao:
+            return [("豆包（火山引擎 Ark）", VisionAPIConfig.ModelProvider.doubao.defaultRealtimeBaseURL)]
+        case .stepfun:
+            return [("阶越星辰", VisionAPIConfig.ModelProvider.stepfun.defaultRealtimeBaseURL)]
+        case .openai:
+            return [("OpenAI 兼容（自定义）", "")]
+        case .gemini:
+            return [("Gemini (暂不支持实时)", "")]
+        case .geminiCompatible:
+            return [("Gemini 兼容 (暂不支持实时)", "")]
         }
-
-        if !searchText.isEmpty {
-            models = providerManager.searchModels(searchText)
-            if showVisionOnly {
-                models = models.filter { $0.isVisionCapable }
-            }
-        }
-
-        return models
     }
 }
 
@@ -875,313 +1132,138 @@ struct LanguageSettingsView: View {
     }
 }
 
-// MARK: - Video Quality Settings
+// MARK: - Image Gen Model Settings
 
-struct VideoQualitySettingsView: View {
-    @Binding var selectedQuality: String
+struct ImageGenModelSettingsView: View {
+    @Binding var selectedModel: String
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var modelManager = CustomModelManager.shared
 
-    var qualities: [(String, String, String)] {
-        [
-            ("low", "settings.quality.low".localized, "settings.quality.low.desc".localized),
-            ("medium", "settings.quality.medium".localized, "settings.quality.medium.desc".localized),
-            ("high", "settings.quality.high".localized, "settings.quality.high.desc".localized)
-        ]
-    }
+    @State private var newModelName = ""
+    @State private var addingForProvider: VisionAPIConfig.ModelProvider?
+
+    let presetModels: [(provider: VisionAPIConfig.ModelProvider, models: [String])] = [
+        (.gemini, ["gemini-3-pro-image-preview", "gemini-2.0-flash-exp"]),
+        (.geminiCompatible, []),
+        (.doubao, ["doubao-seedream-4-5-251128"])
+    ]
 
     var body: some View {
         NavigationView {
             List {
-                Section {
-                    ForEach(qualities, id: \.0) { quality in
-                        Button {
-                            selectedQuality = quality.0
-                            UserDefaults.standard.set(quality.0, forKey: "video_quality")
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(quality.1)
-                                        .foregroundColor(.primary)
-                                    Text(quality.2)
-                                        .font(AppTypography.caption)
-                                        .foregroundColor(AppColors.textSecondary)
-                                }
-                                Spacer()
-                                if selectedQuality == quality.0 {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                        }
-                    }
-                } header: {
-                    Text("settings.quality.select".localized)
-                } footer: {
-                    Text("settings.quality.description".localized)
-                }
-            }
-            .navigationTitle("settings.quality".localized)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("done".localized) {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
-
-// MARK: - App Language Settings
-
-struct AppLanguageSettingsView: View {
-    @ObservedObject var languageManager = LanguageManager.shared
-    @Environment(\.dismiss) private var dismiss
-    @State private var showRestartAlert = false
-    @State private var pendingLanguage: AppLanguage?
-
-    var body: some View {
-        NavigationView {
-            List {
-                Section {
-                    ForEach(AppLanguage.allCases, id: \.self) { language in
-                        Button {
-                            // 只有选择不同语言时才提示重启
-                            if languageManager.currentLanguage != language {
-                                pendingLanguage = language
-                                showRestartAlert = true
-                            }
-                        } label: {
-                            HStack {
-                                Text(language.displayName)
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                if languageManager.currentLanguage == language {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                        }
-                    }
-                } header: {
-                    Text("settings.applanguage.select".localized)
-                } footer: {
-                    Text("settings.applanguage.description".localized)
-                }
-            }
-            .navigationTitle("settings.applanguage".localized)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("done".localized) {
-                        dismiss()
-                    }
-                }
-            }
-            .alert("settings.applanguage.restart.title".localized, isPresented: $showRestartAlert) {
-                Button("cancel".localized, role: .cancel) {
-                    pendingLanguage = nil
-                }
-                Button("settings.applanguage.restart.confirm".localized) {
-                    if let language = pendingLanguage {
-                        languageManager.currentLanguage = language
-                        // 延迟一点退出，确保设置已保存
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            exit(0)
-                        }
-                    }
-                }
-            } message: {
-                Text("settings.applanguage.restart.message".localized)
-            }
-        }
-    }
-}
-
-// MARK: - Live AI Provider Settings
-
-struct LiveAIProviderSettingsView: View {
-    @ObservedObject var providerManager = APIProviderManager.shared
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationView {
-            List {
-                Section {
-                    ForEach(LiveAIProvider.allCases, id: \.self) { provider in
-                        Button {
-                            providerManager.liveAIProvider = provider
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(provider.displayName)
-                                        .foregroundColor(.primary)
-                                    Text(liveAIProviderDescription(provider))
-                                        .font(AppTypography.caption)
-                                        .foregroundColor(AppColors.textSecondary)
-                                }
-                                Spacer()
-                                if providerManager.liveAIProvider == provider {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                        }
-                    }
-                } header: {
-                    Text("settings.liveai.provider.select".localized)
-                } footer: {
-                    Text("settings.liveai.provider.description".localized)
-                }
-
-                // API Key status
+                // 当前模型
                 Section {
                     HStack {
-                        Text("settings.apikey.status".localized)
+                        Text("当前选择")
+                            .foregroundColor(.secondary)
                         Spacer()
-                        if providerManager.hasLiveAIAPIKey {
-                            HStack(spacing: 4) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                Text("settings.apikey.configured".localized)
-                                    .foregroundColor(.green)
-                            }
-                        } else {
-                            HStack(spacing: 4) {
-                                Image(systemName: "exclamationmark.circle.fill")
-                                    .foregroundColor(.red)
-                                Text("settings.apikey.notconfigured".localized)
-                                    .foregroundColor(.red)
-                            }
-                        }
+                        Text(selectedModel)
+                            .foregroundColor(.primary)
+                            .fontWeight(.medium)
                     }
-
-                    Link(destination: URL(string: providerManager.liveAIProvider.apiKeyHelpURL)!) {
-                        HStack {
-                            Text("settings.provider.getapikey".localized)
-                            Spacer()
-                            Image(systemName: "arrow.up.right.square")
-                        }
+                }
+                
+                // 服务提供商选择
+                Section {
+                    Picker("模型服务", selection: Binding(
+                        get: { VisionAPIConfig.preferredImageGenProvider },
+                        set: { VisionAPIConfig.preferredImageGenProvider = $0 }
+                    )) {
+                        Text("Gemini").tag(VisionAPIConfig.ModelProvider.gemini)
+                        Text("Gemini 兼容").tag(VisionAPIConfig.ModelProvider.geminiCompatible)
+                        Text("豆包 (Seedream)").tag(VisionAPIConfig.ModelProvider.doubao)
                     }
                 } header: {
-                    Text("\(providerManager.liveAIProvider.displayName) API Key")
+                    Text("选择服务提供商")
+                }
+                
+                // 每个提供商一个 Section
+                ForEach(presetModels, id: \.provider.rawValue) { item in
+                    providerSection(provider: item.provider, presets: item.models)
                 }
             }
-            .navigationTitle("settings.liveai.provider".localized)
+            .navigationTitle("图片生成模型")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("done".localized) {
+                    Button("完成") {
                         dismiss()
                     }
                 }
             }
-        }
-    }
-
-    private func liveAIProviderDescription(_ provider: LiveAIProvider) -> String {
-        switch provider {
-        case .alibaba:
-            return "settings.liveai.alibaba.desc".localized
-        case .google:
-            return "settings.liveai.google.desc".localized
-        }
-    }
-}
-
-// MARK: - Google API Key Settings
-
-struct GoogleAPIKeySettingsView: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var apiKey: String = ""
-    @State private var showSaveSuccess = false
-    @State private var showError = false
-    @State private var errorMessage = ""
-
-    var body: some View {
-        NavigationView {
-            Form {
-                Section {
-                    SecureField("settings.apikey.placeholder".localized, text: $apiKey)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                } header: {
-                    Text("Google Gemini API Key")
-                } footer: {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("settings.apikey.google.help".localized)
-                        Link("settings.apikey.get".localized, destination: URL(string: "https://aistudio.google.com/apikey")!)
-                            .font(.caption)
-                    }
+            .alert("添加自定义模型", isPresented: Binding(
+                get: { addingForProvider != nil },
+                set: { if !$0 { addingForProvider = nil } }
+            )) {
+                TextField("模型名称", text: $newModelName)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled(true)
+                Button("取消", role: .cancel) {
+                    newModelName = ""
+                    addingForProvider = nil
                 }
-
-                Section {
-                    Button("save".localized) {
-                        saveAPIKey()
+                Button("添加") {
+                    if !newModelName.isEmpty, let provider = addingForProvider {
+                        modelManager.addModel(newModelName, for: provider)
+                        selectedModel = newModelName
+                        newModelName = ""
+                        addingForProvider = nil
                     }
-                    .frame(maxWidth: .infinity)
-                    .disabled(apiKey.isEmpty)
-
-                    if APIKeyManager.shared.hasGoogleAPIKey() {
-                        Button("settings.apikey.delete".localized, role: .destructive) {
-                            deleteAPIKey()
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                }
-            }
-            .navigationTitle("settings.apikey.manage".localized)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("done".localized) {
-                        dismiss()
-                    }
-                }
-            }
-            .alert("settings.apikey.saved".localized, isPresented: $showSaveSuccess) {
-                Button("ok".localized) {
-                    dismiss()
-                }
-            } message: {
-                Text("settings.apikey.saved.message".localized)
-            }
-            .alert("error".localized, isPresented: $showError) {
-                Button("ok".localized) {}
-            } message: {
-                Text(errorMessage)
-            }
-            .onAppear {
-                if let existingKey = APIKeyManager.shared.getGoogleAPIKey() {
-                    apiKey = existingKey
                 }
             }
         }
     }
-
-    private func saveAPIKey() {
-        guard !apiKey.isEmpty else {
-            errorMessage = "settings.apikey.empty".localized
-            showError = true
-            return
-        }
-
-        if APIKeyManager.shared.saveGoogleAPIKey(apiKey) {
-            showSaveSuccess = true
-        } else {
-            errorMessage = "settings.apikey.savefailed".localized
-            showError = true
+    
+    @ViewBuilder
+    private func providerSection(provider: VisionAPIConfig.ModelProvider, presets: [String]) -> some View {
+        Section {
+            ForEach(presets, id: \.self) { model in
+                modelRow(model)
+            }
+            
+            ForEach(modelManager.models(for: provider), id: \.self) { model in
+                modelRow(model)
+            }
+            .onDelete { indexSet in
+                let customModels = modelManager.models(for: provider)
+                for index in indexSet {
+                    modelManager.removeModel(customModels[index], for: provider)
+                }
+            }
+            
+            Button {
+                addingForProvider = provider
+            } label: {
+                HStack {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.green)
+                    Text("添加模型")
+                        .foregroundColor(.blue)
+                }
+            }
+        } header: {
+            Text(provider.displayName)
+        } footer: {
+            if !modelManager.models(for: provider).isEmpty {
+                Text("左滑可删除自定义模型")
+            }
         }
     }
-
-    private func deleteAPIKey() {
-        if APIKeyManager.shared.deleteGoogleAPIKey() {
-            apiKey = ""
-            dismiss()
-        } else {
-            errorMessage = "settings.apikey.deletefailed".localized
-            showError = true
+    
+    @ViewBuilder
+    private func modelRow(_ model: String) -> some View {
+        Button {
+            selectedModel = model
+        } label: {
+            HStack {
+                Text(model)
+                    .foregroundColor(.primary)
+                Spacer()
+                if selectedModel == model {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.blue)
+                }
+            }
         }
     }
 }
