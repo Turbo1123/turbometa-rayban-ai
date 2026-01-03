@@ -156,3 +156,39 @@ class ViewModelIntegrationTests: XCTestCase {
     XCTAssertTrue([.stopped, .waiting].contains(viewModel.streamingStatus))
   }
 }
+
+final class FoodNutritionDecodingTests: XCTestCase {
+  func testFoodNutritionResponseDecoding() throws {
+    let json = """
+    {
+      "foods": [
+        {
+          "name": "米饭",
+          "portion": "100克",
+          "calories": 116,
+          "protein": 2.6,
+          "fat": 0.3,
+          "carbs": 25.9,
+          "fiber": 0.4,
+          "sugar": 0.1,
+          "health_rating": "良好"
+        }
+      ],
+      "total_calories": 116,
+      "total_protein": 2.6,
+      "total_fat": 0.3,
+      "total_carbs": 25.9,
+      "health_score": 75,
+      "suggestions": ["注意控制总量"]
+    }
+    """
+    let data = Data(json.utf8)
+    let response = try JSONDecoder().decode(FoodNutritionResponse.self, from: data)
+
+    XCTAssertEqual(response.foods.count, 1)
+    XCTAssertEqual(response.foods.first?.name, "米饭")
+    XCTAssertEqual(response.totalCalories, 116)
+    XCTAssertEqual(response.healthScore, 75)
+    XCTAssertEqual(response.suggestions.first, "注意控制总量")
+  }
+}

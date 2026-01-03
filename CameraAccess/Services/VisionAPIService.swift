@@ -9,8 +9,8 @@ import UIKit
 struct VisionAPIService {
     // API Configuration
     private let apiKey: String
-    private let baseURL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    private let model = "qwen3-vl-plus"
+    private let baseURL = VisionAPIConfig.baseURL
+    private let model = VisionAPIConfig.model
 
     init(apiKey: String) {
         self.apiKey = apiKey

@@ -93,18 +93,13 @@ You need to apply for the following Alibaba Cloud APIs:
 4. **Tap the version number 5 times consecutively**
 5. You'll see a "Developer mode enabled" message
 
-### Step 2: Configure API Key
+### Step 2: 配置 API Key
 
-1. Go to [Alibaba Cloud DashScope](https://dashscope.aliyun.com/)
-2. Log in and create an API Key
-3. Open `VisionAPIConfig.swift` in the project
-4. Replace with your API Key:
+1. 前往 [Alibaba Cloud DashScope](https://dashscope.aliyun.com/)
+2. 登录并创建 API Key
+3. 运行 App 后进入 **「我的」→「API Key 管理」**，输入并保存
 
-```swift
-struct VisionAPIConfig {
-    static let apiKey = "sk-YOUR-API-KEY-HERE"
-}
-```
+✅ API Key 会安全存储在 iOS Keychain 中，不需要写入代码
 
 ### Step 3: Build the Project
 
@@ -198,19 +193,10 @@ ios-deploy --bundle YourApp.app
 
 ## ⚙️ Configuration Options
 
-### API Configuration
+### API 配置
 
-Configure in `VisionAPIConfig.swift`:
-
-```swift
-struct VisionAPIConfig {
-    // Alibaba Cloud API Key
-    static let apiKey = "sk-YOUR-API-KEY-HERE"
-
-    // API Base URL (usually doesn't need modification)
-    static let baseURL = "https://dashscope.aliyuncs.com"
-}
-```
+API Key 通过应用内设置进行管理（**「我的」→「API Key 管理」**），并安全保存到 Keychain。
+如需调整服务地址/模型，可在 `CameraAccess/Services/VisionAPIConfig.swift` 中统一配置。
 
 ### System Prompts
 

@@ -4,6 +4,7 @@
  */
 
 import SwiftUI
+import UIKit
 
 struct GalleryView: View {
     @State private var photos: [GalleryPhoto] = []
@@ -68,20 +69,13 @@ struct GalleryView: View {
     }
 
     private func loadPhotos() {
-        // TODO: Load photos from storage
-        // For now, using placeholder data
-        photos = []
+        photos = PhotoStorageService.shared.loadPhotos()
     }
 }
 
 // MARK: - Gallery Photo Model
 
-struct GalleryPhoto: Identifiable {
-    let id = UUID()
-    let image: UIImage
-    let timestamp: Date
-    let aiDescription: String?
-}
+
 
 // MARK: - Photo Grid Item
 
@@ -177,4 +171,72 @@ struct PhotoDetailView: View {
             rootViewController.present(activityVC, animated: true)
         }
     }
+}
+
+// MARK: - Photo Storage Service
+// (Placed here to ensure compilation visibility)
+class PhotoStorageService {
+    static let shared = PhotoStorageService()
+    
+    private let fileManager = FileManager.default
+    private var documentsDirectory: URL {
+        fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+    
+    private var photosDirectory: URL {
+        documentsDirectory.appendingPathComponent("CapturedPhotos")
+    }
+    
+    init() {
+        createDirectoryIfNeeded()
+    }
+    
+    private func createDirectoryIfNeeded() {
+        if !fileManager.fileExists(atPath: photosDirectory.path) {
+            try? fileManager.createDirectory(at: photosDirectory, withIntermediateDirectories: true)
+        }
+    }
+    
+    func savePhoto(_ image: UIImage, description: String? = nil) {
+        let timestamp = Date()
+        let filename = "\(Int(timestamp.timeIntervalSince1970)).jpg"
+        let fileURL = photosDirectory.appendingPathComponent(filename)
+        
+        guard let data = image.jpegData(compressionQuality: 0.9) else { return }
+        
+        do {
+            try data.write(to: fileURL)
+            print("✅ [PhotoStorage] Saved photo to \(fileURL.path)")
+        } catch {
+            print("❌ [PhotoStorage] Failed to save photo: \(error)")
+        }
+    }
+    
+    func loadPhotos() -> [GalleryPhoto] {
+        guard let fileURLs = try? fileManager.contentsOfDirectory(at: photosDirectory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles) else {
+            return []
+        }
+        
+        let sortedURLs = fileURLs.sorted { url1, url2 in
+            let date1 = (try? url1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
+            let date2 = (try? url2.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
+            return date1 > date2
+        }
+        
+        return sortedURLs.compactMap { url in
+            guard let data = try? Data(contentsOf: url),
+                  let image = UIImage(data: data) else { return nil }
+            
+            let creationDate = (try? url.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
+            
+            return GalleryPhoto(image: image, timestamp: creationDate, aiDescription: nil)
+        }
+    }
+}
+
+public struct GalleryPhoto: Identifiable {
+    public let id = UUID()
+    public let image: UIImage
+    public let timestamp: Date
+    public let aiDescription: String?
 }

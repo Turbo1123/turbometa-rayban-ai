@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__grok-search__get_config_info",
+      "mcp__grok-search__switch_model",
+      "mcp__grok-search__web_search",
+      "mcp__codex__codex"
+    ]
+  }
+}

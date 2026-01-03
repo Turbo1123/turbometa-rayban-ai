@@ -81,6 +81,7 @@ class StreamSessionViewModel: ObservableObject {
     // State changes tell us when streaming starts, stops, or encounters issues
     stateListenerToken = streamSession.statePublisher.listen { [weak self] state in
       Task { @MainActor [weak self] in
+        print("🔄 [StreamSession] State changed to: \(state)")
         self?.updateStatusFromState(state)
       }
     }
@@ -92,8 +93,10 @@ class StreamSessionViewModel: ObservableObject {
         guard let self else { return }
 
         if let image = videoFrame.makeUIImage() {
+          print("📸 [StreamSession] Received video frame")
           self.currentVideoFrame = image
           if !self.hasReceivedFirstFrame {
+            print("🚀 [StreamSession] First frame received!")
             self.hasReceivedFirstFrame = true
           }
         }
@@ -131,28 +134,50 @@ class StreamSessionViewModel: ObservableObject {
     let permission = Permission.camera
     do {
       let status = try await wearables.checkPermissionStatus(permission)
+      print("🔍 [StreamSession] Permission status: \(status)") 
       if status == .granted {
+        print("✅ [StreamSession] Permission granted, starting session...")
         await startSession()
         return
       }
+      
+      print("⚠️ [StreamSession] Requesting permission...")
       let requestStatus = try await wearables.requestPermission(permission)
+      print("🔍 [StreamSession] Request result: \(requestStatus)")
+      
       if requestStatus == .granted {
+        print("✅ [StreamSession] Permission newly granted, starting session...")
         await startSession()
         return
       }
+      print("❌ [StreamSession] Permission denied")
       showError("Permission denied")
     } catch {
+      print("❌ [StreamSession] Permission validation failed: \(error)")
       showError("Permission error: \(error.description)")
     }
   }
 
   func startSession() async {
-    // Reset to unlimited time when starting a new stream
+    print("🎬 [StreamSession] Calling streamSession.start()")
+    
+    // Ensure any previous session is stopped and state is cleared
+    if streamingStatus != .stopped {
+        print("⚠️ [StreamSession] Session already running, stopping first...")
+        await stopSession()
+    }
+
     activeTimeLimit = .noLimit
     remainingTime = 0
     stopTimer()
+    
+    // Reset state before starting
+    hasReceivedFirstFrame = false
+    currentVideoFrame = nil
+    streamingStatus = .waiting
 
     await streamSession.start()
+    print("▶️ [StreamSession] streamSession.start() returned")
   }
 
   private func showError(_ message: String) {
@@ -161,8 +186,15 @@ class StreamSessionViewModel: ObservableObject {
   }
 
   func stopSession() async {
+    print("🛑 [StreamSession] Stopping session...")
     stopTimer()
     await streamSession.stop()
+    
+    // Force reset state
+    streamingStatus = .stopped
+    hasReceivedFirstFrame = false
+    currentVideoFrame = nil
+    print("⏹ [StreamSession] Session stopped and state reset")
   }
 
   func dismissError() {

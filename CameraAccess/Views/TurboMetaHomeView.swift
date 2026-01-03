@@ -8,11 +8,15 @@ import SwiftUI
 struct TurboMetaHomeView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
     @ObservedObject var wearablesViewModel: WearablesViewModel
-    let apiKey: String
+    let visionApiKey: String
+    let realtimeApiKey: String
 
     @State private var showLiveAI = false
     @State private var showLiveStream = false
     @State private var showLeanEat = false
+    @State private var showGeminiGen = false
+    @State private var showAPIKeyMissingAlert = false
+    @State private var apiKeyMissingMessage = "请先在“我的”→“API Key 管理”中完成配置"
 
     var body: some View {
         NavigationView {
@@ -52,17 +56,26 @@ struct TurboMetaHomeView: View {
                                     icon: "brain.head.profile",
                                     gradient: [AppColors.liveAI, AppColors.liveAI.opacity(0.7)]
                                 ) {
-                                    showLiveAI = true
+                                    if realtimeApiKey.isEmpty {
+                                        apiKeyMissingMessage = "请先在“我的”→“API Key 管理”中配置实时对话服务"
+                                        showAPIKeyMissingAlert = true
+                                    } else {
+                                        showLiveAI = true
+                                    }
                                 }
 
                                 FeatureCard(
-                                    title: NSLocalizedString("home.translate.title", comment: "Translate title"),
-                                    subtitle: NSLocalizedString("home.translate.subtitle", comment: "Translate subtitle"),
-                                    icon: "text.bubble",
-                                    gradient: [AppColors.translate, AppColors.translate.opacity(0.7)],
-                                    isPlaceholder: true
+                                    title: "AI 创意生成",
+                                    subtitle: "照片风格化与生成",
+                                    icon: "paintpalette.fill",
+                                    gradient: [AppColors.secondary, AppColors.secondary.opacity(0.7)]
                                 ) {
-                                    // Placeholder
+                                    if VisionAPIConfig.apiKey(for: VisionAPIConfig.activeImageGenProvider).isEmpty {
+                                        apiKeyMissingMessage = "请先在“我的”→“API Key 管理”中配置 Gemini 服务"
+                                        showAPIKeyMissingAlert = true
+                                    } else {
+                                        showGeminiGen = true
+                                    }
                                 }
                             }
 
@@ -74,7 +87,12 @@ struct TurboMetaHomeView: View {
                                     icon: "chart.bar.fill",
                                     gradient: [AppColors.leanEat, AppColors.leanEat.opacity(0.7)]
                                 ) {
-                                    showLeanEat = true
+                                    if visionApiKey.isEmpty {
+                                        apiKeyMissingMessage = "请先在“我的”→“API Key 管理”中配置视觉/营养服务"
+                                        showAPIKeyMissingAlert = true
+                                    } else {
+                                        showLeanEat = true
+                                    }
                                 }
 
                                 FeatureCard(
@@ -105,13 +123,21 @@ struct TurboMetaHomeView: View {
             }
             .navigationBarHidden(true)
             .fullScreenCover(isPresented: $showLiveAI) {
-                LiveAIView(streamViewModel: streamViewModel, apiKey: apiKey)
+                LiveAIView(streamViewModel: streamViewModel, apiKey: realtimeApiKey)
             }
             .fullScreenCover(isPresented: $showLiveStream) {
                 SimpleLiveStreamView(streamViewModel: streamViewModel)
             }
             .fullScreenCover(isPresented: $showLeanEat) {
                 StreamView(viewModel: streamViewModel, wearablesVM: wearablesViewModel)
+            }
+            .fullScreenCover(isPresented: $showGeminiGen) {
+                GeminiGenView(streamViewModel: streamViewModel, apiKey: VisionAPIConfig.apiKey(for: VisionAPIConfig.activeImageGenProvider))
+            }
+            .alert("需要配置 API Key", isPresented: $showAPIKeyMissingAlert) {
+                Button("知道了") {}
+            } message: {
+                Text(apiKeyMissingMessage)
             }
         }
     }

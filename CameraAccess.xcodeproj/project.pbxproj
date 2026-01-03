@@ -61,6 +61,9 @@
 		8FD96B952E6F0F7D00F56AB1 /* MWDATCore in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB1 /* MWDATCore */; };
 		8FD96B952E6F0F7D00F56AB2 /* MWDATCamera in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB2 /* MWDATCamera */; };
 		8FD96B952E6F0F7D00F56AB3 /* MWDATMockDevice in Frameworks */ = {isa = PBXBuildFile; productRef = 8FD96B942E6F0F7D00F56AB3 /* MWDATMockDevice */; };
+		C262ABEA2EFBB1C8007F1D5D /* GeminiGenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C262ABE92EFBB1C8007F1D5D /* GeminiGenView.swift */; };
+		C262ABEE2EFBB1E3007F1D5D /* GeminiImageGenService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C262ABED2EFBB1E3007F1D5D /* GeminiImageGenService.swift */; };
+		C2F89B182EFBB4B300531E75 /* GeminiGenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F89B172EFBB4B300531E75 /* GeminiGenViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -141,6 +144,9 @@
 		8FD96B782E6F0A9800F56AB1 /* TurboMeta.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TurboMeta.entitlements; sourceTree = "<group>"; };
 		8FD96B792E6F0A9800F56AB1 /* TurboMetaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurboMetaApp.swift; sourceTree = "<group>"; };
 		8FD96B7B2E6F0A9800F56AB1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C262ABE92EFBB1C8007F1D5D /* GeminiGenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiGenView.swift; sourceTree = "<group>"; };
+		C262ABED2EFBB1E3007F1D5D /* GeminiImageGenService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiImageGenService.swift; sourceTree = "<group>"; };
+		C2F89B172EFBB4B300531E75 /* GeminiGenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiGenViewModel.swift; sourceTree = "<group>"; };
 		E699CC952E8150670052C240 /* CameraAccessTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CameraAccessTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -182,6 +188,7 @@
 		4BA57A922EF8227E002EC214 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				C262ABED2EFBB1E3007F1D5D /* GeminiImageGenService.swift */,
 				4BA57A8D2EF8227E002EC214 /* ConversationStorage.swift */,
 				4BA57A8E2EF8227E002EC214 /* LeanEatService.swift */,
 				4BA57A8F2EF8227E002EC214 /* OmniRealtimeService.swift */,
@@ -221,6 +228,7 @@
 		4BA57AA12EF8227E002EC214 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				C2F89B172EFBB4B300531E75 /* GeminiGenViewModel.swift */,
 				4BA57A9A2EF8227E002EC214 /* MockDeviceKit */,
 				4BA57A9B2EF8227E002EC214 /* DebugMenuViewModel.swift */,
 				4BA57A9C2EF8227E002EC214 /* LeanEatViewModel.swift */,
@@ -257,6 +265,7 @@
 		4BA57ABF2EF8227E002EC214 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C262ABE92EFBB1C8007F1D5D /* GeminiGenView.swift */,
 				4BA57AF52EF82400002EC214 /* PermissionsRequestView.swift */,
 				4BA57AA72EF8227E002EC214 /* Components */,
 				4BA57AAB2EF8227E002EC214 /* MockDeviceKit */,
@@ -385,8 +394,9 @@
 		CCCCCCCCCCCCCCCCCCCCCC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 2600;
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					8A8A8A8A8A8A8A8A8A8A8A8A = {
 						CreatedOnToolsVersion = 12.5;
@@ -449,8 +459,10 @@
 				4BA57AC32EF8227E002EC214 /* ConversationDetailView.swift in Sources */,
 				4BA57AC42EF8227E002EC214 /* CircleButton.swift in Sources */,
 				4BA57AC52EF8227E002EC214 /* CustomButton.swift in Sources */,
+				C262ABEA2EFBB1C8007F1D5D /* GeminiGenView.swift in Sources */,
 				4BA57AC62EF8227E002EC214 /* StreamSessionViewModel.swift in Sources */,
 				4BA57AF32EF823ED002EC214 /* PermissionsManager.swift in Sources */,
+				C2F89B182EFBB4B300531E75 /* GeminiGenViewModel.swift in Sources */,
 				4BA57AC72EF8227E002EC214 /* VisionAPIService.swift in Sources */,
 				4BA57AC82EF8227E002EC214 /* ConversationRecord.swift in Sources */,
 				4BA57AC92EF8227E002EC214 /* DesignSystem.swift in Sources */,
@@ -487,6 +499,7 @@
 				4BA57AF62EF82400002EC214 /* PermissionsRequestView.swift in Sources */,
 				4BA57AE82EF8227E002EC214 /* CardView.swift in Sources */,
 				4BA57AE92EF8227E002EC214 /* MockDeviceKitView.swift in Sources */,
+				C262ABEE2EFBB1E3007F1D5D /* GeminiImageGenService.swift in Sources */,
 				4BA57AEA2EF8227E002EC214 /* OmniRealtimeViewModel.swift in Sources */,
 				4BA57AEB2EF8227E002EC214 /* GalleryView.swift in Sources */,
 				4BA57AEC2EF8227E002EC214 /* MockDeviceCardView.swift in Sources */,
@@ -544,17 +557,18 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = B9L9HM4KD5;
+				DEVELOPMENT_TEAM = 3NUT9SN8XW;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
 				INFOPLIST_FILE = CameraAccess/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meta.wearables.external.CameraAccess;
+				PRODUCT_BUNDLE_IDENTIFIER = com.meta.zhangzhujian;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -573,16 +587,17 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = B9L9HM4KD5;
+				DEVELOPMENT_TEAM = 3NUT9SN8XW;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = CameraAccess/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.meta.wearables.external.CameraAccess;
+				PRODUCT_BUNDLE_IDENTIFIER = com.meta.zhangzhujian;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -651,6 +666,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -703,6 +719,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -712,6 +729,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -757,6 +775,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;

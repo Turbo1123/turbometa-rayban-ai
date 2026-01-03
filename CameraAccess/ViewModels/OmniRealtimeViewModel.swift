@@ -18,6 +18,10 @@ class OmniRealtimeViewModel: ObservableObject {
     @Published var conversationHistory: [ConversationMessage] = []
     @Published var errorMessage: String?
     @Published var showError = false
+    @Published var audioInputLevel: Float = 0
+    @Published var audioRouteInfo: String = "未获取"
+    @Published var audioFrameCount: Int = 0
+    @Published var lastAudioFrameAt: Date?
 
     // Service
     private var omniService: OmniRealtimeService
@@ -117,6 +121,25 @@ class OmniRealtimeViewModel: ObservableObject {
             Task { @MainActor in
                 self?.errorMessage = error
                 self?.showError = true
+            }
+        }
+
+        omniService.onAudioInputLevel = { [weak self] level in
+            Task { @MainActor in
+                self?.audioInputLevel = level
+            }
+        }
+
+        omniService.onAudioRouteInfo = { [weak self] info in
+            Task { @MainActor in
+                self?.audioRouteInfo = info
+            }
+        }
+
+        omniService.onAudioFrameStats = { [weak self] count, lastAt in
+            Task { @MainActor in
+                self?.audioFrameCount = count
+                self?.lastAudioFrameAt = lastAt
             }
         }
     }

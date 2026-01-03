@@ -21,6 +21,7 @@ struct StreamView: View {
   @ObservedObject var viewModel: StreamSessionViewModel
   @ObservedObject var wearablesVM: WearablesViewModel
   @Environment(\.dismiss) private var dismiss
+  @State private var showAPIKeyMissingAlert = false
 
   var body: some View {
     ZStack {
@@ -64,6 +65,33 @@ struct StreamView: View {
             .foregroundColor(.white)
         }
       }
+
+      // Close Button (Always visible)
+      VStack {
+          HStack {
+              Button {
+                  Task {
+                      await viewModel.stopSession()
+                  }
+                  dismiss()
+              } label: {
+                  Image(systemName: "xmark.circle.fill")
+                      .font(.system(size: 32))
+                      .foregroundColor(.white.opacity(0.8))
+                      .padding()
+              }
+              Spacer()
+          }
+          Spacer()
+      }
+      }
+    }
+    .onChange(of: viewModel.hasActiveDevice) { isConnected in
+      if isConnected {
+        print("⚡️ StreamView: Device connected, starting stream...")
+        Task {
+          await viewModel.handleStartStreaming()
+        }
       }
     }
     .onAppear {
@@ -95,12 +123,20 @@ struct StreamView: View {
             viewModel.dismissPhotoPreview()
           },
           onAIRecognition: {
-            viewModel.showPhotoPreview = false
-            viewModel.showVisionRecognition = true
+            if VisionAPIConfig.apiKey.isEmpty {
+              showAPIKeyMissingAlert = true
+            } else {
+              viewModel.showPhotoPreview = false
+              viewModel.showVisionRecognition = true
+            }
           },
           onLeanEat: {
-            viewModel.showPhotoPreview = false
-            viewModel.showLeanEat = true
+            if VisionAPIConfig.apiKey.isEmpty {
+              showAPIKeyMissingAlert = true
+            } else {
+              viewModel.showPhotoPreview = false
+              viewModel.showLeanEat = true
+            }
           }
         )
       }
@@ -129,6 +165,11 @@ struct StreamView: View {
         streamViewModel: viewModel,
         apiKey: VisionAPIConfig.apiKey
       )
+    }
+    .alert("需要配置 API Key", isPresented: $showAPIKeyMissingAlert) {
+      Button("知道了") {}
+    } message: {
+      Text("请先在“我的”→“API Key 管理”中完成配置")
     }
   }
 

@@ -14,12 +14,12 @@
 
 1. **找到文件位置**
    - 在左侧项目导航器中，展开 `CameraAccess` 文件夹
-   - 找到 `Utilities` 文件夹
+   - 找到 `Utilities` 或 `Utils` 文件夹
 
 2. **添加文件**
-   - 右键点击 `Utilities` 文件夹
+   - 右键点击 `Utilities` 或 `Utils` 文件夹
    - 选择 **"Add Files to \"CameraAccess\"..."**
-   - 浏览并选择: `CameraAccess/Utilities/APIKeyManager.swift`
+   - 浏览并选择: `CameraAccess/Utils/APIKeyManager.swift`
 
 3. **配置选项**（重要！）
    - ✅ **勾选** "Copy items if needed"
@@ -28,7 +28,7 @@
 
 ### 3. 验证文件已添加
 
-在 Xcode 左侧导航器中，你应该能在 `Utilities` 文件夹下看到：
+在 Xcode 左侧导航器中，你应该能在 `Utilities` 或 `Utils` 文件夹下看到：
 - ✅ `APIKeyManager.swift`
 - ✅ `DesignSystem.swift`
 - ✅ `TimeUtils.swift`
@@ -55,7 +55,7 @@
 **解决方法**：
 1. 在项目导航器中右键点击 `CameraAccess` 文件夹
 2. 选择 **"New Group"**
-3. 命名为 `Utilities`
+3. 命名为 `Utils` 或 `Utilities`
 4. 然后按照上述步骤添加文件
 
 ### Q: 文件添加后仍然报错
