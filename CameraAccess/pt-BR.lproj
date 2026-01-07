@@ -1,0 +1,426 @@
+/*
+ * Portuguese (Brazil) Localization Strings
+ * Portueguese Localization
+ */
+
+// MARK: - App General
+"app.name" = "TurboMeta";
+"app.subtitle" = "Assistente RayBan Meta";
+"ok" = "OK";
+"cancel" = "Cancelar";
+"close" = "Fechar";
+"done" = "Concluído";
+"error" = "Erro";
+"loading" = "Carregando...";
+"save" = "Salvar";
+"delete" = "Excluir";
+"retry" = "Tentar Novamente";
+"back" = "Voltar";
+
+// MARK: - Home Screen
+"home.title" = "Início";
+"home.liveai.title" = "Live AI";
+"home.liveai.subtitle" = "Chat em Tempo Real";
+"home.quickvision.title" = "Quick Vision";
+"home.quickvision.subtitle" = "Acionamento por Voz Siri";
+"home.translate.title" = "Tradução ao Vivo";
+"home.translate.subtitle" = "Tradução Instantânea";
+"home.leaneat.title" = "LeanEat";
+"home.leaneat.subtitle" = "Reconhecimento de Calorias";
+"home.wordlearn.title" = "WordLearn";
+"home.wordlearn.subtitle" = "Aprendizado de Vocabulário";
+"home.livestream.title" = "Transmissão ao Vivo";
+"home.livestream.subtitle" = "Plataformas de Streaming";
+"home.rtmp.title" = "Streaming RTMP";
+"home.rtmp.subtitle" = "YouTube · Twitch · Bilibili";
+"home.experimental" = "Experimental";
+"home.comingsoon" = "Em Breve";
+
+// MARK: - Live AI
+"liveai.title" = "Live AI";
+"liveai.connected" = "Conectado";
+"liveai.connecting" = "Conectando...";
+"liveai.disconnected" = "Desconectado";
+"liveai.speaking" = "IA Falando";
+"liveai.listening" = "Ouvindo...";
+"liveai.thinking" = "Pensando...";
+"liveai.stop" = "Parar";
+"liveai.start" = "Iniciar";
+"liveai.device.notconnected.title" = "Óculos RayBan Meta Não Conectados";
+"liveai.device.notconnected.message" = "Por favor, conecte seus óculos inteligentes na tela inicial primeiro,\ndepois use o recurso Live AI";
+"liveai.device.backtohome" = "Voltar ao Início";
+
+// MARK: - Quick Vision
+"quickvision.title" = "Quick Vision";
+"quickvision.recognizing" = "Reconhecendo";
+"quickvision.result" = "Resultado do Reconhecimento";
+"quickvision.start" = "Iniciar Reconhecimento";
+"quickvision.processing" = "Processando...";
+"quickvision.glasses.notconnected" = "Óculos Não Conectados";
+"quickvision.siri.tip.title" = "Atalhos da Siri";
+"quickvision.siri.tip.description" = "Você pode acionar o Quick Vision das seguintes formas:";
+"quickvision.siri.tip.voice" = "E aí Siri, TurboMeta Quick Vision";
+"quickvision.siri.tip.action" = "Adicionar ao widget da tela bloqueada";
+"quickvision.siri.support" = "Suporta Siri e Atalhos";
+"quickvision.stop.speaking" = "Parar de Falar";
+"quickvision.replay" = "Reproduzir Novamente";
+"quickvision.error.nodevice" = "Óculos não conectados. Por favor, pareie no Meta View primeiro";
+"quickvision.error.streamfailed" = "Falha ao iniciar transmissão de vídeo. Verifique a conexão dos óculos";
+"quickvision.error.timeout" = "Tempo de espera pelo vídeo esgotado. Tente novamente";
+"quickvision.error.noimage" = "Não foi possível processar a imagem";
+"quickvision.error.apikey" = "Por favor, configure a Chave de API nas Configurações primeiro";
+
+// MARK: - Stream View (Camera)
+"stream.title" = "Câmera";
+"stream.stop" = "Parar Transmissão";
+"stream.photo" = "Tirar Foto";
+"stream.timer" = "Temporizador";
+"stream.ending" = "Transmissão encerrando em %@";
+"stream.device.notconnected.title" = "Óculos RayBan Meta Não Conectados";
+"stream.device.notconnected.message" = "Por favor, conecte seus óculos inteligentes na tela inicial primeiro,\ndepois use o recurso de transmissão";
+"stream.device.backtohome" = "Voltar ao Início";
+"stream.connecting" = "Conectando aos óculos...";
+"stream.waiting" = "Aguardando transmissão de vídeo...";
+
+// MARK: - Photo Preview
+"photo.share" = "Compartilhar";
+"photo.ai" = "Reconhecimento por IA";
+"photo.nutrition" = "Análise Nutricional";
+"photo.save" = "Salvar em Fotos";
+"photo.saved" = "Salvo";
+
+// MARK: - LeanEat (Nutrition Analysis)
+"leaneat.title" = "Análise Nutricional";
+"leaneat.analyzing" = "Analisando...";
+"leaneat.healthscore" = "Pontuação de Saúde";
+"leaneat.totalnutrition" = "Nutrição Total";
+"leaneat.calories" = "Calorias";
+"leaneat.protein" = "Proteína";
+"leaneat.fat" = "Gordura";
+"leaneat.carbs" = "Carboidratos";
+"leaneat.fiber" = "Fibras";
+"leaneat.sugar" = "Açúcar";
+"leaneat.foods" = "Detalhes dos Alimentos";
+"leaneat.suggestions" = "Conselho Nutricional";
+"leaneat.portion" = "Porção";
+"leaneat.rating.excellent" = "Excelente";
+"leaneat.rating.good" = "Bom";
+"leaneat.rating.fair" = "Razoável";
+"leaneat.rating.poor" = "Ruim";
+"leaneat.healthscore.excellent" = "Muito Saudável";
+"leaneat.healthscore.good" = "Bastante Saudável";
+"leaneat.healthscore.fair" = "Nada Mal";
+"leaneat.healthscore.poor" = "Precisa Melhorar";
+"leaneat.error.title" = "Análise Falhou";
+"leaneat.retry" = "Tentar Novamente";
+
+// MARK: - Vision Recognition
+"vision.title" = "Reconhecimento de Imagem IA";
+"vision.analyzing" = "IA Analisando...";
+"vision.result" = "Resultado do Reconhecimento";
+
+// MARK: - Records
+"records.title" = "Registros";
+"records.empty" = "Sem Registros";
+"records.conversation" = "Histórico de Conversas";
+"records.date" = "Data";
+
+// MARK: - Gallery
+"gallery.title" = "Galeria";
+"gallery.empty" = "Sem Fotos";
+
+// MARK: - Settings
+"settings.title" = "Configurações";
+"settings.device" = "Gerenciamento de Dispositivo";
+"settings.device.status" = "Status do Dispositivo";
+"settings.device.online" = "Online";
+"settings.device.offline" = "Offline";
+"settings.device.connected" = "Conectado";
+"settings.device.notconnected" = "Não Conectado";
+"settings.device.stream" = "Transmissão de Vídeo";
+"settings.device.stream.active" = "Ativo";
+"settings.device.stream.inactive" = "Inativo";
+"settings.ai" = "Configurações de IA";
+
+// API Provider
+"settings.provider" = "Provedor de API";
+"settings.provider.select" = "Selecionar Provedor de API";
+"settings.provider.description" = "Escolha o provedor de serviço API para visão IA";
+"settings.provider.alibaba.desc" = "Modelos Alibaba Qwen Vision";
+"settings.provider.openrouter.desc" = "API Unificada, +500 Modelos de IA";
+"settings.provider.getapikey" = "Obter Chave de API";
+
+// Model Settings
+"settings.model" = "Configurações do Modelo";
+"settings.model.select" = "Selecionar Modelo";
+"settings.model.current" = "Usando atualmente";
+"settings.model.alibaba" = "Modelos Alibaba";
+"settings.model.openrouter" = "Modelos OpenRouter";
+"settings.model.qwen3vlplus.desc" = "Modelo de visão de alta performance";
+"settings.model.qwen3vlmax.desc" = "Modelo de visão mais poderoso";
+"settings.model.search" = "Buscar modelos...";
+"settings.model.visiononly" = "Mostrar apenas modelos com capacidade de visão";
+"settings.model.loading" = "Carregando modelos...";
+"settings.model.retry" = "Tentar Novamente";
+"settings.model.notfound" = "Nenhum modelo correspondente encontrado";
+
+// Endpoint Settings
+"settings.endpoint" = "Região do Serviço";
+"settings.endpoint.beijing.desc" = "Usuários da China continental";
+"settings.endpoint.singapore.desc" = "Usuários internacionais";
+"settings.endpoint.description" = "Chaves de API para diferentes regiões não são intercambiáveis";
+
+// Live AI Settings
+"settings.liveai" = "Live AI";
+"settings.liveai.provider" = "Provedor Live AI";
+"settings.liveai.provider.select" = "Selecionar Provedor Live AI";
+"settings.liveai.provider.description" = "Escolha o provedor para chat de voz em tempo real";
+"settings.liveai.alibaba.desc" = "Modelo de áudio em tempo real Qwen Omni";
+"settings.liveai.google.desc" = "Modelo de áudio em tempo real Gemini Live";
+
+"settings.language" = "Idioma de Saída";
+"settings.language.select" = "Selecionar Idioma de Saída";
+"settings.language.description" = "A IA usará este idioma para saída de voz e respostas de texto";
+"settings.applanguage" = "Idioma do App";
+"settings.applanguage.select" = "Selecionar Idioma do App";
+"settings.applanguage.description" = "Alterar o idioma da interface do aplicativo";
+"settings.applanguage.restart.title" = "Reinício Necessário";
+"settings.applanguage.restart.message" = "O aplicativo precisa reiniciar para a mudança de idioma ter efeito";
+"settings.applanguage.restart.confirm" = "Reiniciar Agora";
+
+// API Key
+"settings.apikey" = "Gerenciamento de Chave de API";
+"settings.apikey.manage" = "Gerenciamento de Chave de API";
+"settings.apikey.status" = "Status da Chave de API";
+"settings.apikey.configured" = "Configurada";
+"settings.apikey.notconfigured" = "Não Configurada";
+"settings.apikey.placeholder" = "Insira a Chave de API";
+"settings.apikey.alibaba.help" = "Visite o console do Alibaba Cloud para obter sua Chave de API";
+"settings.apikey.openrouter.help" = "Visite o site do OpenRouter para obter sua Chave de API";
+"settings.apikey.google.help" = "Visite o Google AI Studio para obter sua Chave de API";
+"settings.apikey.get" = "Obter Chave de API";
+"settings.apikey.delete" = "Excluir Chave de API";
+"settings.apikey.saved" = "Salvo com Sucesso";
+"settings.apikey.saved.message" = "Chave de API salva com segurança";
+"settings.apikey.empty" = "A Chave de API não pode estar vazia";
+"settings.apikey.savefailed" = "Falha ao salvar, tente novamente";
+"settings.apikey.deletefailed" = "Falha ao excluir, tente novamente";
+
+"settings.quality" = "Qualidade de Vídeo";
+"settings.quality.select" = "Selecionar Qualidade de Vídeo";
+"settings.quality.description" = "Qualidade mais alta consome mais bateria";
+"settings.quality.low" = "Qualidade Baixa";
+"settings.quality.low.desc" = "Economia de bateria, para uso prolongado";
+"settings.quality.medium" = "Qualidade Média";
+"settings.quality.medium.desc" = "Modo balanceado (Recomendado)";
+"settings.quality.high" = "Qualidade Alta";
+"settings.quality.high.desc" = "Melhor qualidade, maior uso de bateria";
+"settings.about" = "Sobre";
+"settings.version" = "Versão";
+"settings.sdkversion" = "Versão do SDK";
+
+// MARK: - Tabs
+"tab.home" = "Início";
+"tab.records" = "Registros";
+"tab.gallery" = "Galeria";
+"tab.settings" = "Ajustes";
+
+// MARK: - Errors
+"error.network" = "Erro de rede, verifique sua conexão";
+"error.api" = "Erro de API";
+"error.api.code" = "Erro de API: %d";
+"error.permission.denied" = "Permissão negada, habilite nas Configurações";
+"error.device.notfound" = "Dispositivo não encontrado";
+"error.device.notconnected" = "Dispositivo não conectado";
+"error.timeout" = "Tempo limite da operação, tente novamente";
+"error.unknown" = "Erro desconhecido";
+"error.invalidresponse" = "Resposta inválida";
+"error.noaudiodata" = "Nenhum dado de áudio recebido";
+"error.playbackfailed" = "Falha na reprodução de áudio";
+
+// MARK: - TTS
+"tts.speaking" = "Falando...";
+"tts.stopped" = "Parado";
+
+// MARK: - Units
+"unit.kcal" = "kcal";
+"unit.gram" = "gramas";
+"unit.g" = "g";
+
+// MARK: - AI Prompts
+"prompt.quickvision" = "Você é um assistente de IA para óculos inteligentes. Descreva o conteúdo da imagem de forma concisa, adequada para anúncio de voz.\n\nRequisitos:\n1. Descreva o conteúdo principal em 1-2 frases\n2. Use linguagem natural e coloquial em PORTUGUÊS\n3. Não use muitos sinais de pontuação\n4. Mantenha o total abaixo de 50 palavras\n5. Descreva diretamente, não diga \"na imagem\" ou \"eu vejo\"";
+"prompt.liveai" = "Você é um assistente de IA para óculos inteligentes RayBan Meta.\n\n[IMPORTANTE] Responda sempre em Português.\n\nMantenha suas respostas concisas e coloquiais, como conversar com um amigo. O usuário está usando óculos e pode ver os arredores, forneça sugestões rápidas e úteis com base no que eles veem. Seja direto e vá ao ponto.";
+
+// MARK: - Quick Vision Modes
+"prompt.quickvision.health" = "Analise os aspectos de saúde deste alimento/bebida. Forneça análise científica a partir destes ângulos:\n1. Equilíbrio nutricional\n2. Aditivos e conservantes\n3. Teor de açúcar/sal/gordura\n4. Possíveis impactos na saúde\n5. Recomendações de saúde\n\nUse linguagem concisa e coloquial em PORTUGUÊS adequada para voz, com menos de 100 palavras.";
+"prompt.quickvision.blind" = "Descreva o ambiente detalhadamente em PORTUGUÊS para um usuário com deficiência visual, incluindo:\n1. Objetos e pessoas ao redor\n2. Distâncias e direções aproximadas\n3. Quaisquer obstáculos ou perigos\n4. Atmosfera geral (interno/externo, iluminação)\n5. Detalhes importantes a notar\n\nSeja claro e específico, use palavras direcionais (à frente, lado esquerdo), com menos de 80 palavras.";
+"prompt.quickvision.reading" = "Identifique e leia em voz alta o texto na imagem. Requisitos:\n1. Identifique com precisão todo o texto visível\n2. Organize o conteúdo na ordem de leitura\n3. Se for um menu/sinal, mencione o tipo\n4. Se o texto não estiver claro, mencione isso\n\nLeia o conteúdo do texto diretamente em PORTUGUÊS (ou traduza se necessário), sem explicações extras.";
+"prompt.quickvision.translate" = "Identifique o texto na imagem e traduza para {LANGUAGE}. Requisitos:\n1. Identifique com precisão todo o texto visível\n2. Traduza com precisão e naturalidade\n3. Se houver vários parágrafos, traduza separadamente\n4. Diga apenas a tradução, não precisa mencionar o original\n\nAdequado para anúncio de voz, com menos de 100 palavras.";
+"prompt.quickvision.encyclopedia" = "Identifique o objeto, construção, obra de arte ou criatura na imagem e forneça informações estilo enciclopédia em PORTUGUÊS. Inclua:\n1. Nome e classificação\n2. Contexto histórico ou origem\n3. Fatos interessantes\n4. Significado cultural\n\nSeja como um guia de museu, envolvente e informativo, adequado para anúncio de voz, com menos de 100 palavras.";
+
+"quickvision.mode.standard" = "Modo Padrão";
+"quickvision.mode.health" = "Análise de Saúde";
+"quickvision.mode.blind" = "Modo de Acessibilidade";
+"quickvision.mode.reading" = "Modo de Leitura";
+"quickvision.mode.translate" = "Modo de Tradução";
+"quickvision.mode.encyclopedia" = "Modo Enciclopédia";
+"quickvision.mode.custom" = "Prompt Personalizado";
+
+"quickvision.mode.standard.desc" = "Descrição geral da imagem";
+"quickvision.mode.health.desc" = "Analisar aspectos de saúde dos alimentos";
+"quickvision.mode.blind.desc" = "Descrever ambiente para acessibilidade";
+"quickvision.mode.reading.desc" = "Identificar e ler texto";
+"quickvision.mode.translate.desc" = "Identificar e traduzir texto";
+"quickvision.mode.encyclopedia.desc" = "Informações de enciclopédia";
+"quickvision.mode.custom.desc" = "Usar prompt personalizado";
+
+"quickvision.settings" = "Configurações de Visão";
+"quickvision.settings.mode" = "Modo de Visão";
+"quickvision.settings.customprompt" = "Prompt Personalizado";
+"quickvision.settings.targetlanguage" = "Idioma Alvo da Tradução";
+"quickvision.settings.history" = "Histórico de Visão";
+"quickvision.history" = "Histórico de Visão";
+"quickvision.history.empty" = "Sem registros de visão";
+"quickvision.history.clear" = "Limpar Histórico";
+"quickvision.history.clear.confirm" = "Tem certeza que deseja limpar todo o histórico de visão?";
+"quickvision.today" = "Hoje";
+"quickvision.yesterday" = "Ontem";
+"quickvision.custom.default" = "Por favor, descreva o conteúdo da imagem de forma concisa, adequada para anúncio de voz.";
+"quickvision.tab" = "Quick Vision";
+"quickvision.records.empty" = "Sem Registros de Visão";
+"quickvision.records.empty.hint" = "Registros aparecerão aqui após usar o Quick Vision";
+
+// MARK: - Live AI Modes
+"liveai.mode.standard" = "Modo Padrão";
+"liveai.mode.museum" = "Modo Museu";
+"liveai.mode.blind" = "Modo de Acessibilidade";
+"liveai.mode.reading" = "Modo de Leitura";
+"liveai.mode.translate" = "Modo de Tradução";
+"liveai.mode.custom" = "Prompt Personalizado";
+
+"liveai.mode.standard.desc" = "Conversa livre, vê imagens por voz";
+"liveai.mode.museum.desc" = "Guia de museu, explica exposições";
+"liveai.mode.blind.desc" = "Descreve ambiente para acessibilidade";
+"liveai.mode.reading.desc" = "Identifica e lê texto em voz alta";
+"liveai.mode.translate.desc" = "Tradução em tempo real de texto visível";
+"liveai.mode.custom.desc" = "Usar prompt de sistema personalizado";
+
+"liveai.settings" = "Modo de Conversa";
+"liveai.settings.mode" = "Modo de Conversa";
+"liveai.settings.mode.footer" = "Modos diferentes mudam o comportamento da IA. Tem efeito ao reconectar.";
+"liveai.settings.customprompt" = "Prompt de Sistema Personalizado";
+"liveai.settings.customprompt.footer" = "Personalize o papel e comportamento da IA. Tem efeito na próxima conexão.";
+"liveai.settings.targetlanguage" = "Idioma Alvo da Tradução";
+"liveai.custom.default" = "Você é um assistente útil. Responda perguntas de forma concisa.";
+
+// Live AI Mode Prompts
+"prompt.liveai.standard" = "Você é um assistente de IA para óculos inteligentes RayBan Meta.\n\n[IMPORTANTE] Responda sempre em Português.\n\nMantenha suas respostas concisas e coloquiais, como conversar com um amigo. O usuário está usando óculos e pode ver os arredores, forneça sugestões rápidas e úteis com base no que eles veem. Seja direto e vá ao ponto.";
+"prompt.liveai.museum" = "Você é um assistente de IA guia de museu profissional.\n\n[IMPORTANTE] Responda sempre em Português.\n\nQuando o usuário olhar para uma exposição, forneça:\n1. Nome e informações básicas\n2. Contexto histórico e significado cultural\n3. Histórias ou fatos interessantes\n4. Conexões com outras exposições\n\nSeja conhecedor, mas envolvente, tornando a visita agradável.";
+"prompt.liveai.blind" = "Você é um assistente de óculos inteligentes para usuários com deficiência visual.\n\n[IMPORTANTE] Responda sempre em Português.\n\nSua tarefa é ajudar os usuários a entenderem seus arredores:\n1. Descreva objetos, pessoas e ambiente detalhadamente\n2. Use palavras direcionais claras (à frente, esquerda, retaguarda direita, etc.)\n3. Aponte obstáculos ou perigos\n4. Leia sinais, menus e outros textos\n5. Forneça sugestões de navegação seguras e práticas\n\nFale claramente e de forma organizada, priorize as informações mais importantes.";
+"prompt.liveai.reading" = "Você é um assistente de IA para leitura.\n\n[IMPORTANTE] Responda sempre em Português.\n\nSua tarefa é ajudar os usuários a ler texto visível:\n1. Identifique e leia com precisão todo o texto visível\n2. Organize o conteúdo na ordem correta de leitura\n3. Para documentos, explique a estrutura\n4. Para línguas estrangeiras, leia e depois traduza\n\nFale em ritmo moderado, articule claramente, como um leitor profissional.";
+"prompt.liveai.translate" = "Você é um assistente de IA de tradução em tempo real.\n\n[IMPORTANTE] Os resultados da tradução devem estar em {LANGUAGE}.\n\nSua tarefa é ajudar os usuários a entender conteúdo em língua estrangeira:\n1. Identifique o texto na visualização\n2. Traduza para {LANGUAGE}\n3. Para menus ou sinais, explique seu propósito\n4. Para termos técnicos, forneça breves explicações\n\nTraduza com precisão, naturalidade e de forma idiomática.";
+
+// MARK: - RTMP Streaming
+"rtmp.title" = "Streaming RTMP";
+"rtmp.status.disconnected" = "Desconectado";
+"rtmp.status.connecting" = "Conectando...";
+"rtmp.status.connected" = "Conectado";
+"rtmp.status.streaming" = "Transmitindo";
+"rtmp.connecting.video" = "Conectando ao stream de vídeo...";
+"rtmp.frames" = "Quadros";
+"rtmp.time" = "Tempo";
+"rtmp.data" = "Dados";
+"rtmp.start" = "Iniciar Transmissão";
+"rtmp.stop" = "Parar Transmissão";
+"rtmp.url.placeholder" = "URL do Servidor RTMP";
+"rtmp.key.placeholder" = "Chave da Stream";
+"rtmp.settings" = "Configurações de Streaming";
+"rtmp.settings.bitrate" = "Taxa de Bits (Bitrate)";
+"rtmp.settings.bitrate.description" = "Maior taxa de bits = melhor qualidade, mais largura de banda";
+"rtmp.settings.platform" = "Predefinições de Plataforma";
+"rtmp.settings.note" = "Nota";
+"rtmp.settings.experimental" = "Recurso Experimental";
+"rtmp.settings.experimental.description" = "O streaming RTMP é um recurso experimental. Algumas plataformas podem exigir configuração adicional.";
+"rtmp.recommended" = "Recomendado";
+"rtmp.platform.custom" = "Personalizado";
+"rtmp.error.invalidurl" = "Por favor, insira uma URL RTMP válida";
+
+// MARK: - Live Translate
+"livetranslate.title" = "Tradução ao Vivo";
+"livetranslate.connected" = "Conectado";
+"livetranslate.connecting" = "Conectando...";
+"livetranslate.recording" = "Gravando";
+"livetranslate.placeholder" = "Pressione o botão de gravar para começar a falar";
+"livetranslate.source" = "Origem";
+"livetranslate.target" = "Destino";
+"livetranslate.clear" = "Limpar";
+
+// Live Translate Settings
+"livetranslate.settings.title" = "Configurações de Tradução";
+"livetranslate.settings.sourceLanguage" = "Idioma de Origem";
+"livetranslate.settings.targetLanguage" = "Idioma de Destino";
+"livetranslate.settings.targetLanguage.footer" = "O idioma de destino suporta saída de áudio";
+"livetranslate.settings.voice" = "Voz";
+"livetranslate.settings.voice.footer" = "Vozes diferentes suportam idiomas diferentes";
+"livetranslate.settings.output" = "Configurações de Saída";
+"livetranslate.settings.audioOutput" = "Saída de Áudio";
+"livetranslate.settings.imageEnhance" = "Aprimoramento Visual";
+"livetranslate.settings.imageEnhance.footer" = "Habilite o aprimoramento visual para melhorar a precisão da tradução para homófonos";
+"livetranslate.settings.history" = "Histórico de Tradução";
+"livetranslate.settings.clearHistory" = "Limpar Histórico";
+"livetranslate.settings.historyCount" = "%d registros de tradução";
+"common.done" = "Concluído";
+"common.ok" = "OK";
+
+// Live Translate Languages
+"livetranslate.lang.en" = "Inglês";
+"livetranslate.lang.zh" = "Chinês";
+"livetranslate.lang.ja" = "Japonês";
+"livetranslate.lang.ko" = "Coreano";
+"livetranslate.lang.fr" = "Francês";
+"livetranslate.lang.de" = "Alemão";
+"livetranslate.lang.ru" = "Russo";
+"livetranslate.lang.es" = "Espanhol";
+"livetranslate.lang.pt" = "Português";
+"livetranslate.lang.it" = "Italiano";
+"livetranslate.lang.yue" = "Cantonês";
+"livetranslate.lang.id" = "Indonésio";
+"livetranslate.lang.vi" = "Vietnamita";
+"livetranslate.lang.th" = "Tailandês";
+"livetranslate.lang.ar" = "Árabe";
+"livetranslate.lang.hi" = "Hindi";
+"livetranslate.lang.el" = "Grego";
+"livetranslate.lang.tr" = "Turco";
+
+// Live Translate Voices
+"livetranslate.voice.cherry" = "Cherry";
+"livetranslate.voice.nofish" = "Nofish";
+"livetranslate.voice.jada" = "Jada";
+"livetranslate.voice.dylan" = "Dylan";
+"livetranslate.voice.sunny" = "Sunny";
+"livetranslate.voice.peter" = "Peter";
+"livetranslate.voice.kiki" = "Kiki";
+"livetranslate.voice.eric" = "Eric";
+
+"livetranslate.voice.cherry.desc" = "Feminina calorosa, multilíngue";
+"livetranslate.voice.nofish.desc" = "Feminina natural, multilíngue";
+"livetranslate.voice.jada.desc" = "Feminina animada, apenas Chinês";
+"livetranslate.voice.dylan.desc" = "Masculina encantadora, apenas Chinês";
+"livetranslate.voice.sunny.desc" = "Feminina brilhante, apenas Chinês";
+"livetranslate.voice.peter.desc" = "Masculina estável, apenas Chinês";
+"livetranslate.voice.kiki.desc" = "Feminina cantonesa, apenas Cantonês";
+"livetranslate.voice.eric.desc" = "Masculina madura, apenas Chinês";
+
+// Live Translate Errors
+"livetranslate.error.title" = "Erro de Tradução";
+"livetranslate.error.noApiKey" = "Por favor, configure a Chave de API nas Configurações primeiro";
+"livetranslate.error.cannotSwap" = "A combinação de idiomas atual não pode ser invertida";
+
+// Live Translate Microphone
+"livetranslate.settings.microphone" = "Microfone";
+"livetranslate.settings.usePhoneMic" = "Usar Microfone do iPhone";
+"livetranslate.settings.microphone.footer" = "Habilite para usar o microfone do iPhone para traduzir outros; Desabilite para usar o microfone dos óculos para traduzir a si mesmo";
+
+// Live Translate Home Card
+"home.translate.title" = "Tradução ao Vivo";
+"home.translate.subtitle" = "18 Idiomas";
