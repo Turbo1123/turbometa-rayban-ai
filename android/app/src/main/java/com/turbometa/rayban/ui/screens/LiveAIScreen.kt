@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meta.wearable.dat.core.types.Permission
 import com.meta.wearable.dat.core.types.PermissionStatus
 import com.turbometa.rayban.R
+import com.turbometa.rayban.managers.BluetoothAudioManager
 import com.turbometa.rayban.models.ConversationMessage
 import com.turbometa.rayban.models.MessageRole
 import com.turbometa.rayban.ui.components.*
@@ -58,6 +59,11 @@ fun LiveAIScreen(
     val isConnected by viewModel.isConnected.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
     val isSpeaking by viewModel.isSpeaking.collectAsState()
+
+    // Audio source state
+    val currentAudioSource by viewModel.currentAudioSource.collectAsState()
+    val isBluetoothScoConnected by viewModel.isBluetoothScoConnected.collectAsState()
+    val isBluetoothScoAvailable by viewModel.isBluetoothScoAvailable.collectAsState()
 
     // Wearables state
     val currentFrame by wearablesViewModel.currentFrame.collectAsState()
@@ -206,6 +212,15 @@ fun LiveAIScreen(
                         modifier = Modifier.padding(AppSpacing.medium)
                     )
                 }
+
+                // Audio source toggle
+                AudioSourceToggle(
+                    currentSource = currentAudioSource,
+                    isBluetoothAvailable = isBluetoothScoAvailable,
+                    onSourceChange = { source ->
+                        viewModel.switchAudioSource(source)
+                    }
+                )
 
                 // Messages list
                 LazyColumn(
@@ -605,5 +620,52 @@ private fun getInstructionText(
         state == OmniRealtimeViewModel.ViewState.Processing -> stringResource(R.string.processing_response)
         state == OmniRealtimeViewModel.ViewState.Speaking -> stringResource(R.string.ai_speaking)
         else -> stringResource(R.string.tap_to_speak)
+    }
+}
+
+/**
+ * 音频源切换组件
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AudioSourceToggle(
+    currentSource: BluetoothAudioManager.AudioSource,
+    isBluetoothAvailable: Boolean,
+    onSourceChange: (BluetoothAudioManager.AudioSource) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // 手机麦克风按钮
+        FilterChip(
+            selected = currentSource == BluetoothAudioManager.AudioSource.PHONE_MIC,
+            onClick = { onSourceChange(BluetoothAudioManager.AudioSource.PHONE_MIC) },
+            label = { Text("手机麦克风") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.PhoneAndroid,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        )
+
+        // 眼镜麦克风按钮
+        FilterChip(
+            selected = currentSource == BluetoothAudioManager.AudioSource.BLUETOOTH_MIC,
+            onClick = { onSourceChange(BluetoothAudioManager.AudioSource.BLUETOOTH_MIC) },
+            label = { Text("眼镜麦克风") },
+            enabled = isBluetoothAvailable,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Bluetooth,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        )
     }
 }

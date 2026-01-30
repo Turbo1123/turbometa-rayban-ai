@@ -13,6 +13,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.turbometa.rayban.managers.AlibabaEndpoint
+import com.turbometa.rayban.managers.BluetoothAudioManager
 import com.turbometa.rayban.managers.LiveAIModeManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,6 +85,17 @@ class OmniRealtimeService(
     private val gson = Gson()
     private var scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    // Bluetooth Audio Manager
+    private var bluetoothAudioManager: BluetoothAudioManager? = null
+    private var currentAudioSource = BluetoothAudioManager.AudioSource.PHONE_MIC
+
+    init {
+        // 初始化蓝牙音频管理器
+        context?.let {
+            bluetoothAudioManager = BluetoothAudioManager(it)
+        }
+    }
+
     private var pendingImageFrame: Bitmap? = null
     private var lastImageSentTime = 0L
     private val imageSendIntervalMs = 500L  // 发送图片的间隔（毫秒）
@@ -141,17 +153,40 @@ class OmniRealtimeService(
         _isConnected.value = false
         _isRecording.value = false
         _isSpeaking.value = false
+        bluetoothAudioManager?.cleanup()
         scope.cancel()
+    }
+
+    /**
+     * 根据当前音频源获取采样率
+     */
+    private fun getSampleRate(): Int {
+        return when (currentAudioSource) {
+            BluetoothAudioManager.AudioSource.BLUETOOTH_MIC -> 16000  // HFP标准
+            BluetoothAudioManager.AudioSource.PHONE_MIC -> SAMPLE_RATE  // 24000
+        }
+    }
+
+    /**
+     * 根据当前音频源获取AudioSource
+     */
+    private fun getAudioSource(): Int {
+        return when (currentAudioSource) {
+            BluetoothAudioManager.AudioSource.BLUETOOTH_MIC -> MediaRecorder.AudioSource.VOICE_COMMUNICATION
+            BluetoothAudioManager.AudioSource.PHONE_MIC -> MediaRecorder.AudioSource.MIC
+        }
     }
 
     fun startRecording() {
         if (_isRecording.value) return
 
         try {
-            val bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT)
+            val sampleRate = getSampleRate()
+            val audioSource = getAudioSource()
+            val bufferSize = AudioRecord.getMinBufferSize(sampleRate, CHANNEL_CONFIG, AUDIO_FORMAT)
             audioRecord = AudioRecord(
-                MediaRecorder.AudioSource.MIC,
-                SAMPLE_RATE,
+                audioSource,
+                sampleRate,
                 CHANNEL_CONFIG,
                 AUDIO_FORMAT,
                 bufferSize * 2
@@ -190,6 +225,32 @@ class OmniRealtimeService(
         audioRecord?.stop()
         audioRecord?.release()
         audioRecord = null
+    }
+
+    /**
+     * 切换音频源
+     * @param source 目标音频源
+     */
+    fun switchAudioSource(source: BluetoothAudioManager.AudioSource) {
+        if (currentAudioSource == source) return
+
+        val wasRecording = _isRecording.value
+
+        // 停止当前录音
+        if (wasRecording) {
+            stopRecording()
+        }
+
+        // 切换音频路由
+        bluetoothAudioManager?.switchAudioSource(source)
+        currentAudioSource = source
+
+        // 如果之前在录音，重新启动
+        if (wasRecording) {
+            startRecording()
+        }
+
+        Log.d(TAG, "音频源已切换到: $source")
     }
 
     fun updateVideoFrame(frame: Bitmap) {
@@ -362,15 +423,22 @@ class OmniRealtimeService(
 
     private fun startAudioPlayback() {
         if (audioTrack == null) {
+            // 输出采样率固定使用AI返回的采样率（24kHz）
             val bufferSize = AudioTrack.getMinBufferSize(
                 SAMPLE_RATE,
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT
             )
 
-            // 使用 AudioAttributes 替代已弃用的 STREAM_MUSIC（兼容性更好）
+            // 根据音频源选择不同的AudioAttributes
             val audioAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setUsage(
+                    if (currentAudioSource == BluetoothAudioManager.AudioSource.BLUETOOTH_MIC) {
+                        AudioAttributes.USAGE_VOICE_COMMUNICATION
+                    } else {
+                        AudioAttributes.USAGE_MEDIA
+                    }
+                )
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                 .build()
 
