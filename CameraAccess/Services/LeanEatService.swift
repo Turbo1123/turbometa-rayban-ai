@@ -58,8 +58,13 @@ class LeanEatService {
     // MARK: - Nutrition Analysis
 
     func analyzeFood(_ image: UIImage) async throws -> FoodNutritionResponse {
-        // Convert image to base64
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        // Validate image
+        guard image.isValid else {
+            throw LeanEatError.invalidImage
+        }
+
+        // Use ImageProcessor for optimized compression
+        guard let imageData = image.compressed(maxFileSizeKB: 500) else {
             throw LeanEatError.invalidImage
         }
 
@@ -135,17 +140,21 @@ JSON格式如下：
     // MARK: - Private Methods
 
     private func makeRequest(_ request: ChatCompletionRequest) async throws -> String {
-        let url = URL(string: "\(baseURL)/chat/completions")!
+        guard let url = URL(string: "\(baseURL)/chat/completions") else {
+            throw LeanEatError.invalidResponse
+        }
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        urlRequest.timeoutInterval = 60
 
         let encoder = JSONEncoder()
         urlRequest.httpBody = try encoder.encode(request)
 
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        // Use retry-enabled network request
+        let (data, response) = try await URLSession.shared.dataWithRetry(for: urlRequest, retryCount: 2)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw LeanEatError.invalidResponse

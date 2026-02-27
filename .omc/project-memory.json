@@ -1,0 +1,256 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1772175383997,
+  "projectRoot": "/Users/zhangzhujian/dockers/turbometa-rayban-ai",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "CameraAccess": {
+      "path": "CameraAccess",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1772175383981,
+      "keyFiles": [
+        "Info.plist",
+        "TurboMeta.entitlements",
+        "TurboMetaApp.swift"
+      ]
+    },
+    "CameraAccess.xcodeproj": {
+      "path": "CameraAccess.xcodeproj",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1772175383981,
+      "keyFiles": [
+        "project.pbxproj",
+        "project.pbxproj.backup"
+      ]
+    },
+    "CameraAccessTests": {
+      "path": "CameraAccessTests",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1772175383982,
+      "keyFiles": [
+        "CameraAccessTests.swift"
+      ]
+    },
+    "Payload": {
+      "path": "Payload",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1772175383982,
+      "keyFiles": []
+    },
+    "ad": {
+      "path": "ad",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1772175383982,
+      "keyFiles": [
+        "adbattery.png",
+        "外挂电池.jpg",
+        "更换后的图片.jpg",
+        "电池更换计划.jpg"
+      ]
+    },
+    "android": {
+      "path": "android",
+      "purpose": null,
+      "fileCount": 7,
+      "lastAccessed": 1772175383983,
+      "keyFiles": [
+        "CHANGELOG.md",
+        "README.md",
+        "build.gradle.kts",
+        "gradle.properties",
+        "gradlew"
+      ]
+    },
+    "downloads": {
+      "path": "downloads",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1772175383983,
+      "keyFiles": []
+    },
+    "i4png": {
+      "path": "i4png",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1772175383983,
+      "keyFiles": [
+        "第一步打开爱思选择工具ipa签名.png",
+        "第三步.png",
+        "第二步用appleid进行签名.png"
+      ]
+    },
+    "screenshots": {
+      "path": "screenshots",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1772175383983,
+      "keyFiles": [
+        "camera.jpg",
+        "对话记录.jpg",
+        "设置页面.jpg",
+        "请我喝咖啡.png",
+        "首页.jpg"
+      ]
+    },
+    "ttt": {
+      "path": "ttt",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1772175383984,
+      "keyFiles": []
+    },
+    "CameraAccess/Models": {
+      "path": "CameraAccess/Models",
+      "purpose": "Data models",
+      "fileCount": 5,
+      "lastAccessed": 1772175383984,
+      "keyFiles": [
+        "ConversationRecord.swift",
+        "FoodNutritionModel.swift",
+        "LiveAIModels.swift"
+      ]
+    },
+    "CameraAccess/Services": {
+      "path": "CameraAccess/Services",
+      "purpose": "Business logic services",
+      "fileCount": 12,
+      "lastAccessed": 1772175383984,
+      "keyFiles": [
+        "ConversationStorage.swift",
+        "GeminiImageGenService.swift",
+        "GeminiLiveService.swift"
+      ]
+    },
+    "CameraAccessTests/Assets": {
+      "path": "CameraAccessTests/Assets",
+      "purpose": "Static assets",
+      "fileCount": 2,
+      "lastAccessed": 1772175383984,
+      "keyFiles": [
+        "plant.mp4",
+        "plant.png"
+      ]
+    },
+    "android/app": {
+      "path": "android/app",
+      "purpose": "Application code",
+      "fileCount": 2,
+      "lastAccessed": 1772175383985,
+      "keyFiles": [
+        "build.gradle.kts",
+        "proguard-rules.pro"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "CameraAccess.xcodeproj/project.pbxproj",
+      "accessCount": 9,
+      "lastAccessed": 1772175532165,
+      "type": "file"
+    },
+    {
+      "path": "CameraAccess/Views/SettingsView.swift",
+      "accessCount": 7,
+      "lastAccessed": 1772197021057,
+      "type": "file"
+    },
+    {
+      "path": "CameraAccess/Views/GeminiGenView.swift",
+      "accessCount": 6,
+      "lastAccessed": 1772194410042,
+      "type": "file"
+    },
+    {
+      "path": "CameraAccess/ViewModels/GeminiGenViewModel.swift",
+      "accessCount": 6,
+      "lastAccessed": 1772194654780,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 5,
+      "lastAccessed": 1772175483412,
+      "type": "directory"
+    },
+    {
+      "path": "CameraAccess/Services/VisionAPIConfig.swift",
+      "accessCount": 2,
+      "lastAccessed": 1772194225347,
+      "type": "file"
+    },
+    {
+      "path": "CameraAccess/Info.plist",
+      "accessCount": 1,
+      "lastAccessed": 1772175469299,
+      "type": "file"
+    },
+    {
+      "path": "CameraAccess/TurboMeta.entitlements",
+      "accessCount": 1,
+      "lastAccessed": 1772175482458,
+      "type": "file"
+    },
+    {
+      "path": "CameraAccess/TurboMetaApp.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772175533938,
+      "type": "file"
+    },
+    {
+      "path": "ExportOptions.plist",
+      "accessCount": 1,
+      "lastAccessed": 1772176018130,
+      "type": "file"
+    },
+    {
+      "path": "CameraAccess",
+      "accessCount": 1,
+      "lastAccessed": 1772192399251,
+      "type": "directory"
+    },
+    {
+      "path": "CameraAccess/Services/GeminiImageGenService.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772192420053,
+      "type": "file"
+    },
+    {
+      "path": "CameraAccess/Services/ImageGenModelsService.swift",
+      "accessCount": 1,
+      "lastAccessed": 1772194290794,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

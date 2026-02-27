@@ -7,6 +7,14 @@ import Foundation
 import SwiftUI
 import UIKit
 
+// MARK: - Constants
+
+private enum TranslateConstants {
+    static let imageSendInterval: TimeInterval = 0.5
+    static let maxHistoryCount = 50
+    static let reconnectDelay: TimeInterval = 0.3
+}
+
 @MainActor
 class LiveTranslateViewModel: ObservableObject {
 
@@ -159,8 +167,8 @@ class LiveTranslateViewModel: ObservableObject {
             translationHistory.insert(record, at: 0)
 
             // 限制历史记录数量
-            if translationHistory.count > 50 {
-                translationHistory = Array(translationHistory.prefix(50))
+            if translationHistory.count > TranslateConstants.maxHistoryCount {
+                translationHistory = Array(translationHistory.prefix(TranslateConstants.maxHistoryCount))
             }
         }
     }
@@ -228,21 +236,34 @@ class LiveTranslateViewModel: ObservableObject {
     }
 
     private func updateServiceSettings() {
-        translateService?.updateSettings(
-            sourceLanguage: sourceLanguage,
-            targetLanguage: targetLanguage,
-            voice: selectedVoice,
-            audioEnabled: audioOutputEnabled
-        )
+        // 如果已连接，需要断开并重新连接以应用新设置
+        // 因为 LiveTranslate 不支持在会话进行中更新配置
+        if isConnected {
+            print("🔄 [TranslateVM] 设置已更改，正在重新连接...")
+            disconnect()
+            // 短暂延迟后重新连接
+            DispatchQueue.main.asyncAfter(deadline: .now() + TranslateConstants.reconnectDelay) { [weak self] in
+                self?.connect()
+            }
+        } else {
+            // 未连接时只更新本地设置
+            translateService?.updateSettings(
+                sourceLanguage: sourceLanguage,
+                targetLanguage: targetLanguage,
+                voice: selectedVoice,
+                audioEnabled: audioOutputEnabled
+            )
+        }
     }
 
     // MARK: - Image Timer
 
     private func startImageTimer() {
         stopImageTimer()
-        imageTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+        imageTimer = Timer.scheduledTimer(withTimeInterval: TranslateConstants.imageSendInterval, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
             Task { @MainActor in
-                self?.sendCurrentFrame()
+                self.sendCurrentFrame()
             }
         }
     }

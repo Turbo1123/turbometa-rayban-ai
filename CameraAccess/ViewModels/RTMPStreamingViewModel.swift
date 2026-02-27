@@ -7,7 +7,7 @@ import SwiftUI
 import Combine
 import os.log
 
-private let logger = Logger(subsystem: "com.turbometa.rayban", category: "RTMPStreaming")
+private let logger = os.Logger(subsystem: "com.turbometa.rayban", category: "RTMPStreaming")
 
 @MainActor
 class RTMPStreamingViewModel: ObservableObject {

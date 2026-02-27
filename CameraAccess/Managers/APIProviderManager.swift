@@ -32,6 +32,13 @@ enum AlibabaEndpoint: String, CaseIterable, Codable {
         case .singapore: return "wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime"
         }
     }
+
+    var liveTranslateURL: String {
+        switch self {
+        case .beijing: return "wss://dashscope.aliyuncs.com/api-ws/v1/realtime"
+        case .singapore: return "wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime"
+        }
+    }
 }
 
 // MARK: - API Provider Enum (Vision API)
@@ -255,6 +262,28 @@ class APIProviderManager: ObservableObject {
         self.liveAIModel = savedLiveAIModel ?? liveProvider.defaultModel
     }
 
+    // MARK: - Type Mapping Helpers
+
+    /// Maps APIProvider to VisionAPIConfig.ModelProvider for unified key management
+    private func modelProvider(for provider: APIProvider) -> VisionAPIConfig.ModelProvider {
+        switch provider {
+        case .alibaba:
+            return .qwen
+        case .openrouter:
+            return .openrouter
+        }
+    }
+
+    /// Maps LiveAIProvider to VisionAPIConfig.ModelProvider for unified key management
+    private func modelProvider(for provider: LiveAIProvider) -> VisionAPIConfig.ModelProvider {
+        switch provider {
+        case .alibaba:
+            return .qwen
+        case .google:
+            return .gemini
+        }
+    }
+
     // MARK: - Live AI Configuration
 
     var liveAIWebSocketURL: String {
@@ -262,12 +291,7 @@ class APIProviderManager: ObservableObject {
     }
 
     var liveAIAPIKey: String {
-        switch liveAIProvider {
-        case .alibaba:
-            return APIKeyManager.shared.getAPIKey(for: .alibaba, endpoint: alibabaEndpoint) ?? ""
-        case .google:
-            return APIKeyManager.shared.getGoogleAPIKey() ?? ""
-        }
+        return APIKeyManager.shared.getAPIKey(provider: modelProvider(for: liveAIProvider)) ?? ""
     }
 
     var hasLiveAIAPIKey: Bool {
@@ -281,10 +305,7 @@ class APIProviderManager: ObservableObject {
     }
 
     var currentAPIKey: String {
-        if currentProvider == .alibaba {
-            return APIKeyManager.shared.getAPIKey(for: currentProvider, endpoint: alibabaEndpoint) ?? ""
-        }
-        return APIKeyManager.shared.getAPIKey(for: currentProvider) ?? ""
+        return APIKeyManager.shared.getAPIKey(provider: modelProvider(for: currentProvider)) ?? ""
     }
 
     var currentModel: String {
@@ -292,17 +313,14 @@ class APIProviderManager: ObservableObject {
     }
 
     var hasAPIKey: Bool {
-        if currentProvider == .alibaba {
-            return APIKeyManager.shared.hasAPIKey(for: currentProvider, endpoint: alibabaEndpoint)
-        }
-        return APIKeyManager.shared.hasAPIKey(for: currentProvider)
+        return APIKeyManager.shared.hasAPIKey(provider: modelProvider(for: currentProvider))
     }
 
     // MARK: - OpenRouter Models
 
     func fetchOpenRouterModels() async {
         guard currentProvider == .openrouter else { return }
-        guard let apiKey = APIKeyManager.shared.getAPIKey(for: .openrouter), !apiKey.isEmpty else {
+        guard let apiKey = APIKeyManager.shared.getAPIKey(provider: .openrouter), !apiKey.isEmpty else {
             modelsError = "请先配置 OpenRouter API Key"
             return
         }
@@ -311,14 +329,17 @@ class APIProviderManager: ObservableObject {
         modelsError = nil
 
         do {
-            let url = URL(string: "https://openrouter.ai/api/v1/models")!
+            guard let url = URL(string: "https://openrouter.ai/api/v1/models") else {
+                throw NSError(domain: "OpenRouter", code: -1, userInfo: [NSLocalizedDescriptionKey: "无效的URL"])
+            }
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
             request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
             request.setValue("TurboMeta", forHTTPHeaderField: "X-Title")
             request.timeoutInterval = 30
 
-            let (data, response) = try await URLSession.shared.data(for: request)
+            // 使用带重试的网络请求
+            let (data, response) = try await URLSession.shared.dataWithRetry(for: request, retryCount: 2)
 
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 throw NSError(domain: "OpenRouter", code: -1, userInfo: [NSLocalizedDescriptionKey: "获取模型列表失败"])
@@ -363,6 +384,26 @@ class APIProviderManager: ObservableObject {
 // MARK: - Static Helpers for Non-MainActor Access
 
 extension APIProviderManager {
+    /// Maps APIProvider to VisionAPIConfig.ModelProvider for unified key management
+    nonisolated private static func modelProvider(for provider: APIProvider) -> VisionAPIConfig.ModelProvider {
+        switch provider {
+        case .alibaba:
+            return .qwen
+        case .openrouter:
+            return .openrouter
+        }
+    }
+
+    /// Maps LiveAIProvider to VisionAPIConfig.ModelProvider for unified key management
+    nonisolated private static func modelProvider(for provider: LiveAIProvider) -> VisionAPIConfig.ModelProvider {
+        switch provider {
+        case .alibaba:
+            return .qwen
+        case .google:
+            return .gemini
+        }
+    }
+
     nonisolated static var staticCurrentProvider: APIProvider {
         let savedProvider = UserDefaults.standard.string(forKey: "api_provider") ?? "alibaba"
         return APIProvider(rawValue: savedProvider) ?? .alibaba
@@ -379,12 +420,7 @@ extension APIProviderManager {
     }
 
     nonisolated static var staticLiveAIAPIKey: String {
-        switch staticLiveAIProvider {
-        case .alibaba:
-            return APIKeyManager.shared.getAPIKey(for: .alibaba, endpoint: staticAlibabaEndpoint) ?? ""
-        case .google:
-            return APIKeyManager.shared.getGoogleAPIKey() ?? ""
-        }
+        return APIKeyManager.shared.getAPIKey(provider: modelProvider(for: staticLiveAIProvider)) ?? ""
     }
 
     nonisolated static var staticCurrentModel: String {
@@ -397,13 +433,14 @@ extension APIProviderManager {
     }
 
     nonisolated static var staticAPIKey: String {
-        if staticCurrentProvider == .alibaba {
-            return APIKeyManager.shared.getAPIKey(for: staticCurrentProvider, endpoint: staticAlibabaEndpoint) ?? ""
-        }
-        return APIKeyManager.shared.getAPIKey(for: staticCurrentProvider) ?? ""
+        return APIKeyManager.shared.getAPIKey(provider: modelProvider(for: staticCurrentProvider)) ?? ""
     }
 
     nonisolated static var staticLiveAIWebsocketURL: String {
         return staticLiveAIProvider.websocketURL(endpoint: staticAlibabaEndpoint)
+    }
+
+    nonisolated static var staticLiveTranslateWebsocketURL: String {
+        return staticAlibabaEndpoint.liveTranslateURL
     }
 }

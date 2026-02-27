@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"rm -rf ./build && mkdir -p ./build && xcodebuild archive \\\\\\n  -project CameraAccess.xcodeproj \\\\\\n  -scheme CameraAccess \\\\\\n  -archivePath ./build/CameraAccess.xcarchive \\\\\\n  -configura...",
+  "error": "Exit code 65\nCommand line invocation:\n    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild archive -project CameraAccess.xcodeproj -scheme CameraAccess -archivePath ./build/CameraAccess.xcarchive -configuration Release -destination generic/platform=iOS \"CODE_SIGN_IDENTITY=Apple Development\" DEVELOPMENT_TEAM=3NUT9SN8XW\n\nBuild settings from command line:\n    CODE_SIGN_IDENTITY = Apple Development\n    DEVELOPMENT_TEAM = 3NUT9SN8XW\n\nResolve Package Graph\n\n\nResolved source packages:\n  Me...",
+  "timestamp": "2026-02-27T07:07:28.264Z",
+  "retry_count": 1
+}

@@ -127,23 +127,23 @@ struct GeminiImageGenService {
     /// - Returns: Generated image as UIImage
     func generateImage(originalImage: UIImage, prompt: String, style: ImageStyle) async throws -> UIImage {
         let provider = VisionAPIConfig.activeImageGenProvider
-        
+
         if provider == .doubao {
             // Doubao T2I Logic (OpenAI Compatible)
-            // Note: Doubao Seedream is primarily T2I. We ignore originalImage for now, 
+            // Note: Doubao Seedream is primarily T2I. We ignore originalImage for now,
             // or we could use it if they support I2I via specific endpoint, strictly following user request for "Seedream"
             return try await generateImageOpenAI(prompt: prompt, style: style)
         }
-        
-        // 1. Prepare Image Data
-        guard let imageData = originalImage.jpegData(compressionQuality: 0.8) else {
+
+        // 1. Prepare Image Data - 使用 ImageProcessor 优化压缩
+        guard let imageData = originalImage.compressed(maxFileSizeKB: 500) else {
             throw GeminiImageGenError.invalidImage
         }
         let base64Image = imageData.base64EncodedString()
-        
+
         // 2. Construct Prompt
         let fullPrompt = "Redraw this image in \(style.promptModifier). \(prompt)"
-        
+
         // 3. Create Request
         let requestBody = GenerateContentRequest(
             contents: [
@@ -162,7 +162,7 @@ struct GeminiImageGenService {
             ],
             generationConfig: nil
         )
-        
+
         // 4. Make Request
         return try await makeRequest(requestBody)
     }
@@ -182,11 +182,12 @@ struct GeminiImageGenService {
     
     // Support for text modification
     func modifyImage(originalImage: UIImage, instruction: String) async throws -> UIImage {
-         guard let imageData = originalImage.jpegData(compressionQuality: 0.8) else {
+        // 使用 ImageProcessor 优化压缩
+        guard let imageData = originalImage.compressed(maxFileSizeKB: 500) else {
             throw GeminiImageGenError.invalidImage
         }
         let base64Image = imageData.base64EncodedString()
-        
+
         let requestBody = GenerateContentRequest(
             contents: [
                 GenerateContentRequest.Content(
@@ -204,7 +205,7 @@ struct GeminiImageGenService {
             ],
             generationConfig: nil
         )
-        
+
         return try await makeRequest(requestBody)
     }
 
@@ -214,15 +215,15 @@ struct GeminiImageGenService {
         // Construct URL: baseURL + /models/{model}:generateContent
         // Note: VisionAPIConfig.baseURL might be just the host or base path.
         // Standard Google Gemini path: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent
-        
+
         let model = VisionAPIConfig.imageGenModel
-        
+
         // Clean up base URL to ensure it doesn't end with slash
         var cleanBaseURL = baseURL
         if cleanBaseURL.hasSuffix("/") {
             cleanBaseURL.removeLast()
         }
-        
+
         // Check if baseURL already contains "models" or full path (for proxies)
         // If it's the standard Google URL, we append /models/{model}:generateContent
         let endpoint: String
@@ -241,7 +242,8 @@ struct GeminiImageGenService {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+        urlRequest.timeoutInterval = 120 // 增加超时时间到120秒，图片生成可能较慢
+
         // If not using query param for key (e.g. custom proxy), add header
         if !endpoint.contains("key=") {
              urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
@@ -250,7 +252,8 @@ struct GeminiImageGenService {
         let encoder = JSONEncoder()
         urlRequest.httpBody = try encoder.encode(requestBody)
 
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        // 使用带重试的网络请求
+        let (data, response) = try await URLSession.shared.dataWithRetry(for: urlRequest, retryCount: 2)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw GeminiImageGenError.invalidResponse
@@ -261,11 +264,11 @@ struct GeminiImageGenService {
             print("Gemini Image Gen Error: \(errorMessage)")
             throw GeminiImageGenError.apiError(statusCode: httpResponse.statusCode, message: errorMessage)
         }
-        
+
         // Parse Response
         let decoder = JSONDecoder()
         let genResponse = try decoder.decode(GenerateContentResponse.self, from: data)
-        
+
         // Extract Image
         // Check for inline data in the first candidate
         if let firstCandidate = genResponse.candidates?.first,
@@ -275,9 +278,9 @@ struct GeminiImageGenService {
            let image = UIImage(data: imageData) {
             return image
         }
-        
+
         throw GeminiImageGenError.noImageGenerated
-        
+
     }
 
     private func makeOpenAIRequest(_ requestBody: OpenAIImageGenRequest) async throws -> UIImage {
@@ -286,53 +289,55 @@ struct GeminiImageGenService {
         if cleanBaseURL.hasSuffix("/") {
             cleanBaseURL.removeLast()
         }
-        
+
         let endpoint = "\(cleanBaseURL)/images/generations"
-        
+
         guard let url = URL(string: endpoint) else {
             throw GeminiImageGenError.invalidURL
         }
-        
+
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        
+        urlRequest.timeoutInterval = 120 // 增加超时时间到120秒
+
         let encoder = JSONEncoder()
         urlRequest.httpBody = try encoder.encode(requestBody)
-        
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
-        
+
+        // 使用带重试的网络请求
+        let (data, response) = try await URLSession.shared.dataWithRetry(for: urlRequest, retryCount: 2)
+
         guard let httpResponse = response as? HTTPURLResponse else {
             throw GeminiImageGenError.invalidResponse
         }
-        
+
         guard httpResponse.statusCode == 200 else {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
             print("OpenAI/Doubao Image Gen Error: \(errorMessage)")
             throw GeminiImageGenError.apiError(statusCode: httpResponse.statusCode, message: errorMessage)
         }
-        
+
         let decoder = JSONDecoder()
         let genResponse = try decoder.decode(OpenAIImageGenResponse.self, from: data)
-        
+
         if let firstItem = genResponse.data.first {
             if let b64 = firstItem.b64_json,
                let imageData = Data(base64Encoded: b64),
                let image = UIImage(data: imageData) {
                 return image
             }
-            
+
             if let urlString = firstItem.url,
                let imageURL = URL(string: urlString) {
-                // Download image from URL
-                let (imageData, _) = try await URLSession.shared.data(from: imageURL)
+                // Download image from URL with retry
+                let (imageData, _) = try await URLSession.shared.dataWithRetry(from: imageURL, retryCount: 2)
                 if let image = UIImage(data: imageData) {
                     return image
                 }
             }
         }
-        
+
         throw GeminiImageGenError.noImageGenerated
     }
 }

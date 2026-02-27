@@ -59,7 +59,6 @@ struct GeminiGenView: View {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("保存") {
                             viewModel.saveToAlbum()
-                            viewModel.saveToAlbum()
                         }
                     }
                 }
@@ -113,12 +112,22 @@ struct GeminiGenView: View {
     
     .onAppear {
         volumeHandler.startHandler()
+        // Fetch available models
+        Task {
+            await viewModel.fetchModelsForProvider()
+        }
         if streamViewModel.hasActiveDevice {
             Task {
                 if !streamViewModel.isStreaming {
                     await streamViewModel.handleStartStreaming()
                 }
             }
+        }
+    }
+    .onChange(of: viewModel.selectedProvider) { _ in
+        // Refetch models when provider changes
+        Task {
+            await viewModel.fetchModelsForProvider()
         }
     }
     .onChange(of: streamViewModel.hasActiveDevice) { isConnected in
@@ -271,7 +280,71 @@ struct GeminiGenView: View {
                     .cornerRadius(16)
                     .frame(maxHeight: 350)
                     .padding(.horizontal)
-                
+
+                // Model Selection
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("选择模型")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        Spacer()
+                        if viewModel.isLoadingModels {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                                .tint(.gray)
+                        } else {
+                            Button(action: {
+                                Task {
+                                    await viewModel.fetchModelsForProvider()
+                                }
+                            }) {
+                                Image(systemName: "arrow.clockwise")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+
+                    // Provider Picker
+                    Picker("Provider", selection: $viewModel.selectedProvider) {
+                        Text("Gemini").tag(VisionAPIConfig.ModelProvider.gemini)
+                        Text("豆包 (Seedream)").tag(VisionAPIConfig.ModelProvider.doubao)
+                        Text("OpenAI").tag(VisionAPIConfig.ModelProvider.openai)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
+                    .colorScheme(.dark)
+
+                    // Model Picker
+                    Menu {
+                        ForEach(viewModel.availableModels, id: \.self) { model in
+                            Button {
+                                viewModel.selectedModel = model
+                            } label: {
+                                HStack {
+                                    Text(model)
+                                    if viewModel.selectedModel == model {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Text(viewModel.selectedModel)
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                            Spacer()
+                            Image(systemName: "chevron.down")
+                                .foregroundColor(.gray)
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                    }
+                }
+
                 // Aspect Ratio Selection
                 VStack(alignment: .leading, spacing: 12) {
                     Text("选择画幅")
@@ -295,7 +368,7 @@ struct GeminiGenView: View {
                         .font(.headline)
                         .foregroundColor(.white)
                         .padding(.horizontal)
-                    
+
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(GeminiImageGenService.ImageStyle.allCases) { style in

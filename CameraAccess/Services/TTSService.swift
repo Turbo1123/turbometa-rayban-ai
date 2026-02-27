@@ -71,7 +71,7 @@ class TTSService: NSObject, ObservableObject {
 
             // 只在需要时配置，避免与现有会话冲突
             // 使用和 OmniRealtimeService 完全一样的设置（不要 defaultToSpeaker）
-            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth, .allowBluetoothA2DP])
+            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP, .allowBluetoothA2DP])
             try audioSession.setPreferredSampleRate(24000)
             try audioSession.setActive(true, options: [.notifyOthersOnDeactivation])
             print("✅ [TTS] Audio session 已配置")
@@ -143,7 +143,7 @@ class TTSService: NSObject, ObservableObject {
         }
 
         // 阿里云：使用阿里云 TTS
-        let key = apiKey ?? APIKeyManager.shared.getAPIKey(for: .alibaba)
+        let key = apiKey ?? APIKeyManager.shared.getAPIKey(provider: .qwen)
 
         guard let finalKey = key, !finalKey.isEmpty else {
             print("❌ [TTS] No Alibaba API key, falling back to system TTS")
@@ -187,7 +187,12 @@ class TTSService: NSObject, ObservableObject {
     // MARK: - Private Methods
 
     private func synthesizeAndPlay(text: String, apiKey: String) async throws {
-        var request = URLRequest(url: URL(string: baseURL)!)
+        guard let url = URL(string: baseURL) else {
+            print("❌ [TTS] Invalid URL: \(baseURL)")
+            throw TTSError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

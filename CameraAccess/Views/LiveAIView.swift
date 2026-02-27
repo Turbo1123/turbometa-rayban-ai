@@ -146,8 +146,8 @@ struct LiveAIView: View {
         } // end ZStack
         .onAppear {
             volumeHandler.startHandler()
-            
-            if apiKey.isEmpty {
+
+            guard !apiKey.isEmpty else {
                 showAPIKeyAlert = true
                 return
             }
@@ -170,17 +170,17 @@ struct LiveAIView: View {
             // 自动连接并开始录音
             viewModel.connect()
 
-            // 更新视频帧
+            // 更新视频帧（使用 weak self 避免循环引用）
             if frameTimer == nil {
                 frameTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
                     // 根据当前选择的视频源更新帧
-                    if usePhoneCamera {
-                        if let frame = phoneCameraManager.currentFrame {
-                            viewModel.updateVideoFrame(frame)
+                    if self.usePhoneCamera {
+                        if let frame = self.phoneCameraManager.currentFrame {
+                            self.viewModel.updateVideoFrame(frame)
                         }
                     } else {
-                        if let frame = streamViewModel.currentVideoFrame {
-                            viewModel.updateVideoFrame(frame)
+                        if let frame = self.streamViewModel.currentVideoFrame {
+                            self.viewModel.updateVideoFrame(frame)
                         }
                     }
                 }

@@ -355,11 +355,10 @@ class OmniRealtimeViewModel: ObservableObject {
         showError = false
     }
 
-    nonisolated deinit {
-        Task { @MainActor [weak omniService, weak geminiService] in
-            omniService?.disconnect()
-            geminiService?.disconnect()
-        }
+    deinit {
+        // Clean up services
+        omniService?.disconnect()
+        geminiService?.disconnect()
     }
 }
 

@@ -74,15 +74,13 @@ struct OmniRealtimeView: View {
         }
         .onAppear {
             viewModel.connect()
-            // Update video frames
-            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-                if let frame = streamViewModel.currentVideoFrame {
-                    viewModel.updateVideoFrame(frame)
-                }
-            }
         }
         .onDisappear {
             viewModel.disconnect()
+        }
+        .task {
+            // Update video frames 在独立的 task 中，使用 weak self
+            await startVideoFrameUpdates()
         }
         .alert("错误", isPresented: $viewModel.showError) {
             Button("确定") {
@@ -94,6 +92,21 @@ struct OmniRealtimeView: View {
             }
         }
     }
+
+    // MARK: - Video Frame Updates
+
+    @MainActor
+    private func startVideoFrameUpdates() async {
+        // 使用 AsyncTimerSequence 替代 Timer，更符合 Swift 并发模式
+        for await _ in Timer.publish(every: 0.1, on: .main, in: .common).autoconnect().values {
+            guard !Task.isCancelled else { break }
+            if let frame = streamViewModel.currentVideoFrame {
+                viewModel.updateVideoFrame(frame)
+            }
+        }
+    }
+
+    // deinit removed for struct
 
     // MARK: - Header
 

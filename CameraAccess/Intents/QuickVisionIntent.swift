@@ -256,6 +256,11 @@ class QuickVisionManager: ObservableObject {
     private(set) var streamViewModel: StreamSessionViewModel?
     private let tts = TTSService.shared
 
+    // 超时保护：如果处理时间超过这个值，自动重置状态
+    private let processingTimeout: TimeInterval = 60 // 60秒超时
+    private var processingStartTime: Date?
+    private var timeoutCheckTimer: Timer?
+
     private init() {
         // 监听 Intent 触发
         NotificationCenter.default.addObserver(
@@ -283,9 +288,17 @@ class QuickVisionManager: ObservableObject {
 
     /// 使用指定模式执行快速识图
     func performQuickVisionWithMode(_ mode: QuickVisionMode, customPrompt: String? = nil) async {
-        guard !isProcessing else {
-            print("⚠️ [QuickVision] Already processing")
-            return
+        // 检查是否已在处理中，如果是则检查是否超时
+        if isProcessing {
+            if let startTime = processingStartTime,
+               Date().timeIntervalSince(startTime) > processingTimeout {
+                // 超时，重置状态
+                print("⏰ [QuickVision] Processing timeout detected, resetting state")
+                resetProcessingState()
+            } else {
+                print("⚠️ [QuickVision] Already processing")
+                return
+            }
         }
 
         guard let streamViewModel = streamViewModel else {
@@ -294,14 +307,20 @@ class QuickVisionManager: ObservableObject {
             return
         }
 
+        // 开始处理
         isProcessing = true
+        processingStartTime = Date()
         errorMessage = nil
         lastResult = nil
         lastImage = nil
         lastMode = mode
 
+        // 启动超时检查定时器
+        startTimeoutCheck()
+
         // 获取 API Key
-        guard let apiKey = APIKeyManager.shared.getAPIKey(), !apiKey.isEmpty else {
+        let apiKey = APIProviderManager.staticAPIKey
+        guard !apiKey.isEmpty else {
             errorMessage = "请先在设置中配置 API Key"
             tts.speak("请先在设置中配置 API Key")
             isProcessing = false
@@ -406,7 +425,31 @@ class QuickVisionManager: ObservableObject {
             await streamViewModel.stopSession()
         }
 
+        // 处理完成，清理状态
+        resetProcessingState()
+    }
+
+    // MARK: - Helper Methods
+
+    /// 重置处理状态
+    private func resetProcessingState() {
         isProcessing = false
+        processingStartTime = nil
+        timeoutCheckTimer?.invalidate()
+        timeoutCheckTimer = nil
+    }
+
+    /// 启动超时检查定时器
+    private func startTimeoutCheck() {
+        timeoutCheckTimer?.invalidate()
+        timeoutCheckTimer = Timer.scheduledTimer(withTimeInterval: processingTimeout, repeats: false) { [weak self] _ in
+            Task { @MainActor in
+                guard let self = self, self.isProcessing else { return }
+                print("⏰ [QuickVision] Processing timeout reached, forcing reset")
+                self.tts.speak("识别超时，请重试")
+                self.resetProcessingState()
+            }
+        }
     }
 
     /// 执行快速识图（使用当前设置的模式）

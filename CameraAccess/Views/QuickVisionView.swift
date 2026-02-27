@@ -97,6 +97,12 @@ struct QuickVisionView: View {
             // 自动开始识图（包含启动流、拍照、停止流、识别、TTS）
             await quickVisionManager.performQuickVision()
         }
+        .onDisappear {
+            // 确保在视图消失时停止播报
+            if tts.isSpeaking {
+                tts.stop()
+            }
+        }
     }
 
     // MARK: - Video Preview Section

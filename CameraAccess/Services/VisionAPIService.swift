@@ -60,8 +60,13 @@ struct VisionAPIService {
 
     /// Analyze image and get description
     func analyzeImage(_ image: UIImage, prompt: String = "图中描绘的是什么景象?") async throws -> String {
-        // Convert image to base64
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        // Validate image
+        guard image.isValid else {
+            throw VisionAPIError.invalidImage
+        }
+
+        // Use ImageProcessor for optimized compression
+        guard let imageData = image.compressed(maxFileSizeKB: 500) else {
             throw VisionAPIError.invalidImage
         }
 
@@ -103,17 +108,21 @@ struct VisionAPIService {
     // MARK: - Private Methods
 
     private func makeRequest(_ request: ChatCompletionRequest) async throws -> ChatCompletionResponse {
-        let url = URL(string: "\(baseURL)/chat/completions")!
+        guard let url = URL(string: "\(baseURL)/chat/completions") else {
+            throw VisionAPIError.invalidResponse
+        }
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        urlRequest.timeoutInterval = 60
 
         let encoder = JSONEncoder()
         urlRequest.httpBody = try encoder.encode(request)
 
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        // Use retry-enabled network request
+        let (data, response) = try await URLSession.shared.dataWithRetry(for: urlRequest, retryCount: 2)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw VisionAPIError.invalidResponse

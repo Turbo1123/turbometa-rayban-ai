@@ -17,6 +17,7 @@
 import MWDATCamera
 import MWDATCore
 import SwiftUI
+import os
 
 enum StreamingStatus {
   case streaming
@@ -59,6 +60,7 @@ class StreamSessionViewModel: ObservableObject {
   private let wearables: WearablesInterface
   private let deviceSelector: AutoDeviceSelector
   private var deviceMonitorTask: Task<Void, Never>?
+  private let logger = os.Logger(subsystem: "com.turbometa.rayban", category: "StreamSessionViewModel")
 
   init(wearables: WearablesInterface) {
     self.wearables = wearables
@@ -272,5 +274,23 @@ class StreamSessionViewModel: ObservableObject {
     @unknown default:
       return "An unknown streaming error occurred."
     }
+  }
+
+  // MARK: - Cleanup
+
+  deinit {
+    // Clean up listener tokens to prevent memory leaks
+    stateListenerToken = nil
+    videoFrameListenerToken = nil
+    errorListenerToken = nil
+    photoDataListenerToken = nil
+
+    // Stop device monitoring
+    deviceMonitorTask?.cancel()
+
+    // Stop timer if running
+    // stopTimer() // Commented out to avoid "MainActor isolated" error in deinit
+
+    print("🧹 [StreamSession] ViewModel deallocated and cleaned up")
   }
 }

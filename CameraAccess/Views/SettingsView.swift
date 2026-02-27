@@ -62,6 +62,7 @@ struct SettingsView: View {
     @State private var showModelSettings = false
     @State private var showEndpointSettings = false
     @State private var showRealtimeModelSettings = false
+    @State private var showTranslationModelInfo = false
     @State private var showRealtimeEndpointSettings = false
     @State private var showImageGenModelSettings = false
     @State private var showImageGenEndpointSettings = false
@@ -71,18 +72,17 @@ struct SettingsView: View {
     @AppStorage(VisionAPIConfig.imageGenModelKey) private var selectedImageGenModel = VisionAPIConfig.defaultImageGenModel
     @AppStorage(VisionAPIConfig.providerKey) private var preferredProviderRaw = VisionAPIConfig.ModelProvider.qwen.rawValue
     @AppStorage(VisionAPIConfig.realtimeInputLanguageKey) private var selectedLanguage = VisionAPIConfig.defaultRealtimeInputLanguage
-    @State private var hasAPIKey = false // 改为 State 变量
     @State private var showModelEndpointAlert = false
+
+    // Computed property for API key status - always up-to-date
+    private var hasAPIKey: Bool {
+        APIKeyManager.shared.hasAPIKey(provider: activeProvider)
+    }
     @State private var modelEndpointAlertMessage = ""
 
     init(streamViewModel: StreamSessionViewModel, apiKey: String) {
         self.streamViewModel = streamViewModel
         self.apiKey = apiKey
-    }
-
-    // 刷新 API Key 状态
-    private func refreshAPIKeyStatus() {
-        hasAPIKey = APIKeyManager.shared.hasAPIKey(provider: activeProvider)
     }
 
     private var preferredProvider: VisionAPIConfig.ModelProvider {
@@ -187,6 +187,41 @@ struct SettingsView: View {
                                 .foregroundColor(AppColors.textPrimary)
                             Spacer()
                             Text(selectedRealtimeModel)
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                            Image(systemName: "chevron.right")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
+
+                    Button {
+                        showTranslationModelInfo = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "text.bubble.fill")
+                                .foregroundColor(AppColors.translate)
+                            Text("实时翻译模型")
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Text("Qwen LiveTranslate")
+                                .font(AppTypography.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                    }
+
+                    Button {
+                        showImageGenModelSettings = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "photo.artframe")
+                                .foregroundColor(.purple)
+                            Text("图片生成模型")
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Text(selectedImageGenModel)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
                                 .font(AppTypography.caption)
                                 .foregroundColor(AppColors.textSecondary)
                             Image(systemName: "chevron.right")
@@ -328,12 +363,6 @@ struct SettingsView: View {
             .sheet(isPresented: $showAPIKeySettings) {
                 APIKeySettingsView(selectedProviderRaw: $preferredProviderRaw)
             }
-            .onChange(of: showAPIKeySettings) { isShowing in
-                // 当 API Key 设置界面关闭时，刷新状态
-                if !isShowing {
-                    refreshAPIKeyStatus()
-                }
-            }
             .sheet(isPresented: $showModelSettings) {
                 ModelSettingsView(selectedModel: $selectedModel)
             }
@@ -354,41 +383,39 @@ struct SettingsView: View {
             }
             .onChange(of: showEndpointSettings) { isShowing in
                 if !isShowing {
-                    refreshAPIKeyStatus()
                     validateModelEndpointPair()
                 }
             }
             .onChange(of: showRealtimeEndpointSettings) { isShowing in
                 if !isShowing {
-                    refreshAPIKeyStatus()
                     validateRealtimeConfigPair()
                 }
             }
             .sheet(isPresented: $showLanguageSettings) {
                 LanguageSettingsView(selectedLanguage: $selectedLanguage)
             }
+            .alert("实时翻译模型", isPresented: $showTranslationModelInfo) {
+                Button("确定", role: .cancel) { }
+            } message: {
+                Text("实时翻译目前使用阿里云 Qwen LiveTranslate 模型，随「实时对话服务地址」自动配置。")
+            }
             .onChange(of: selectedModel) { _ in
                 if let provider = VisionAPIConfig.provider(for: selectedModel) {
                     preferredProviderRaw = provider.rawValue
                 }
-                refreshAPIKeyStatus()
                 validateModelEndpointPair()
             }
             .onChange(of: selectedRealtimeModel) { _ in
                 if let provider = VisionAPIConfig.provider(for: selectedRealtimeModel) {
                     preferredProviderRaw = provider.rawValue
                 }
-                refreshAPIKeyStatus()
                 validateRealtimeConfigPair()
             }
             .onChange(of: preferredProviderRaw) { _ in
-                refreshAPIKeyStatus()
                 validateModelEndpointPair()
                 validateRealtimeConfigPair()
             }
             .onAppear {
-                // 视图出现时刷新 API Key 状态
-                refreshAPIKeyStatus()
                 validateModelEndpointPair()
                 validateRealtimeConfigPair()
             }
@@ -965,6 +992,8 @@ struct APIEndpointSettingsView: View {
             return [("OpenAI 兼容（自定义）", "")]
         case .gemini:
             return [("Gemini (Google/Vertex)", VisionAPIConfig.ModelProvider.gemini.defaultBaseURL)]
+        case .openrouter:
+            return [("OpenRouter（自定义）", "")]
         case .geminiCompatible:
             return [("Gemini 兼容（自定义）", "")]
         }
@@ -1073,6 +1102,8 @@ struct RealtimeEndpointSettingsView: View {
             return [("OpenAI 兼容（自定义）", "")]
         case .gemini:
             return [("Gemini (暂不支持实时)", "")]
+        case .openrouter:
+            return [("OpenRouter (暂不支持实时)", "")]
         case .geminiCompatible:
             return [("Gemini 兼容 (暂不支持实时)", "")]
         }
@@ -1142,10 +1173,17 @@ struct ImageGenModelSettingsView: View {
     @State private var newModelName = ""
     @State private var addingForProvider: VisionAPIConfig.ModelProvider?
 
-    let presetModels: [(provider: VisionAPIConfig.ModelProvider, models: [String])] = [
-        (.gemini, ["gemini-3-pro-image-preview", "gemini-2.0-flash-exp"]),
-        (.geminiCompatible, []),
-        (.doubao, ["doubao-seedream-4-5-251128"])
+    // Dynamic model fetching
+    @State private var selectedProvider: VisionAPIConfig.ModelProvider = VisionAPIConfig.preferredImageGenProvider
+    @State private var fetchedModels: [VisionAPIConfig.ModelProvider: [String]] = [:]
+    @State private var isLoadingModels: Bool = false
+
+    // Fallback models when API fetch fails
+    static let fallbackModels: [VisionAPIConfig.ModelProvider: [String]] = [
+        .gemini: ["gemini-3-pro-image-preview", "gemini-2.0-flash-exp", "gemini-2.0-flash-preview-image-generation"],
+        .geminiCompatible: [],
+        .doubao: ["doubao-seedream-4-5-251128"],
+        .openai: ["gpt-image-1", "dall-e-3", "dall-e-2"]
     ]
 
     var body: some View {
@@ -1162,33 +1200,64 @@ struct ImageGenModelSettingsView: View {
                             .fontWeight(.medium)
                     }
                 }
-                
+
                 // 服务提供商选择
                 Section {
-                    Picker("模型服务", selection: Binding(
-                        get: { VisionAPIConfig.preferredImageGenProvider },
-                        set: { VisionAPIConfig.preferredImageGenProvider = $0 }
-                    )) {
-                        Text("Gemini").tag(VisionAPIConfig.ModelProvider.gemini)
-                        Text("Gemini 兼容").tag(VisionAPIConfig.ModelProvider.geminiCompatible)
-                        Text("豆包 (Seedream)").tag(VisionAPIConfig.ModelProvider.doubao)
+                    HStack {
+                        Text("模型服务")
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Picker("", selection: $selectedProvider) {
+                            Text("Gemini").tag(VisionAPIConfig.ModelProvider.gemini)
+                            Text("Gemini 兼容").tag(VisionAPIConfig.ModelProvider.geminiCompatible)
+                            Text("豆包 (Seedream)").tag(VisionAPIConfig.ModelProvider.doubao)
+                            Text("OpenAI").tag(VisionAPIConfig.ModelProvider.openai)
+                        }
+                        .pickerStyle(.menu)
                     }
+
+                    // Refresh button
+                    Button {
+                        Task {
+                            await fetchModels(for: selectedProvider)
+                        }
+                    } label: {
+                        HStack {
+                            if isLoadingModels {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            } else {
+                                Image(systemName: "arrow.clockwise")
+                            }
+                            Text(isLoadingModels ? "正在获取模型..." : "刷新模型列表")
+                        }
+                    }
+                    .disabled(isLoadingModels)
                 } header: {
                     Text("选择服务提供商")
                 }
-                
-                // 每个提供商一个 Section
-                ForEach(presetModels, id: \.provider.rawValue) { item in
-                    providerSection(provider: item.provider, presets: item.models)
-                }
+
+                // Models for selected provider
+                providerSection(provider: selectedProvider)
             }
             .navigationTitle("图片生成模型")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("完成") {
+                        VisionAPIConfig.preferredImageGenProvider = selectedProvider
                         dismiss()
                     }
+                }
+            }
+            .onAppear {
+                Task {
+                    await fetchModels(for: selectedProvider)
+                }
+            }
+            .onChange(of: selectedProvider) { newProvider in
+                Task {
+                    await fetchModels(for: newProvider)
                 }
             }
             .alert("添加自定义模型", isPresented: Binding(
@@ -1213,14 +1282,134 @@ struct ImageGenModelSettingsView: View {
             }
         }
     }
-    
+
+    // MARK: - Model Fetching
+
+    private func fetchModels(for provider: VisionAPIConfig.ModelProvider) async {
+        isLoadingModels = true
+
+        let models: [String]
+        switch provider {
+        case .gemini:
+            models = await fetchGeminiModels()
+        case .doubao:
+            models = await fetchOpenAICompatibleModels(for: provider, filter: ["seedream", "image"])
+        case .openai:
+            models = await fetchOpenAICompatibleModels(for: provider, filter: ["dall", "gpt-image", "image"])
+        default:
+            models = Self.fallbackModels[provider] ?? []
+        }
+
+        fetchedModels[provider] = models
+        isLoadingModels = false
+    }
+
+    private func fetchGeminiModels() async -> [String] {
+        let apiKey = VisionAPIConfig.apiKey(for: .gemini)
+        guard !apiKey.isEmpty else { return Self.fallbackModels[.gemini] ?? [] }
+
+        let baseURL = VisionAPIConfig.baseURL(for: .gemini)
+        var cleanURL = baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
+
+        guard let url = URL(string: "\(cleanURL)/models?key=\(apiKey)") else {
+            return Self.fallbackModels[.gemini] ?? []
+        }
+
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                return Self.fallbackModels[.gemini] ?? []
+            }
+
+            struct GeminiModelsResponse: Codable {
+                let models: [GeminiModel]?
+                struct GeminiModel: Codable {
+                    let name: String
+                    let supportedGenerationMethods: [String]?
+                    enum CodingKeys: String, CodingKey {
+                        case name
+                        case supportedGenerationMethods = "supportedGenerationMethods"
+                    }
+                    var modelId: String {
+                        name.replacingOccurrences(of: "models/", with: "")
+                    }
+                    var supportsImageGeneration: Bool {
+                        guard let methods = supportedGenerationMethods else { return false }
+                        return methods.contains("generateContent")
+                    }
+                }
+            }
+
+            let modelsResponse = try JSONDecoder().decode(GeminiModelsResponse.self, from: data)
+            let imageModels = modelsResponse.models?
+                .filter { $0.supportsImageGeneration }
+                .map { $0.modelId } ?? []
+
+            return imageModels.isEmpty ? (Self.fallbackModels[.gemini] ?? []) : imageModels
+
+        } catch {
+            print("⚠️ [ImageGenSettings] Failed to fetch Gemini models: \(error)")
+            return Self.fallbackModels[.gemini] ?? []
+        }
+    }
+
+    private func fetchOpenAICompatibleModels(for provider: VisionAPIConfig.ModelProvider, filter: [String]) async -> [String] {
+        let apiKey = VisionAPIConfig.apiKey(for: provider)
+        guard !apiKey.isEmpty else { return Self.fallbackModels[provider] ?? [] }
+
+        let baseURL = VisionAPIConfig.baseURL(for: provider)
+        var cleanURL = baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
+
+        guard let url = URL(string: "\(cleanURL)/models") else {
+            return Self.fallbackModels[provider] ?? []
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                return Self.fallbackModels[provider] ?? []
+            }
+
+            struct OpenAIModelsResponse: Codable {
+                let data: [OpenAIModel]
+                struct OpenAIModel: Codable {
+                    let id: String
+                }
+            }
+
+            let modelsResponse = try JSONDecoder().decode(OpenAIModelsResponse.self, from: data)
+            let imageModels = modelsResponse.data
+                .map { $0.id }
+                .filter { modelId in
+                    let lowercased = modelId.lowercased()
+                    return filter.contains { keyword in lowercased.contains(keyword.lowercased()) }
+                }
+
+            return imageModels.isEmpty ? (Self.fallbackModels[provider] ?? []) : imageModels
+
+        } catch {
+            print("⚠️ [ImageGenSettings] Failed to fetch models: \(error)")
+            return Self.fallbackModels[provider] ?? []
+        }
+    }
+
     @ViewBuilder
-    private func providerSection(provider: VisionAPIConfig.ModelProvider, presets: [String]) -> some View {
+    private func providerSection(provider: VisionAPIConfig.ModelProvider) -> some View {
         Section {
-            ForEach(presets, id: \.self) { model in
+            // Fetched or fallback models
+            let models = fetchedModels[provider] ?? Self.fallbackModels[provider] ?? []
+            ForEach(models, id: \.self) { model in
                 modelRow(model)
             }
-            
+
+            // Custom models
             ForEach(modelManager.models(for: provider), id: \.self) { model in
                 modelRow(model)
             }
@@ -1230,26 +1419,37 @@ struct ImageGenModelSettingsView: View {
                     modelManager.removeModel(customModels[index], for: provider)
                 }
             }
-            
+
             Button {
                 addingForProvider = provider
             } label: {
                 HStack {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.green)
-                    Text("添加模型")
+                    Text("添加自定义模型")
                         .foregroundColor(.blue)
                 }
             }
         } header: {
-            Text(provider.displayName)
+            HStack {
+                Text(provider.displayName)
+                if isLoadingModels && selectedProvider == provider {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                }
+            }
         } footer: {
-            if !modelManager.models(for: provider).isEmpty {
-                Text("左滑可删除自定义模型")
+            VStack(alignment: .leading, spacing: 4) {
+                if !modelManager.models(for: provider).isEmpty {
+                    Text("左滑可删除自定义模型")
+                }
+                Text("模型列表从 API 自动获取，获取失败时显示预设模型")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
             }
         }
     }
-    
+
     @ViewBuilder
     private func modelRow(_ model: String) -> some View {
         Button {

@@ -20,7 +20,7 @@ class LiveTranslateService: NSObject {
     private let model = "qwen3-livetranslate-flash-realtime"
     // 根据用户设置的区域动态获取 WebSocket URL
     private var baseURL: String {
-        return APIProviderManager.staticLiveAIWebsocketURL
+        return APIProviderManager.staticLiveTranslateWebsocketURL
     }
 
     // Audio Engine (for recording)
@@ -60,6 +60,7 @@ class LiveTranslateService: NSObject {
     // State
     private var isRecording = false
     private var eventIdCounter = 0
+    private var isSessionConfigured = false
 
     // Image sending
     private var lastImageSendTime: Date?
@@ -121,6 +122,15 @@ class LiveTranslateService: NSObject {
     // MARK: - WebSocket Connection
 
     func connect() {
+        print("🔍 [Translate] DEBUG INFO:")
+        print("  - Base URL: \(baseURL)")
+        print("  - Model: \(model)")
+        print("  - API Key Present: \(!apiKey.isEmpty)")
+        if !apiKey.isEmpty {
+            let maskedKey = String(apiKey.prefix(4)) + "..." + String(apiKey.suffix(4))
+            print("  - API Key: \(maskedKey)")
+        }
+
         let urlString = "\(baseURL)?model=\(model)"
         print("🔌 [Translate] 准备连接 WebSocket: \(urlString)")
 
@@ -141,6 +151,7 @@ class LiveTranslateService: NSObject {
 
         print("🔌 [Translate] WebSocket 任务已启动")
         receiveMessage()
+        isSessionConfigured = false
 
         // 等待连接后发送配置
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -170,13 +181,19 @@ class LiveTranslateService: NSObject {
         self.voice = voice
         self.audioOutputEnabled = audioEnabled
 
-        // 如果已连接，重新配置会话
-        if webSocket != nil {
-            configureSession()
+        // LiveTranslate 会话一旦开始就不能更新配置
+        // 设置只在本地保存，下次连接时生效
+        if isSessionConfigured {
+            print("⚠️ [Translate] 会话已配置，新设置将在下次连接时生效")
         }
     }
 
     private func configureSession() {
+        guard !isSessionConfigured else {
+            print("⚠️ [Translate] 会话已配置，跳过重复配置")
+            return
+        }
+
         var modalities: [String] = ["text"]
         if audioOutputEnabled {
             modalities.append("audio")
@@ -468,9 +485,13 @@ class LiveTranslateService: NSObject {
 
         DispatchQueue.main.async {
             switch type {
-            case TranslateServerEvent.sessionCreated.rawValue,
-                 TranslateServerEvent.sessionUpdated.rawValue:
-                print("✅ [Translate] 会话已建立")
+            case TranslateServerEvent.sessionCreated.rawValue:
+                print("✅ [Translate] 会话已创建")
+                // 会话创建后等待配置完成
+
+            case TranslateServerEvent.sessionUpdated.rawValue:
+                print("✅ [Translate] 会话配置完成")
+                self.isSessionConfigured = true
                 self.onConnected?()
 
             case TranslateServerEvent.responseAudioTranscriptText.rawValue:

@@ -346,13 +346,14 @@ class GeminiLiveService: NSObject {
     }
 
     func sendImageInput(_ image: UIImage) {
-        guard let imageData = image.jpegData(compressionQuality: 0.6) else {
-            print("❌ [Gemini] 无法压缩图片")
+        // 使用ImageProcessor优化压缩
+        guard let imageData = image.compressed(maxFileSizeKB: 500) else {
+            logError("Failed to compress image for Gemini", category: .ai)
             return
         }
         let base64Image = imageData.base64EncodedString()
 
-        print("📸 [Gemini] 发送图片: \(imageData.count) bytes")
+        logInfo("Sending image to Gemini: \(imageData.count) bytes", category: .ai)
 
         let message: [String: Any] = [
             "realtime_input": [

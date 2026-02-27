@@ -69,7 +69,16 @@ struct GalleryView: View {
     }
 
     private func loadPhotos() {
-        photos = PhotoStorageService.shared.loadPhotos()
+        let loadedPhotos = PhotoStorageService.shared.loadPhotos()
+        // 限制照片数量以避免内存问题
+        let maxPhotos = 1000
+        if loadedPhotos.count > maxPhotos {
+            photos = Array(loadedPhotos.prefix(maxPhotos))
+            logWarning("Gallery photo count limited to \(maxPhotos)", category: .performance)
+        } else {
+            photos = loadedPhotos
+        }
+        logInfo("Gallery loaded (\(photos.count) photos)", category: .ui)
     }
 }
 
@@ -177,59 +186,123 @@ struct PhotoDetailView: View {
 // (Placed here to ensure compilation visibility)
 class PhotoStorageService {
     static let shared = PhotoStorageService()
-    
+
     private let fileManager = FileManager.default
     private var documentsDirectory: URL {
         fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
-    
+
     private var photosDirectory: URL {
         documentsDirectory.appendingPathComponent("CapturedPhotos")
     }
-    
+
+    // 最大存储照片数量
+    private let maxStoredPhotos = 1000
+
     init() {
         createDirectoryIfNeeded()
     }
-    
+
     private func createDirectoryIfNeeded() {
         if !fileManager.fileExists(atPath: photosDirectory.path) {
-            try? fileManager.createDirectory(at: photosDirectory, withIntermediateDirectories: true)
+            do {
+                try fileManager.createDirectory(at: photosDirectory, withIntermediateDirectories: true)
+                logInfo("Created photos directory: \(photosDirectory.path)", category: .general)
+            } catch {
+                logError("Failed to create photos directory: \(error.localizedDescription)", category: .general)
+            }
         }
     }
-    
+
     func savePhoto(_ image: UIImage, description: String? = nil) {
+        // 使用ImageProcessor优化压缩
+        guard let data = image.compressed(maxFileSizeKB: 500) else {
+            logError("Failed to compress image for storage", category: .general)
+            return
+        }
+
         let timestamp = Date()
         let filename = "\(Int(timestamp.timeIntervalSince1970)).jpg"
         let fileURL = photosDirectory.appendingPathComponent(filename)
-        
-        guard let data = image.jpegData(compressionQuality: 0.9) else { return }
-        
+
         do {
             try data.write(to: fileURL)
-            print("✅ [PhotoStorage] Saved photo to \(fileURL.path)")
+            logInfo("Saved photo to storage", category: .general)
+
+            // 清理旧照片
+            cleanupOldPhotos()
         } catch {
-            print("❌ [PhotoStorage] Failed to save photo: \(error)")
+            logError("Failed to save photo: \(error.localizedDescription)", category: .general)
         }
     }
-    
+
     func loadPhotos() -> [GalleryPhoto] {
-        guard let fileURLs = try? fileManager.contentsOfDirectory(at: photosDirectory, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles) else {
+        guard let fileURLs = try? fileManager.contentsOfDirectory(
+            at: photosDirectory,
+            includingPropertiesForKeys: [.creationDateKey, .fileSizeKey],
+            options: .skipsHiddenFiles
+        ) else {
             return []
         }
-        
+
         let sortedURLs = fileURLs.sorted { url1, url2 in
             let date1 = (try? url1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
             let date2 = (try? url2.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
             return date1 > date2
         }
-        
-        return sortedURLs.compactMap { url in
+
+        let photos = sortedURLs.compactMap { url -> GalleryPhoto? in
             guard let data = try? Data(contentsOf: url),
-                  let image = UIImage(data: data) else { return nil }
-            
+                  let image = UIImage(data: data) else {
+                return nil
+            }
+
             let creationDate = (try? url.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date()
-            
+
             return GalleryPhoto(image: image, timestamp: creationDate, aiDescription: nil)
+        }
+
+        logInfo("Loaded \(photos.count) photos from storage", category: .general)
+        return photos
+    }
+
+    /// 清理旧照片，保持最大数量限制
+    private func cleanupOldPhotos() {
+        guard let fileURLs = try? fileManager.contentsOfDirectory(
+            at: photosDirectory,
+            includingPropertiesForKeys: [.creationDateKey],
+            options: .skipsHiddenFiles
+        ) else {
+            return
+        }
+
+        if fileURLs.count > maxStoredPhotos {
+            let sortedURLs = fileURLs.sorted { url1, url2 in
+                let date1 = (try? url1.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
+                let date2 = (try? url2.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? Date.distantPast
+                return date1 < date2
+            }
+
+            // 删除最旧的照片
+            let urlsToDelete = Array(sortedURLs.prefix(fileURLs.count - maxStoredPhotos))
+            for url in urlsToDelete {
+                try? fileManager.removeItem(at: url)
+            }
+
+            logInfo("Cleaned up \(urlsToDelete.count) old photos", category: .general)
+        }
+    }
+
+    /// 清除所有照片
+    func clearAllPhotos() {
+        do {
+            let fileURLs = try fileManager.contentsOfDirectory(at: photosDirectory, includingPropertiesForKeys: nil)
+            for url in fileURLs {
+                try fileManager.removeItem(at: url)
+            }
+            logInfo("Cleared all photos from storage", category: .general)
+        } catch {
+            logError("Failed to clear photos: \(error.localizedDescription)", category: .general)
         }
     }
 }

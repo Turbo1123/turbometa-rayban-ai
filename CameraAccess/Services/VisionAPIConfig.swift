@@ -12,6 +12,7 @@ struct VisionAPIConfig {
         case stepfun
         case openai
         case gemini
+        case openrouter
         case geminiCompatible
 
         var id: String { rawValue }
@@ -23,6 +24,7 @@ struct VisionAPIConfig {
             case .stepfun: return "阶越星辰"
             case .openai: return "OpenAI 兼容"
             case .gemini: return "Gemini"
+            case .openrouter: return "OpenRouter"
             case .geminiCompatible: return "Gemini 兼容"
             }
         }
@@ -41,7 +43,8 @@ struct VisionAPIConfig {
                 return ""
             case .gemini:
                 return "https://generativelanguage.googleapis.com/v1beta"
-
+            case .openrouter:
+                return "https://openrouter.ai/api/v1"
             case .geminiCompatible:
                 return ""
             }
@@ -58,6 +61,8 @@ struct VisionAPIConfig {
             case .openai:
                 return ""
             case .gemini:
+                return ""
+            case .openrouter:
                 return ""
             case .geminiCompatible:
                 return ""
@@ -214,6 +219,9 @@ struct VisionAPIConfig {
         if lowercased.contains("gemini") {
             return .gemini
         }
+        if lowercased.contains("openrouter") {
+            return .openrouter
+        }
         return nil
     }
 
@@ -233,6 +241,9 @@ struct VisionAPIConfig {
         }
         if lowercased.contains("google") || lowercased.contains("googleapis") {
             return .gemini
+        }
+        if lowercased.contains("openrouter") {
+            return .openrouter
         }
         return nil
     }

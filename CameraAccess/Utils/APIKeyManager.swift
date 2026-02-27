@@ -19,7 +19,9 @@ class APIKeyManager {
     func saveAPIKey(_ key: String, provider: VisionAPIConfig.ModelProvider) -> Bool {
         guard !key.isEmpty else { return false }
 
-        let data = key.data(using: .utf8)!
+        guard let data = key.data(using: .utf8) else {
+            return false
+        }
 
         // Delete existing key first
         deleteAPIKey(provider: provider)

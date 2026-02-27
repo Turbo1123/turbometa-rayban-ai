@@ -16,9 +16,9 @@ class QuickVisionService {
     /// Initialize with explicit configuration
     init(apiKey: String, baseURL: String? = nil, model: String? = nil) {
         self.apiKey = apiKey
-        self.provider = VisionAPIConfig.provider
-        self.baseURL = baseURL ?? VisionAPIConfig.baseURL
-        self.model = model ?? VisionAPIConfig.model
+        self.provider = APIProviderManager.staticCurrentProvider
+        self.baseURL = baseURL ?? APIProviderManager.staticBaseURL
+        self.model = model ?? APIProviderManager.staticCurrentModel
     }
 
     /// Initialize with current provider configuration
@@ -89,8 +89,18 @@ class QuickVisionService {
     ///   - customPrompt: 自定义提示词（可选，如果为 nil 则使用当前模式的提示词）
     /// - Returns: 简洁的描述文本，适合 TTS 播报
     func analyzeImage(_ image: UIImage, customPrompt: String? = nil) async throws -> String {
-        // Convert image to base64
-        guard let imageData = image.jpegData(compressionQuality: 0.7) else {
+        // 验证图片
+        guard image.isValid else {
+            print("❌ [QuickVision] Invalid image provided")
+            throw QuickVisionError.invalidImage
+        }
+
+        // 如果图片过大，先进行缩放
+        let processedImage = image.sizeInMB > 5.0 ? image.scaled(maxWidth: 2048, maxHeight: 2048) : image
+
+        // 使用优化的压缩方法
+        guard let imageData = processedImage.compressed(maxFileSizeKB: 500) else {
+            print("❌ [QuickVision] Failed to compress image")
             throw QuickVisionError.invalidImage
         }
 
@@ -134,10 +144,10 @@ class QuickVisionService {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
 
-        // Set headers based on provider
-        let headers = VisionAPIConfig.headers(with: apiKey)
-        for (key, value) in headers {
-            urlRequest.setValue(value, forHTTPHeaderField: key)
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        if provider == .openrouter {
+            urlRequest.setValue("TurboMeta", forHTTPHeaderField: "X-Title")
         }
 
         urlRequest.timeoutInterval = 60 // 60秒超时（OpenRouter 可能需要更长时间）

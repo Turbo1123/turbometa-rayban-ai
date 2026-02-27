@@ -50,14 +50,14 @@
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Needed to connect to Meta AI Glasses</string>
+	<key>NSCameraUsageDescription</key>
+	<string>TurboMeta 需要访问相机以拍摄照片用于 AI 生成。</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>TurboMeta 需要访问麦克风以实现与智能眼镜的实时语音对话功能。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>TurboMeta 需要访问相册以保存从智能眼镜拍摄的照片。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>TurboMeta 需要访问相册以选择照片进行 AI 生成。</string>
-	<key>NSCameraUsageDescription</key>
-	<string>TurboMeta 需要访问相机以拍摄照片用于 AI 生成。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

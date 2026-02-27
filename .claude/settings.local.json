@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nMerge local-modifications: Add Gemini image generation features\n\nResolved conflicts by preferring upstream changes for:\n- Project configuration \\(project.pbxproj, Info.plist\\)\n- Core services and API configurations\n- UI components and ViewModels\n\nPreserved local enhancements:\n- GeminiImageGenService.swift\n- GeminiGenViewModel.swift\n- GeminiGenView.swift\n- Various UI improvements in Gallery, Stream, Settings views\n\nNote: Gemini files need to be added to Xcode project manually\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "mcp__codex__codex",
+      "Bash(xcodebuild:*)",
+      "Bash(tee:*)",
+      "Bash(chmod:*)",
+      "Bash(ruby:*)",
+      "Bash(cat:*)",
+      "Bash(git checkout:*)",
+      "Bash(python3:*)",
+      "Bash(open \"https://www.deepseek.com\")",
+      "Bash(xcode-select -p)",
+      "Bash(security find-identity -v -p codesigning)",
+      "Bash(unzip -l ./build/TurboMeta.ipa 2>/dev/null | head -30)",
+      "Bash(xcodebuild -exportArchive \\\\\n  -archivePath ./build/CameraAccess.xcarchive \\\\\n  -exportPath ./build \\\\\n  -exportOptionsPlist ExportOptions.plist 2>&1 && ls -lh ./build/*.ipa)",
+      "Bash(rm -rf ./build && mkdir -p ./build && xcodebuild archive \\\\\n  -project CameraAccess.xcodeproj \\\\\n  -scheme TurboMeta \\\\\n  -archivePath ./build/CameraAccess.xcarchive \\\\\n  -configuration Release \\\\\n  -destination 'generic/platform=iOS' \\\\\n  CODE_SIGN_IDENTITY=\"Apple Development\" \\\\\n  DEVELOPMENT_TEAM=\"3NUT9SN8XW\" 2>&1 | tail -5 && \\\\\nxcodebuild -exportArchive \\\\\n  -archivePath ./build/CameraAccess.xcarchive \\\\\n  -exportPath ./build \\\\\n  -exportOptionsPlist ExportOptions.plist 2>&1 | tail -3 && \\\\\nls -lh ./build/*.ipa)"
+    ]
+  }
+}

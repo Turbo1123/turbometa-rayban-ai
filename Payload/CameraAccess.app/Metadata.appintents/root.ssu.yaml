@@ -1,0 +1,160 @@
+apiVersion: ssu/v1
+nlu:
+  shortcuts:
+    bundleIdentifier: com.hellozzj1.external.CameraAccess
+    intents:
+    - metadata:
+        name: QuickVisionIntent_0
+        title: 快速识图
+      corpuses:
+        training:
+        - locale: zh-Hans
+          utterances:
+          - 用 ${+applicationName} 识图
+          - 用 ${+applicationName} 看看这是什么
+          - ${+applicationName} 快速识图
+          - ${+applicationName} 拍照识别
+        - locale: en
+          utterances:
+          - '{${+prefix} }用 ${+applicationName} 识图'
+          - '{${+prefix} }用 ${+applicationName} 看看这是什么'
+          - '{${+prefix} }${+applicationName} 快速识图'
+          - '{${+prefix} }${+applicationName} 拍照识别'
+    - metadata:
+        name: QuickVisionHealthIntent_1
+        title: 健康识图
+      corpuses:
+        training:
+        - locale: zh-Hans
+          utterances:
+          - 用 ${+applicationName} 分析健康
+          - ${+applicationName} 健康识图
+          - ${+applicationName} 这个食物健康吗
+        - locale: en
+          utterances:
+          - '{${+prefix} }用 ${+applicationName} 分析健康'
+          - '{${+prefix} }${+applicationName} 健康识图'
+          - '{${+prefix} }${+applicationName} 这个食物健康吗'
+    - metadata:
+        name: QuickVisionBlindIntent_2
+        title: 环境描述
+      corpuses:
+        training:
+        - locale: zh-Hans
+          utterances:
+          - 用 ${+applicationName} 描述环境
+          - ${+applicationName} 看看周围有什么
+          - ${+applicationName} 帮我看看前面
+        - locale: en
+          utterances:
+          - '{${+prefix} }用 ${+applicationName} 描述环境'
+          - '{${+prefix} }${+applicationName} 看看周围有什么'
+          - '{${+prefix} }${+applicationName} 帮我看看前面'
+    - metadata:
+        name: QuickVisionReadingIntent_3
+        title: 朗读文字
+      corpuses:
+        training:
+        - locale: zh-Hans
+          utterances:
+          - 用 ${+applicationName} 朗读文字
+          - ${+applicationName} 读一下这个
+          - ${+applicationName} 帮我读文字
+        - locale: en
+          utterances:
+          - '{${+prefix} }用 ${+applicationName} 朗读文字'
+          - '{${+prefix} }${+applicationName} 读一下这个'
+          - '{${+prefix} }${+applicationName} 帮我读文字'
+    - metadata:
+        name: QuickVisionTranslateIntent_4
+        title: 翻译文字
+      corpuses:
+        training:
+        - locale: zh-Hans
+          utterances:
+          - 用 ${+applicationName} 翻译
+          - ${+applicationName} 翻译这个
+          - ${+applicationName} 这个是什么意思
+        - locale: en
+          utterances:
+          - '{${+prefix} }用 ${+applicationName} 翻译'
+          - '{${+prefix} }${+applicationName} 翻译这个'
+          - '{${+prefix} }${+applicationName} 这个是什么意思'
+    - metadata:
+        name: QuickVisionEncyclopediaIntent_5
+        title: 百科识别
+      corpuses:
+        training:
+        - locale: zh-Hans
+          utterances:
+          - 用 ${+applicationName} 介绍这个
+          - ${+applicationName} 百科识别
+          - ${+applicationName} 这是什么东西
+        - locale: en
+          utterances:
+          - '{${+prefix} }用 ${+applicationName} 介绍这个'
+          - '{${+prefix} }${+applicationName} 百科识别'
+          - '{${+prefix} }${+applicationName} 这是什么东西'
+    - metadata:
+        name: LiveAIIntent_6
+        title: 实时对话
+      corpuses:
+        training:
+        - locale: zh-Hans
+          utterances:
+          - 用 ${+applicationName} 实时对话
+          - ${+applicationName} 实时对话
+          - 开始 ${+applicationName} 实时对话
+          - ${+applicationName} 开始对话
+        - locale: en
+          utterances:
+          - '{${+prefix} }用 ${+applicationName} 实时对话'
+          - '{${+prefix} }${+applicationName} 实时对话'
+          - '{${+prefix} }开始 ${+applicationName} 实时对话'
+          - '{${+prefix} }${+applicationName} 开始对话'
+    - metadata:
+        name: StopLiveAIIntent_7
+        title: 停止实时对话
+      corpuses:
+        training:
+        - locale: zh-Hans
+          utterances:
+          - ${+applicationName} 停止实时对话
+          - 停止 ${+applicationName} 实时对话
+          - ${+applicationName} 结束对话
+        - locale: en
+          utterances:
+          - '{${+prefix} }${+applicationName} 停止实时对话'
+          - '{${+prefix} }停止 ${+applicationName} 实时对话'
+          - '{${+prefix} }${+applicationName} 结束对话'
+    - metadata:
+        name: +negative
+      corpuses:
+        training:
+        - locale: zh-Hans
+          utterances: []
+        - locale: en
+          utterances:
+          - '{${+prefix} }${+standardAppShortcutNegatives}'
+variables:
+- name: +applicationName
+  type: ssu/expansion
+  definitions:
+  - locale: zh-Hans
+    synomyms:
+    - CameraAccess
+  - locale: en
+    synomyms:
+    - CameraAccess
+- name: +prefix
+  type: ssu/expansion
+  definitions:
+  - locale: en
+    synomyms:
+      $ref: ssu://Resources/prefix/en.yaml
+- name: +standardAppShortcutNegatives
+  type: ssu/expansion
+  definitions:
+  - locale: en
+    synomyms:
+      $ref: ssu://Resources/standardAppShortcutNegatives/en.yaml

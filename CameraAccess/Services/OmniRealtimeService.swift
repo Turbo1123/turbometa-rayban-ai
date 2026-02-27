@@ -60,7 +60,7 @@ class OmniRealtimeService: NSObject {
     // Audio Playback Engine (separate engine for playback)
     private var playbackEngine: AVAudioEngine?
     private var playerNode: AVAudioPlayerNode?
-    private let audioFormat = AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: 24000, channels: 1, interleaved: true)
+    private var audioFormat: AVAudioFormat?
 
     // Audio buffer management
     private var audioBuffer = Data()
@@ -115,6 +115,9 @@ class OmniRealtimeService: NSObject {
     private func setupPlaybackEngine() {
         playbackEngine = AVAudioEngine()
         playerNode = AVAudioPlayerNode()
+
+        // Initialize audio format
+        audioFormat = AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: 24000, channels: 1, interleaved: true)
 
         guard let playbackEngine = playbackEngine,
               let playerNode = playerNode,
