@@ -12,6 +12,7 @@ import android.util.Base64
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.turbometa.rayban.managers.BluetoothAudioManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,7 +29,8 @@ import java.util.concurrent.TimeUnit
 class GeminiLiveService(
     private val apiKey: String,
     private val model: String = "gemini-2.0-flash-exp",
-    private val outputLanguage: String = "zh-CN"
+    private val outputLanguage: String = "zh-CN",
+    private val context: Context? = null
 ) {
     companion object {
         private const val TAG = "GeminiLiveService"
@@ -85,6 +87,17 @@ class GeminiLiveService(
     private var audioChunkCount = 0
     private val minChunksBeforePlay = 2
     private var hasStartedPlaying = false
+
+    // Bluetooth Audio Manager
+    private var bluetoothAudioManager: BluetoothAudioManager? = null
+    private var currentAudioSource = BluetoothAudioManager.AudioSource.PHONE_MIC
+
+    init {
+        // 初始化蓝牙音频管理器
+        context?.let {
+            bluetoothAudioManager = BluetoothAudioManager(it)
+        }
+    }
 
     private val client = OkHttpClient.Builder()
         .readTimeout(0, TimeUnit.MILLISECONDS)
@@ -145,7 +158,26 @@ class GeminiLiveService(
         _isRecording.value = false
         _isSpeaking.value = false
         isSessionConfigured = false
+        bluetoothAudioManager?.cleanup()
         scope.cancel()
+    }
+
+    /**
+     * 根据当前音频源获取输入采样率
+     */
+    private fun getInputSampleRate(): Int {
+        // Gemini输入固定使用16kHz，与HFP兼容
+        return INPUT_SAMPLE_RATE
+    }
+
+    /**
+     * 根据当前音频源获取AudioSource
+     */
+    private fun getAudioSource(): Int {
+        return when (currentAudioSource) {
+            BluetoothAudioManager.AudioSource.BLUETOOTH_MIC -> MediaRecorder.AudioSource.VOICE_COMMUNICATION
+            BluetoothAudioManager.AudioSource.PHONE_MIC -> MediaRecorder.AudioSource.MIC
+        }
     }
 
     // MARK: - Session Configuration
@@ -228,9 +260,10 @@ class GeminiLiveService(
         try {
             Log.d(TAG, "Starting recording")
 
+            val audioSource = getAudioSource()
             val bufferSize = AudioRecord.getMinBufferSize(INPUT_SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT)
             audioRecord = AudioRecord(
-                MediaRecorder.AudioSource.MIC,
+                audioSource,
                 INPUT_SAMPLE_RATE,
                 CHANNEL_CONFIG,
                 AUDIO_FORMAT,
@@ -276,6 +309,32 @@ class GeminiLiveService(
         audioRecord?.release()
         audioRecord = null
         hasAudioBeenSent = false
+    }
+
+    /**
+     * 切换音频源
+     * @param source 目标音频源
+     */
+    fun switchAudioSource(source: BluetoothAudioManager.AudioSource) {
+        if (currentAudioSource == source) return
+
+        val wasRecording = _isRecording.value
+
+        // 停止当前录音
+        if (wasRecording) {
+            stopRecording()
+        }
+
+        // 切换音频路由
+        bluetoothAudioManager?.switchAudioSource(source)
+        currentAudioSource = source
+
+        // 如果之前在录音，重新启动
+        if (wasRecording) {
+            startRecording()
+        }
+
+        Log.d(TAG, "音频源已切换到: $source")
     }
 
     fun updateVideoFrame(frame: Bitmap) {
@@ -480,9 +539,15 @@ class GeminiLiveService(
                 AudioFormat.ENCODING_PCM_16BIT
             )
 
-            // 使用 AudioAttributes 替代已弃用的 STREAM_MUSIC（兼容性更好）
+            // 根据音频源选择不同的AudioAttributes
             val audioAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setUsage(
+                    if (currentAudioSource == BluetoothAudioManager.AudioSource.BLUETOOTH_MIC) {
+                        AudioAttributes.USAGE_VOICE_COMMUNICATION
+                    } else {
+                        AudioAttributes.USAGE_MEDIA
+                    }
+                )
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                 .build()
 

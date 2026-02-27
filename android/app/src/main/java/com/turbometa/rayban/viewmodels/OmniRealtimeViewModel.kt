@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.turbometa.rayban.data.ConversationStorage
 import com.turbometa.rayban.managers.APIProviderManager
+import com.turbometa.rayban.managers.BluetoothAudioManager
 import com.turbometa.rayban.managers.LiveAIProvider
 import com.turbometa.rayban.models.ConversationMessage
 import com.turbometa.rayban.models.ConversationRecord
@@ -34,6 +35,9 @@ class OmniRealtimeViewModel(application: Application) : AndroidViewModel(applica
     private val apiKeyManager = APIKeyManager.getInstance(application)
     private val providerManager = APIProviderManager.getInstance(application)
     private val conversationStorage = ConversationStorage.getInstance(application)
+
+    // Bluetooth Audio Manager
+    private val bluetoothAudioManager = BluetoothAudioManager(application)
 
     // Services
     private var omniService: OmniRealtimeService? = null
@@ -77,6 +81,11 @@ class OmniRealtimeViewModel(application: Application) : AndroidViewModel(applica
 
     private val _isSpeaking = MutableStateFlow(false)
     val isSpeaking: StateFlow<Boolean> = _isSpeaking.asStateFlow()
+
+    // Audio source state
+    val currentAudioSource: StateFlow<BluetoothAudioManager.AudioSource> = bluetoothAudioManager.currentAudioSource
+    val isBluetoothScoConnected: StateFlow<Boolean> = bluetoothAudioManager.isBluetoothScoConnected
+    val isBluetoothScoAvailable: StateFlow<Boolean> = bluetoothAudioManager.isBluetoothScoAvailable
 
     private var currentSessionId: String = UUID.randomUUID().toString()
     private var pendingVideoFrame: Bitmap? = null
@@ -324,6 +333,22 @@ class OmniRealtimeViewModel(application: Application) : AndroidViewModel(applica
         }
         if (_viewState.value == ViewState.Recording) {
             _viewState.value = ViewState.Processing
+        }
+    }
+
+    /**
+     * 切换音频源（手机麦克风 / 眼镜麦克风）
+     */
+    fun switchAudioSource(source: BluetoothAudioManager.AudioSource) {
+        Log.d(TAG, "切换音频源到: $source")
+
+        // 切换蓝牙音频管理器的音频源
+        bluetoothAudioManager.switchAudioSource(source)
+
+        // 通知当前活动的Service切换音频源
+        when (_currentProvider.value) {
+            LiveAIProvider.ALIBABA -> omniService?.switchAudioSource(source)
+            LiveAIProvider.GOOGLE -> geminiService?.switchAudioSource(source)
         }
     }
 
