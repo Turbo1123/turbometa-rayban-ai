@@ -13,7 +13,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Turbo1123/turbometa-rayban-ai)](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/turbo1123)
-[![removed](https://img.shields.io/badge/removed-00457C?style=for-the-badge&logo=removed&logoColor=white)](./.png)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/turbo1123)
 
 [English](./README_EN.md) | [简体中文](./README.md)
 
@@ -31,11 +31,11 @@
 
 ✅ **iOS v1.5.0** | 📱 **Android v1.5.0** [Download](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 
-☕ **Enjoying this project?** [**Buy me a coffee**](https://buymeacoffee.com/turbo1123) or [**removed**](./.png) to support development!
+☕ **Enjoying this project?** [**Buy me a coffee**](https://buymeacoffee.com/turbo1123)  to support development!
 
 </div>
 
-> ☕ **Enjoying this project?** This is a passion project maintained in my spare time. If it's been helpful to you, consider [**buying me a coffee**](https://buymeacoffee.com/turbo1123) or donate via [**removed**](./.png) - it really helps keep the project going!
+> ☕ **Enjoying this project?** This is a passion project maintained in my spare time. If it's been helpful to you, consider [**buying me a coffee**](https://buymeacoffee.com/turbo1123) - it really helps keep the project going!
 
 ### 🆕 v1.5 New Features
 
@@ -147,32 +147,11 @@ Before using TurboMeta, you **MUST** enable developer mode in Meta AI App:
 
 👉 [**Go to Downloads**](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
 
-**iOS Installation Methods:**
+### Build from Source
 
-| Tool | Platform | Description |
-|------|----------|-------------|
-| [](https:///) | macOS/Windows | Free, requires Apple ID |
-| [](https:///) | macOS/Windows | Free, easy to use |
-| [ ()](https://www.i4.cn/) | Windows | Chinese users recommended |
-| Xcode | macOS | Build from source code |
-
-###  Installation Guide (Recommended for Windows)
-
-**Step 1**: Open , go to "Toolbox" → "IPA Signature"
-
-![Step 1](.//.png)
-
-**Step 2**: Add IPA file and sign with your Apple ID
-
-![Step 2](.//.png)
-
-**Step 3**: After signing, go to "Apps" → "Import & Install", select the signed IPA
-
-![Step 3](.//.png)
-
-**Step 4**: On iPhone, go to **Settings → General → VPN & Device Management**, trust the developer certificate
-
-**Step 5**: Open TurboMeta and configure your Alibaba Cloud API Key in Settings 👉 [See Configuration Guide](#api-key-config)
+1. Open the project in Xcode, connect your iPhone and run
+2. First launch requires trusting the developer certificate on iPhone
+3. Open TurboMeta and configure your Alibaba Cloud API Key in Settings 👉 [See Configuration Guide](#api-key-config)
 
 ---
 
@@ -298,11 +277,7 @@ Quick steps:
 2. Click the Run button
 3. First-time run requires trusting the developer in iPhone Settings
 
-#### Method B: Export IPA and Self-Sign
-1. In Xcode, select **Product** → **Archive**
-2. Export the IPA file
-3. Use , , or other tools to 
-
+#### Method B: Using ios-deploy
 ```bash
 # Using ios-deploy (requires installation)
 brew install ios-deploy
@@ -696,12 +671,8 @@ If this project helps you, consider supporting development! Your support keeps t
 <a href="https://buymeacoffee.com/turbo1123" target="_blank">
   <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee" height="50"/>
 </a>
-&nbsp;&nbsp;
-<a href="./.png" target="_blank">
-  <img src="https://img.shields.io/badge/removed-00457C?style=for-the-badge&logo=removed&logoColor=white" alt="removed" height="50"/>
-</a>
 
-### ☕ [**Buy me a coffee**](https://buymeacoffee.com/turbo1123) &nbsp;|&nbsp; 💳 [**removed**](./.png)
+### ☕ [**Buy me a coffee**](https://buymeacoffee.com/turbo1123)
 
 </div>
 

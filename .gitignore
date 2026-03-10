@@ -39,3 +39,12 @@ android/app/build/
 android/.kotlin/
 android/local.properties
 *.apk
+
+# Xcode backup & archive
+*.pbxproj.backup
+*.xcarchive/
+*.mobileprovision
+*.dSYM/
+
+# Signing tutorial images
+/

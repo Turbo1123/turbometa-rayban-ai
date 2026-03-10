@@ -93,13 +93,9 @@
 
 ## Installation / 安装方式
 
-1. Download ``
-2. Sign with your Apple ID using:
-   -  () - Recommended for China users
-   - 
-   - 
-3. Trust developer certificate in Settings → General → VPN & Device Management
-4. Configure API keys in app Settings
+1. Clone the repository and build from source using Xcode
+2. Trust developer certificate in Settings → General → VPN & Device Management
+3. Configure API keys in app Settings
 
 ---
 
@@ -113,7 +109,7 @@
 ## Feedback / 反馈
 
 - GitHub Issues: https://github.com/Turbo1123/turbometa-rayban-ai/issues
-- WeChat: 
+- GitHub Issues
 
 ---
 
