@@ -19,6 +19,10 @@
 
 ---
 
+> **Disclaimer**: This is an open-source project providing source code only for developers to learn and study. We do **NOT** provide any pre-built binaries for download, do NOT support any method of bypassing official app store distribution, and will NOT respond to any inquiries related to unofficial distribution or sideloading. iOS users should build the project using Xcode following standard Apple development workflows. This project strictly complies with all terms of the [Apple Developer Program License Agreement](https://developer.apple.com/support/terms/).
+
+---
+
 ## 🎉 Major Update v1.5.0
 
 <div align="center">

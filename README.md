@@ -19,6 +19,8 @@
 
 ---
 
+> **声明**：本项目为开源项目，仅提供源代码供开发者学习和研究。本项目**不提供任何预编译安装包下载**，不提供任何绕过官方应用商店的安装方式，也不会回答任何与非官方分发、侧载安装相关的问题。iOS 用户请通过 Xcode 按照 Apple 标准开发流程在个人设备上编译运行。本项目严格遵守 [Apple Developer Program License Agreement](https://developer.apple.com/support/terms/) 的所有条款。
+
 > 🌍 **For English speakers**: Please check [**README_EN.md**](./README_EN.md) for the English version of this documentation.
 
 ---
