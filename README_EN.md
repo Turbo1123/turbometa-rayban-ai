@@ -108,25 +108,25 @@ Due to Meta DAT SDK limitations, the app cannot directly access the glasses came
 
 ## 📥 Get the Source Code
 
-> ⚠️ **Disclaimer**: The iOS version of this project is for **educational and development purposes only**. We do **NOT** provide source code only. iOS users must build from source using Xcode. Android users can download the APK directly.
+> ⚠️ **Note**: This is an open-source project. The iOS version provides source code only — users should build the project using Xcode following standard Apple development workflows. Android users can download the APK from the Releases page.
 
-### ⚠️ Important: Enable Developer Mode First!
+### ⚠️ Important: Enable Meta DAT SDK Preview Mode First!
 
-Before using TurboMeta, you **MUST** enable developer mode in Meta AI App:
+Before using TurboMeta, you **MUST** enable DAT SDK Preview Mode in Meta View App (this is unrelated to iOS Developer Mode):
 
 1. **Update RayBan Meta glasses firmware to version 20+** (required for DAT SDK)
-2. **Update Meta AI App to the latest version**
-3. Open **Meta AI App** on your phone
+2. **Update Meta View App to the latest version**
+3. Open **Meta View App** (or **Meta AI App**) on your phone
 4. Go to **Settings** → **App Info**
 5. Find **Version Number**
 6. **Tap the version number 5 times rapidly**
-7. You'll see "DAT SDK Preview Mode enabled" message
+7. A confirmation message will appear
 
-> Without developer mode, the app will show an error when redirecting to Meta AI App!
+> This is required by Meta Wearables DAT SDK (currently in Preview). See Meta's official documentation for details.
 
 ---
 
-### 🍎 iOS — Build from Source (Build from Source)
+### 🍎 iOS — Build from Source
 
 > ✅ Supports bilingual UI, OpenRouter, Gemini, RTMP streaming
 
@@ -236,15 +236,15 @@ You need to apply for the following Alibaba Cloud APIs:
 
 ## 🚀 Installation Guide
 
-### Step 1: Enable RayBan Meta Developer Mode
+### Step 1: Enable Meta DAT SDK Preview Mode
 
-⚠️ **Important**: Since this is currently in Preview phase, you must enable developer mode to use it.
+⚠️ **Important**: Since the Meta Wearables DAT SDK is currently in Preview, you must enable Preview Mode in Meta View App (this is unrelated to iOS Developer Mode).
 
 1. Open **Meta View App** (or **Meta AI App**) on your iPhone
 2. Go to **Settings** → **App Info** or **About**
 3. Find **Version Number**
 4. **Tap the version number 5 times consecutively**
-5. You'll see a "DAT SDK Preview Mode enabled" message
+5. A confirmation message will appear
 
 ### Step 2: Configure API Key
 
@@ -405,7 +405,7 @@ Siri/Shortcut Trigger
 
 **Q: Why does it say "Glasses not connected"?**
 - Ensure glasses are on and paired with Meta View App
-- Make sure developer mode is enabled
+- Make sure Meta DAT SDK Preview Mode is enabled in Meta View App
 - Try reopening TurboMeta App
 
 **Q: Why is there no sound?**
@@ -452,7 +452,7 @@ Customize AI response style in `OmniRealtimeService.swift`:
 2. Check if Bluetooth is enabled
 3. Restart TurboMeta App
 4. Restart glasses (place in charging case)
-5. Ensure developer mode is enabled
+5. Ensure Meta DAT SDK Preview Mode is enabled in Meta View App
 
 ### Q2: AI not responding or responding slowly?
 
@@ -470,13 +470,13 @@ Customize AI response style in `OmniRealtimeService.swift`:
 3. Show food completely in frame
 4. AI analysis is for reference only, not a substitute for professional nutritionists
 
-### Q4: Cannot install on phone?
+### Q4: Xcode build fails or cannot run on device?
 
 **Solutions**:
-1. Check if iPhone is in trusted devices list
-2. Verify developer certificate is valid
-3. Modify Bundle Identifier to avoid conflicts
-4. Ensure you have a valid Apple Developer account
+1. Ensure your iPhone is registered as a development device in Xcode
+2. Verify your signing configuration in Xcode → Signing & Capabilities
+3. Change the Bundle Identifier in Xcode project settings to avoid conflicts
+4. Ensure you are signed in with a valid Apple ID in Xcode → Settings → Accounts
 
 ### Q5: Voice recognition inaccurate?
 
@@ -492,7 +492,7 @@ Customize AI response style in `OmniRealtimeService.swift`:
 - ✅ No storage or upload of user privacy data
 - ✅ API communications use HTTPS encryption
 - ✅ Images and voice are retained only during session
-- ✅ Complies with Apple and Meta privacy policies
+- ✅ Follows industry best practices for data handling
 
 ## 🗺️ Roadmap
 
@@ -594,7 +594,6 @@ xcuserdata/
 *.moved-aside
 DerivedData/
 *.hmap
-
 *.xcuserstate
 *.xcworkspace
 
