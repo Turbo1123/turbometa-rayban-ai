@@ -108,7 +108,7 @@ Due to Meta DAT SDK limitations, the app cannot directly access the glasses came
 
 ## 📥 Get the Source Code
 
-> ⚠️ **Disclaimer**: This is an open-source project for **educational and development purposes only**. We do **NOT** provide any pre-built binary downloads. You must build from source using Xcode or Android Studio.
+> ⚠️ **Disclaimer**: The iOS version of this project is for **educational and development purposes only**. We do **NOT** provide source code only. iOS users must build from source using Xcode. Android users can download the APK directly.
 
 ### ⚠️ Important: Enable Developer Mode First!
 
@@ -137,11 +137,14 @@ Before using TurboMeta, you **MUST** enable developer mode in Meta AI App:
 5. First launch requires trusting the developer certificate in iPhone **Settings → General → VPN & Device Management**
 6. Open TurboMeta and configure your Alibaba Cloud API Key in Settings 👉 [See Configuration Guide](#api-key-config)
 
-### 📱 Android — Build from Source
+### 📱 Android
 
-1. Clone this repository
-2. Open the `android/` directory with **Android Studio**
-3. Connect your Android phone, click Run to build and install
+👉 [**Download APK**](https://github.com/Turbo1123/turbometa-rayban-ai/releases)
+
+**Installation:**
+1. Download the APK file
+2. Enable "Install from unknown sources" in Settings
+3. Open APK to install
 4. Grant permissions (Bluetooth, Microphone)
 5. Configure API Key in Settings 👉 [See Configuration Guide](#api-key-config)
 
