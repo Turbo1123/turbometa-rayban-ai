@@ -18,9 +18,8 @@ class LiveTranslateService: NSObject {
     // Configuration
     private let apiKey: String
     private let model = "qwen3-livetranslate-flash-realtime"
-    // 根据用户设置的区域动态获取 WebSocket URL
     private var baseURL: String {
-        return APIProviderManager.staticLiveAIWebsocketURL
+        return APIProviderManager.staticAlibabaEndpoint.websocketURL
     }
 
     // Audio Engine (for recording)
@@ -59,6 +58,9 @@ class LiveTranslateService: NSObject {
 
     // State
     private var isRecording = false
+    private var isSocketOpen = false
+    private var isSessionReady = false
+    private var isDisconnecting = false
     private var eventIdCounter = 0
 
     // Image sending
@@ -137,6 +139,9 @@ class LiveTranslateService: NSObject {
         urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: OperationQueue())
 
         webSocket = urlSession?.webSocketTask(with: request)
+        isDisconnecting = false
+        isSocketOpen = false
+        isSessionReady = false
         webSocket?.resume()
 
         print("🔌 [Translate] WebSocket 任务已启动")
@@ -145,12 +150,15 @@ class LiveTranslateService: NSObject {
 
     func disconnect() {
         print("🔌 [Translate] 断开 WebSocket 连接")
+        isDisconnecting = true
         webSocket?.cancel(with: .goingAway, reason: nil)
         webSocket = nil
         urlSession?.invalidateAndCancel()
         urlSession = nil
         stopRecording()
         stopPlaybackEngine()
+        isSocketOpen = false
+        isSessionReady = false
     }
 
     // MARK: - Configuration
@@ -167,7 +175,7 @@ class LiveTranslateService: NSObject {
         self.audioOutputEnabled = audioEnabled
 
         // 如果已连接，重新配置会话
-        if webSocket != nil {
+        if isSocketOpen {
             configureSession()
         }
     }
@@ -209,6 +217,10 @@ class LiveTranslateService: NSObject {
 
     func startRecording(usePhoneMic: Bool = false) {
         guard !isRecording else { return }
+        guard isSessionReady else {
+            onError?("翻译服务尚未连接完成，请稍后再试")
+            return
+        }
 
         do {
             print("🎤 [Translate] 开始录音, 使用\(usePhoneMic ? "iPhone" : "蓝牙")麦克风")
@@ -233,7 +245,7 @@ class LiveTranslateService: NSObject {
                 try audioSession.setCategory(
                     .playAndRecord,
                     mode: .default,
-                    options: [.allowBluetooth, .defaultToSpeaker]
+                    options: [.allowBluetoothHFP, .defaultToSpeaker]
                 )
                 print("🎙️ [Translate] 使用蓝牙麦克风（翻译自己）")
             }
@@ -281,7 +293,7 @@ class LiveTranslateService: NSObject {
     }
 
     private func processAudioBuffer(_ buffer: AVAudioPCMBuffer) {
-        guard let floatChannelData = buffer.floatChannelData else { return }
+        guard buffer.floatChannelData != nil else { return }
 
         let inputSampleRate = buffer.format.sampleRate
 
@@ -365,6 +377,8 @@ class LiveTranslateService: NSObject {
     // MARK: - Image Sending
 
     func sendImageFrame(_ image: UIImage) {
+        guard isSessionReady else { return }
+
         // 限制发送频率：每0.5秒最多一张
         let now = Date()
         if let lastTime = lastImageSendTime, now.timeIntervalSince(lastTime) < imageInterval {
@@ -397,6 +411,11 @@ class LiveTranslateService: NSObject {
     // MARK: - Send Events
 
     private func sendEvent(_ event: [String: Any]) {
+        guard isSocketOpen else {
+            print("⚠️ [Translate] WebSocket 尚未连接，跳过发送事件")
+            return
+        }
+
         guard let jsonData = try? JSONSerialization.data(withJSONObject: event),
               let jsonString = String(data: jsonData, encoding: .utf8) else {
             print("❌ [Translate] 无法序列化事件")
@@ -439,6 +458,7 @@ class LiveTranslateService: NSObject {
 
             case .failure(let error):
                 print("❌ [Translate] 接收消息失败: \(error.localizedDescription)")
+                guard self?.isDisconnecting != true else { return }
                 self?.onError?("Receive error: \(error.localizedDescription)")
             }
         }
@@ -475,6 +495,7 @@ class LiveTranslateService: NSObject {
             case TranslateServerEvent.sessionCreated.rawValue,
                  TranslateServerEvent.sessionUpdated.rawValue:
                 print("✅ [Translate] 会话已建立")
+                self.isSessionReady = true
                 self.onConnected?()
 
             case TranslateServerEvent.responseAudioTranscriptText.rawValue:
@@ -610,6 +631,7 @@ extension LiveTranslateService: URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         print("✅ [Translate] WebSocket 连接已建立")
         DispatchQueue.main.async {
+            self.isSocketOpen = true
             self.configureSession()
         }
     }
@@ -617,5 +639,11 @@ extension LiveTranslateService: URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         let reasonString = reason.flatMap { String(data: $0, encoding: .utf8) } ?? "unknown"
         print("🔌 [Translate] WebSocket 已断开, closeCode: \(closeCode.rawValue), reason: \(reasonString)")
+        DispatchQueue.main.async {
+            self.isSocketOpen = false
+            self.isSessionReady = false
+            guard !self.isDisconnecting else { return }
+            self.onError?("翻译服务连接断开：closeCode=\(closeCode.rawValue), reason=\(reasonString)")
+        }
     }
 }

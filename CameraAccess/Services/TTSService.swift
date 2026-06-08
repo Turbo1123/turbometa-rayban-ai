@@ -125,15 +125,15 @@ class TTSService: NSObject, ObservableObject {
 
     /// 播报文本
     /// - 阿里云 API：使用阿里云 qwen3-tts-flash
-    /// - OpenRouter API：使用系统 TTS
+    /// - OpenRouter/AIHubMix API：使用系统 TTS
     func speak(_ text: String, apiKey: String? = nil) {
         // 取消之前的任务
         currentTask?.cancel()
         stop()
 
-        // OpenRouter 使用系统 TTS
-        if APIProviderManager.staticCurrentProvider == .openrouter {
-            print("🔊 [TTS] OpenRouter mode, using system TTS")
+        // Non-Alibaba providers do not use Alibaba qwen3-tts-flash.
+        if APIProviderManager.staticCurrentProvider != .alibaba {
+            print("🔊 [TTS] Non-Alibaba provider, using system TTS")
             isSpeaking = true
             currentTask = Task {
                 await fallbackToSystemTTS(text: text)

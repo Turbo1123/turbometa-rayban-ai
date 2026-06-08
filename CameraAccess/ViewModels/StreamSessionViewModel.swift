@@ -17,6 +17,7 @@
 import MWDATCamera
 import MWDATCore
 import SwiftUI
+import CoreMedia
 import os.log
 
 private let logger = Logger(subsystem: "com.smartview.glassai", category: "StreamSession")
@@ -30,6 +31,7 @@ enum StreamingStatus {
 @MainActor
 class StreamSessionViewModel: ObservableObject {
   @Published var currentVideoFrame: UIImage?
+  @Published var currentSampleBuffer: CMSampleBuffer?
   @Published var hasReceivedFirstFrame: Bool = false
   @Published var streamingStatus: StreamingStatus = .stopped
   @Published var showError: Bool = false
@@ -71,25 +73,8 @@ class StreamSessionViewModel: ObservableObject {
     // Let the SDK auto-select from available devices
     self.deviceSelector = AutoDeviceSelector(wearables: wearables)
 
-    // Get saved video quality setting from UserDefaults (only read at init)
-    let savedQuality = UserDefaults.standard.string(forKey: "video_quality") ?? "medium"
-    let resolution: StreamingResolution
-    switch savedQuality {
-    case "low":
-      resolution = .low
-    case "high":
-      resolution = .high
-    default:
-      resolution = .medium
-    }
-    logger.info("🟢 Using video quality: \(savedQuality) -> \(String(describing: resolution))")
-
     // Create ONE session at init - SDK pattern requires reusing same session
-    let config = StreamSessionConfig(
-      videoCodec: VideoCodec.raw,
-      resolution: resolution,
-      frameRate: 24)
-    streamSession = StreamSession(streamSessionConfig: config, deviceSelector: deviceSelector)
+    streamSession = Self.makeStreamSession(deviceSelector: deviceSelector)
     logger.info("🟢 StreamSession created")
 
     // Monitor device availability
@@ -100,54 +85,7 @@ class StreamSessionViewModel: ObservableObject {
       }
     }
 
-    // Subscribe to session state changes
-    stateListenerToken = streamSession.statePublisher.listen { [weak self] state in
-      Task { @MainActor [weak self] in
-        logger.info("📊 State changed: \(String(describing: state))")
-        self?.updateStatusFromState(state)
-      }
-    }
-
-    // Subscribe to video frames (skip if previous frame still processing)
-    videoFrameListenerToken = streamSession.videoFramePublisher.listen { [weak self] videoFrame in
-      Task { @MainActor [weak self] in
-        guard let self, !self.isProcessingFrame else { return }
-        self.isProcessingFrame = true
-        defer { self.isProcessingFrame = false }
-
-        if let image = videoFrame.makeUIImage() {
-          self.currentVideoFrame = image
-          if !self.hasReceivedFirstFrame {
-            logger.info("🎥 First frame received and converted")
-            self.hasReceivedFirstFrame = true
-          }
-        }
-      }
-    }
-
-    // Subscribe to errors
-    errorListenerToken = streamSession.errorPublisher.listen { [weak self] error in
-      Task { @MainActor [weak self] in
-        guard let self else { return }
-        logger.error("❌ Stream error: \(String(describing: error))")
-        let newErrorMessage = formatStreamingError(error)
-        if newErrorMessage != self.errorMessage {
-          showError(newErrorMessage)
-        }
-      }
-    }
-
-    // Subscribe to photo capture
-    photoDataListenerToken = streamSession.photoDataPublisher.listen { [weak self] photoData in
-      Task { @MainActor [weak self] in
-        guard let self else { return }
-        logger.info("📸 Photo captured - size: \(photoData.data.count) bytes")
-        if let uiImage = UIImage(data: photoData.data) {
-          self.capturedPhoto = uiImage
-          self.showPhotoPreview = true
-        }
-      }
-    }
+    subscribeToStreamSession()
 
     updateStatusFromState(streamSession.state)
     logger.info("🟢 StreamSessionViewModel init complete")
@@ -173,6 +111,42 @@ class StreamSessionViewModel: ObservableObject {
     } catch {
       logger.error("❌ Permission error: \(error.localizedDescription)")
       showError("Permission error: \(error.description)")
+    }
+  }
+
+  func applyVideoQuality(_ quality: String) async {
+    UserDefaults.standard.set(quality, forKey: "video_quality")
+    logger.info("🎥 Applying video quality: \(quality)")
+    await recreateStreamSession()
+  }
+
+  func applyRTMPEncodingMode(_ mode: RTMPVideoEncodingMode) async {
+    UserDefaults.standard.set(mode.rawValue, forKey: "rtmp_video_codec")
+    logger.info("🎥 Applying RTMP video codec: \(mode.rawValue)")
+    await recreateStreamSession()
+  }
+
+  private func recreateStreamSession() async {
+    let wasStreaming = streamingStatus != .stopped
+    if wasStreaming {
+      await streamSession.stop()
+    }
+
+    stateListenerToken = nil
+    videoFrameListenerToken = nil
+    errorListenerToken = nil
+    photoDataListenerToken = nil
+    currentVideoFrame = nil
+    currentSampleBuffer = nil
+    hasReceivedFirstFrame = false
+    isProcessingFrame = false
+
+    streamSession = Self.makeStreamSession(deviceSelector: deviceSelector)
+    subscribeToStreamSession()
+    updateStatusFromState(streamSession.state)
+
+    if wasStreaming {
+      await startSession()
     }
   }
 
@@ -254,6 +228,7 @@ class StreamSessionViewModel: ObservableObject {
     case .stopped:
       logger.info("📊 State is STOPPED - clearing frame")
       currentVideoFrame = nil
+      currentSampleBuffer = nil
       streamingStatus = .stopped
     case .waitingForDevice, .starting, .stopping, .paused:
       logger.info("📊 State is WAITING (\(String(describing: state)))")
@@ -261,6 +236,82 @@ class StreamSessionViewModel: ObservableObject {
     case .streaming:
       logger.info("📊 State is STREAMING ✅")
       streamingStatus = .streaming
+    }
+  }
+
+  private static func makeStreamSession(deviceSelector: AutoDeviceSelector) -> StreamSession {
+    let quality = UserDefaults.standard.string(forKey: "video_quality") ?? "high"
+    let resolution: StreamingResolution
+    switch quality {
+    case "low":
+      resolution = .low
+    case "medium":
+      resolution = .medium
+    default:
+      resolution = .high
+    }
+
+    logger.info("🟢 Using video quality: \(quality) -> \(String(describing: resolution))")
+    let codecSetting = UserDefaults.standard.string(forKey: "rtmp_video_codec") ?? RTMPVideoEncodingMode.h264.rawValue
+    let videoCodec: VideoCodec = codecSetting == RTMPVideoEncodingMode.hevc.rawValue ? .hvc1 : .raw
+    logger.info("🟢 Using video codec: \(codecSetting) -> \(String(describing: videoCodec))")
+
+    let config = StreamSessionConfig(
+      videoCodec: videoCodec,
+      resolution: resolution,
+      frameRate: 24)
+    return StreamSession(streamSessionConfig: config, deviceSelector: deviceSelector)
+  }
+
+  private func subscribeToStreamSession() {
+    stateListenerToken = streamSession.statePublisher.listen { [weak self] state in
+      Task { @MainActor [weak self] in
+        logger.info("📊 State changed: \(String(describing: state))")
+        self?.updateStatusFromState(state)
+      }
+    }
+
+    videoFrameListenerToken = streamSession.videoFramePublisher.listen { [weak self] videoFrame in
+      Task { @MainActor [weak self] in
+        guard let self, !self.isProcessingFrame else { return }
+        self.isProcessingFrame = true
+        defer { self.isProcessingFrame = false }
+
+        self.currentSampleBuffer = videoFrame.sampleBuffer
+
+        if let image = videoFrame.makeUIImage() {
+          self.currentVideoFrame = image
+          if !self.hasReceivedFirstFrame {
+            logger.info("🎥 First frame received and converted")
+            self.hasReceivedFirstFrame = true
+          }
+        } else if !self.hasReceivedFirstFrame {
+          logger.info("🎥 First compressed frame received")
+          self.hasReceivedFirstFrame = true
+        }
+      }
+    }
+
+    errorListenerToken = streamSession.errorPublisher.listen { [weak self] error in
+      Task { @MainActor [weak self] in
+        guard let self else { return }
+        logger.error("❌ Stream error: \(String(describing: error))")
+        let newErrorMessage = formatStreamingError(error)
+        if newErrorMessage != self.errorMessage {
+          showError(newErrorMessage)
+        }
+      }
+    }
+
+    photoDataListenerToken = streamSession.photoDataPublisher.listen { [weak self] photoData in
+      Task { @MainActor [weak self] in
+        guard let self else { return }
+        logger.info("📸 Photo captured - size: \(photoData.data.count) bytes")
+        if let uiImage = UIImage(data: photoData.data) {
+          self.capturedPhoto = uiImage
+          self.showPhotoPreview = true
+        }
+      }
     }
   }
 

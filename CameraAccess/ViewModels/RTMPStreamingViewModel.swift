@@ -6,6 +6,7 @@
 import SwiftUI
 import Combine
 import Security
+import CoreMedia
 import os.log
 
 private let logger = Logger(subsystem: "com.smartview.glassai", category: "RTMPStreaming")
@@ -18,7 +19,8 @@ class RTMPStreamingViewModel: ObservableObject {
     @Published var rtmpUrl: String = ""
     @Published var streamKey: String = ""
     @Published var selectedPlatform: StreamingPlatform = .custom
-    @Published var bitrate: Int = 2_000_000 // 2 Mbps
+    @Published var bitrate: Int = 6_000_000 // 6 Mbps
+    @Published var encodingMode: RTMPVideoEncodingMode = .h264
 
     @Published var isStreaming: Bool = false
     @Published var isConnecting: Bool = false
@@ -28,6 +30,8 @@ class RTMPStreamingViewModel: ObservableObject {
     @Published var currentFps: Double = 0.0
     @Published var connectionTime: TimeInterval = 0
     @Published var bytesSent: Int64 = 0
+    @Published var sourceResolution: String = "-"
+    @Published var outputResolution: String = "-"
 
     @Published var showError: Bool = false
     @Published var errorMessage: String?
@@ -113,7 +117,6 @@ class RTMPStreamingViewModel: ObservableObject {
     // MARK: - Private Properties
 
     private let streamingService: RTMPStreamingService
-    private weak var streamViewModel: StreamSessionViewModel?
     private var statsTimer: Timer?
     private var startTime: Date?
 
@@ -133,10 +136,6 @@ class RTMPStreamingViewModel: ObservableObject {
 
     // MARK: - Public Methods
 
-    func setStreamViewModel(_ viewModel: StreamSessionViewModel) {
-        self.streamViewModel = viewModel
-    }
-
     func selectPlatform(_ platform: StreamingPlatform) {
         selectedPlatform = platform
         if platform != .custom {
@@ -144,9 +143,14 @@ class RTMPStreamingViewModel: ObservableObject {
         }
     }
 
-    func startStreaming() {
+    func startStreaming(videoFrame: UIImage?, sampleBuffer: CMSampleBuffer?) {
         guard !isStreaming else {
             logger.warning("Already streaming")
+            return
+        }
+
+        guard hasCompleteRTMPDestination() else {
+            showError(message: "rtmp.error.missingkey".localized)
             return
         }
 
@@ -161,11 +165,25 @@ class RTMPStreamingViewModel: ObservableObject {
         isConnecting = true
         connectionStatus = .connecting
 
-        // Get video dimensions from current frame
-        let width = 504  // Default from Ray-Ban Meta
-        let height = 504
+        guard let dimensions = videoDimensions(videoFrame: videoFrame, sampleBuffer: sampleBuffer) else {
+            isConnecting = false
+            connectionStatus = .disconnected
+            showError(message: "rtmp.error.novideo".localized)
+            return
+        }
 
-        streamingService.startStreaming(url: fullUrl, width: width, height: height, bitrate: bitrate)
+        let outputBitrate = max(bitrate, recommendedBitrate(width: dimensions.width, height: dimensions.height))
+        sourceResolution = "\(dimensions.width)x\(dimensions.height)"
+        outputResolution = "\(dimensions.width)x\(dimensions.height)"
+        logger.info("RTMP video dimensions: \(dimensions.width)x\(dimensions.height), bitrate: \(outputBitrate), codec: \(self.encodingMode.rawValue)")
+
+        streamingService.startStreaming(
+            url: fullUrl,
+            width: dimensions.width,
+            height: dimensions.height,
+            bitrate: outputBitrate,
+            encodingMode: encodingMode
+        )
 
         saveSettings()
     }
@@ -185,11 +203,31 @@ class RTMPStreamingViewModel: ObservableObject {
         currentFps = 0.0
         connectionTime = 0
         bytesSent = 0
+        outputResolution = "-"
     }
 
     func feedFrame(_ image: UIImage, timestamp: Int64) {
+        let dimensions = videoDimensions(from: image)
+        let resolution = "\(dimensions.width)x\(dimensions.height)"
+        if sourceResolution != resolution {
+            sourceResolution = resolution
+            logger.info("RTMP source frame dimensions changed: \(resolution)")
+        }
         guard isStreaming else { return }
         streamingService.feedFrame(image, timestamp: timestamp)
+    }
+
+    func feedSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
+        if let dimensions = sampleBufferDimensions(sampleBuffer) {
+            let resolution = "\(dimensions.width)x\(dimensions.height)"
+            if sourceResolution != resolution {
+                sourceResolution = resolution
+                outputResolution = resolution
+                logger.info("RTMP source sampleBuffer dimensions changed: \(resolution)")
+            }
+        }
+        guard isStreaming else { return }
+        streamingService.feedSampleBuffer(sampleBuffer)
     }
 
     func dismissError() {
@@ -261,6 +299,10 @@ class RTMPStreamingViewModel: ObservableObject {
 
         guard !url.isEmpty else { return "" }
 
+        if isCompleteRTMPUrl(url) {
+            return url
+        }
+
         if !key.isEmpty {
             if !url.hasSuffix("/") {
                 url += "/"
@@ -269,6 +311,77 @@ class RTMPStreamingViewModel: ObservableObject {
         }
 
         return url
+    }
+
+    private func isCompleteRTMPUrl(_ url: String) -> Bool {
+        guard let urlObj = URL(string: url),
+              let scheme = urlObj.scheme?.lowercased(),
+              scheme == "rtmp" || scheme == "rtmps" else {
+            return false
+        }
+
+        return urlObj.path.split(separator: "/").count >= 2
+    }
+
+    private func hasCompleteRTMPDestination() -> Bool {
+        let url = rtmpUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = streamKey.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard let urlObj = URL(string: url),
+              let scheme = urlObj.scheme?.lowercased(),
+              scheme == "rtmp" || scheme == "rtmps" else {
+            return false
+        }
+
+        if !key.isEmpty {
+            return true
+        }
+
+        let pathComponents = urlObj.path.split(separator: "/")
+        return pathComponents.count >= 2
+    }
+
+    private func videoDimensions(from image: UIImage) -> (width: Int, height: Int) {
+        if let cgImage = image.cgImage {
+            return (cgImage.width, cgImage.height)
+        }
+
+        let scale = max(image.scale, 1)
+        return (Int(image.size.width * scale), Int(image.size.height * scale))
+    }
+
+    private func videoDimensions(videoFrame: UIImage?, sampleBuffer: CMSampleBuffer?) -> (width: Int, height: Int)? {
+        switch encodingMode {
+        case .h264:
+            guard let videoFrame else { return nil }
+            return videoDimensions(from: videoFrame)
+        case .hevc:
+            if let sampleBuffer, let dimensions = sampleBufferDimensions(sampleBuffer) {
+                return dimensions
+            }
+            if let videoFrame {
+                return videoDimensions(from: videoFrame)
+            }
+            return nil
+        }
+    }
+
+    private func sampleBufferDimensions(_ sampleBuffer: CMSampleBuffer) -> (width: Int, height: Int)? {
+        guard let formatDescription = sampleBuffer.formatDescription else { return nil }
+        let dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription)
+        guard dimensions.width > 0, dimensions.height > 0 else { return nil }
+        return (Int(dimensions.width), Int(dimensions.height))
+    }
+
+    private func recommendedBitrate(width: Int, height: Int) -> Int {
+        let pixels = width * height
+        if pixels >= 1_900_000 {
+            return 8_000_000
+        }
+        if pixels >= 900_000 {
+            return 6_000_000
+        }
+        return 4_000_000
     }
 
     private func startStatsTimer() {
@@ -290,6 +403,7 @@ class RTMPStreamingViewModel: ObservableObject {
         UserDefaults.standard.set(rtmpUrl, forKey: "rtmp_url")
         UserDefaults.standard.set(selectedPlatform.rawValue, forKey: "rtmp_platform")
         UserDefaults.standard.set(bitrate, forKey: "rtmp_bitrate")
+        UserDefaults.standard.set(encodingMode.rawValue, forKey: "rtmp_video_codec")
         // Stream key is sensitive, store in Keychain
         saveStreamKeyToKeychain(streamKey)
     }
@@ -305,7 +419,11 @@ class RTMPStreamingViewModel: ObservableObject {
         }
         let savedBitrate = UserDefaults.standard.integer(forKey: "rtmp_bitrate")
         if savedBitrate > 0 {
-            bitrate = savedBitrate
+            bitrate = max(savedBitrate, 6_000_000)
+        }
+        if let savedCodec = UserDefaults.standard.string(forKey: "rtmp_video_codec"),
+           let codec = RTMPVideoEncodingMode(rawValue: savedCodec) {
+            encodingMode = codec
         }
         // Migrate old UserDefaults key to Keychain
         if let oldKey = UserDefaults.standard.string(forKey: "rtmp_stream_key"), !oldKey.isEmpty {

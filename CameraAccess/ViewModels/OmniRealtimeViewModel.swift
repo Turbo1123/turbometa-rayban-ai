@@ -25,6 +25,10 @@ class OmniRealtimeViewModel: ObservableObject {
     private var geminiService: GeminiLiveService?
     private let provider: LiveAIProvider
     private let apiKey: String
+    private let liveAIModel: String
+    private var imageSendTimer: Timer?
+    private var lastImageSendTime: Date?
+    private let imageSendInterval: TimeInterval = 1.0
 
     // Video frame
     private var currentVideoFrame: UIImage?
@@ -33,13 +37,14 @@ class OmniRealtimeViewModel: ObservableObject {
     init(apiKey: String) {
         self.apiKey = apiKey
         self.provider = APIProviderManager.staticLiveAIProvider
+        self.liveAIModel = APIProviderManager.staticLiveAIModel
 
         // Initialize appropriate service based on provider
         switch provider {
         case .alibaba:
             self.omniService = OmniRealtimeService(apiKey: apiKey)
         case .google:
-            self.geminiService = GeminiLiveService(apiKey: apiKey)
+            self.geminiService = GeminiLiveService(apiKey: apiKey, model: liveAIModel)
         }
 
         setupCallbacks()
@@ -70,7 +75,8 @@ class OmniRealtimeViewModel: ObservableObject {
                 print("✅ [OmniVM] 收到第一次音频发送回调，启用图片发送")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     self?.isImageSendingEnabled = true
-                    print("📸 [OmniVM] 图片发送已启用（语音触发模式）")
+                    print("📸 [OmniVM] 图片发送已启用（连续视觉模式）")
+                    self?.startImageSending()
                 }
             }
         }
@@ -79,11 +85,9 @@ class OmniRealtimeViewModel: ObservableObject {
             Task { @MainActor in
                 self?.isSpeaking = true
 
-                if let strongSelf = self,
-                   strongSelf.isImageSendingEnabled,
-                   let frame = strongSelf.currentVideoFrame {
+                if let strongSelf = self, strongSelf.isImageSendingEnabled {
                     print("🎤📸 [OmniVM] 检测到用户语音，发送当前视频帧")
-                    strongSelf.omniService?.sendImageAppend(frame)
+                    strongSelf.sendLatestImage(force: true)
                 }
             }
         }
@@ -155,7 +159,8 @@ class OmniRealtimeViewModel: ObservableObject {
                 print("✅ [GeminiVM] 收到第一次音频发送回调，启用图片发送")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     self?.isImageSendingEnabled = true
-                    print("📸 [GeminiVM] 图片发送已启用（语音触发模式）")
+                    print("📸 [GeminiVM] 图片发送已启用（连续视觉模式）")
+                    self?.startImageSending()
                 }
             }
         }
@@ -164,11 +169,9 @@ class OmniRealtimeViewModel: ObservableObject {
             Task { @MainActor in
                 self?.isSpeaking = true
 
-                if let strongSelf = self,
-                   strongSelf.isImageSendingEnabled,
-                   let frame = strongSelf.currentVideoFrame {
+                if let strongSelf = self, strongSelf.isImageSendingEnabled {
                     print("🎤📸 [GeminiVM] 检测到用户语音，发送当前视频帧")
-                    strongSelf.geminiService?.sendImageInput(frame)
+                    strongSelf.sendLatestImage(force: true)
                 }
             }
         }
@@ -252,6 +255,7 @@ class OmniRealtimeViewModel: ObservableObject {
 
         isConnected = false
         isImageSendingEnabled = false
+        stopImageSending()
     }
 
     private func saveConversation() {
@@ -261,18 +265,10 @@ class OmniRealtimeViewModel: ObservableObject {
             return
         }
 
-        let aiModel: String
-        switch provider {
-        case .alibaba:
-            aiModel = "qwen3-omni-flash-realtime"
-        case .google:
-            aiModel = "gemini-2.0-flash-exp"
-        }
-
         let record = ConversationRecord(
             messages: conversationHistory,
-            aiModel: aiModel,
-            language: "zh-CN" // TODO: 从设置中获取
+            aiModel: liveAIModel,
+            language: "auto-bilingual"
         )
 
         ConversationStorage.shared.saveConversation(record)
@@ -299,6 +295,9 @@ class OmniRealtimeViewModel: ObservableObject {
         }
 
         isRecording = true
+        if isImageSendingEnabled {
+            startImageSending()
+        }
     }
 
     func stopRecording() {
@@ -312,12 +311,50 @@ class OmniRealtimeViewModel: ObservableObject {
         }
 
         isRecording = false
+        stopImageSending()
     }
 
     // MARK: - Video Frames
 
     func updateVideoFrame(_ frame: UIImage) {
         currentVideoFrame = frame
+    }
+
+    private func startImageSending() {
+        guard isConnected, isRecording else { return }
+        guard imageSendTimer == nil else { return }
+
+        sendLatestImage(force: true)
+        imageSendTimer = Timer.scheduledTimer(withTimeInterval: imageSendInterval, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.sendLatestImage(force: false)
+            }
+        }
+    }
+
+    private func stopImageSending() {
+        imageSendTimer?.invalidate()
+        imageSendTimer = nil
+        lastImageSendTime = nil
+    }
+
+    private func sendLatestImage(force: Bool) {
+        guard isConnected, isRecording, isImageSendingEnabled, let frame = currentVideoFrame else {
+            return
+        }
+
+        if !force, let lastImageSendTime, Date().timeIntervalSince(lastImageSendTime) < imageSendInterval {
+            return
+        }
+
+        lastImageSendTime = Date()
+
+        switch provider {
+        case .alibaba:
+            omniService?.sendImageAppend(frame)
+        case .google:
+            geminiService?.sendImageInput(frame)
+        }
     }
 
     // MARK: - Manual Mode (if needed)

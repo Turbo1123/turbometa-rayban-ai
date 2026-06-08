@@ -148,6 +148,7 @@
 "settings.provider.description" = "选择用于 AI 识图的 API 服务提供商";
 "settings.provider.alibaba.desc" = "阿里云通义千问视觉模型";
 "settings.provider.openrouter.desc" = "统一接口，500+ AI 模型";
+"settings.provider.aihubmix.desc" = "OpenAI 兼容的统一模型接口";
 "settings.provider.getapikey" = "获取 API Key";
 
 // Model Settings
@@ -156,8 +157,14 @@
 "settings.model.current" = "当前使用";
 "settings.model.alibaba" = "阿里云模型";
 "settings.model.openrouter" = "OpenRouter 模型";
+"settings.model.aihubmix" = "AIHubMix 模型";
 "settings.model.qwen3vlplus.desc" = "高性能视觉理解模型";
 "settings.model.qwen3vlmax.desc" = "最强视觉理解模型";
+"settings.model.gpt54.desc" = "AIHubMix GPT-5.4 模型";
+"settings.model.gpt55.desc" = "AIHubMix GPT-5.5 模型";
+"settings.model.gemini35flash.desc" = "AIHubMix Gemini 3.5 Flash 模型";
+"settings.model.gpt4omini.desc" = "默认 OpenAI 兼容视觉模型";
+"settings.model.gpt4o.desc" = "更高质量的 OpenAI 兼容视觉模型";
 "settings.model.search" = "搜索模型...";
 "settings.model.visiononly" = "仅显示支持视觉的模型";
 "settings.model.loading" = "加载模型列表...";
@@ -173,6 +180,7 @@
 // Live AI Settings
 "settings.liveai" = "Live AI";
 "settings.liveai.provider" = "Live AI 提供商";
+"settings.liveai.model" = "Live AI 模型";
 "settings.liveai.provider.select" = "选择 Live AI 提供商";
 "settings.liveai.provider.description" = "选择用于实时语音对话的 AI 提供商";
 "settings.liveai.alibaba.desc" = "通义千问 Omni 实时音频模型";
@@ -197,6 +205,7 @@
 "settings.apikey.placeholder" = "请输入 API Key";
 "settings.apikey.alibaba.help" = "请前往阿里云控制台获取您的 API Key";
 "settings.apikey.openrouter.help" = "请前往 OpenRouter 网站获取您的 API Key";
+"settings.apikey.aihubmix.help" = "请前往 AIHubMix 获取您的 API Key";
 "settings.apikey.google.help" = "请前往 Google AI Studio 获取您的 API Key";
 "settings.apikey.get" = "获取 API Key";
 "settings.apikey.delete" = "删除 API Key";
@@ -212,9 +221,9 @@
 "settings.quality.low" = "低画质";
 "settings.quality.low.desc" = "省电模式，适合长时间使用";
 "settings.quality.medium" = "中画质";
-"settings.quality.medium.desc" = "平衡模式（推荐）";
+"settings.quality.medium.desc" = "平衡模式，直播清晰度较低";
 "settings.quality.high" = "高画质";
-"settings.quality.high.desc" = "最佳画质，耗电较快";
+"settings.quality.high.desc" = "最佳画质，直播推荐，耗电较快";
 "settings.about" = "关于";
 "settings.version" = "版本";
 "settings.sdkversion" = "SDK 版本";
@@ -249,7 +258,7 @@
 
 // MARK: - AI Prompts
 "prompt.quickvision" = "你是一个智能眼镜AI助手。请用简洁的中文描述图片内容，适合语音播报。\n\n要求：\n1. 用1-2句话描述主要内容\n2. 语言自然、口语化\n3. 不要使用标点符号过多\n4. 总字数控制在50字以内\n5. 直接描述，不要说\"图片中\"或\"我看到\"";
-"prompt.liveai" = "你是RayBan Meta智能眼镜AI助手。\n\n【重要】必须始终用中文回答，无论用户说什么语言。\n\n回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。";
+"prompt.liveai" = "你是RayBan Meta智能眼镜AI助手。\n\n【重要】支持中文和英文。用户用中文提问就用中文回答，用户用英文提问就用英文回答；如果语言不明确，默认用中文。\n\n回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。";
 
 // MARK: - Quick Vision Modes
 "prompt.quickvision.health" = "分析这个食品/饮料的健康程度。从以下角度科学分析：\n1. 营养成分是否均衡\n2. 添加剂和防腐剂情况\n3. 糖分/盐分/脂肪含量\n4. 对身体的潜在影响\n5. 给出健康建议\n\n用简洁口语化的方式回答，适合语音播报，控制在100字以内。";
@@ -314,10 +323,10 @@
 "liveai.custom.default" = "你是一个智能助手，帮助用户完成各种任务。请用简洁的语言回答问题。";
 
 // Live AI Mode Prompts
-"prompt.liveai.standard" = "你是RayBan Meta智能眼镜AI助手。\n\n【重要】必须始终用中文回答，无论用户说什么语言。\n\n回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。";
-"prompt.liveai.museum" = "你是一位专业的博物馆讲解员AI助手。\n\n【重要】必须始终用中文回答。\n\n当用户看向展品时，请提供：\n1. 展品名称和基本信息\n2. 历史背景和文化意义\n3. 有趣的故事或知识点\n4. 与其他展品的关联\n\n像一位知识渊博又风趣的讲解员，让参观变得生动有趣。";
-"prompt.liveai.blind" = "你是视障用户的智能眼镜助手。\n\n【重要】必须始终用中文回答。\n\n你的任务是帮助用户理解周围环境：\n1. 详细描述周围的物体、人和环境\n2. 使用清晰的方位词（前方、左侧、右后方等）\n3. 指出可能的障碍物或危险\n4. 朗读标识、菜单等文字内容\n5. 提供安全、实用的导航建议\n\n说话清晰、有条理，优先说最重要的信息。";
-"prompt.liveai.reading" = "你是阅读辅助AI助手。\n\n【重要】必须始终用中文回答。\n\n你的任务是帮助用户阅读看到的文字：\n1. 准确识别并朗读所有可见文字\n2. 按照正确的阅读顺序组织内容\n3. 对于文档，说明文字的结构\n4. 对于外语，先读原文再翻译\n\n语速适中，吐字清晰，像一位专业的朗读者。";
+"prompt.liveai.standard" = "你是RayBan Meta智能眼镜AI助手。\n\n【重要】支持中文和英文。用户用中文提问就用中文回答，用户用英文提问就用英文回答；如果语言不明确，默认用中文。\n\n回答要简练、口语化，像朋友聊天一样。用户戴着眼镜可以看到周围环境，根据画面快速给出有用的建议。不要啰嗦，直接说重点。";
+"prompt.liveai.museum" = "你是一位专业的博物馆讲解员AI助手。\n\n【重要】支持中文和英文。用户用中文提问就用中文回答，用户用英文提问就用英文回答；如果语言不明确，默认用中文。\n\n当用户看向展品时，请提供：\n1. 展品名称和基本信息\n2. 历史背景和文化意义\n3. 有趣的故事或知识点\n4. 与其他展品的关联\n\n像一位知识渊博又风趣的讲解员，让参观变得生动有趣。";
+"prompt.liveai.blind" = "你是视障用户的智能眼镜助手。\n\n【重要】支持中文和英文。用户用中文提问就用中文回答，用户用英文提问就用英文回答；如果语言不明确，默认用中文。\n\n你的任务是帮助用户理解周围环境：\n1. 详细描述周围的物体、人和环境\n2. 使用清晰的方位词（前方、左侧、右后方等）\n3. 指出可能的障碍物或危险\n4. 朗读标识、菜单等文字内容\n5. 提供安全、实用的导航建议\n\n说话清晰、有条理，优先说最重要的信息。";
+"prompt.liveai.reading" = "你是阅读辅助AI助手。\n\n【重要】支持中文和英文。用户用中文提问就用中文回答，用户用英文提问就用英文回答；如果语言不明确，默认用中文。\n\n你的任务是帮助用户阅读看到的文字：\n1. 准确识别并朗读所有可见文字\n2. 按照正确的阅读顺序组织内容\n3. 对于文档，说明文字的结构\n4. 对于外语，先读原文再翻译\n\n语速适中，吐字清晰，像一位专业的朗读者。";
 "prompt.liveai.translate" = "你是实时翻译AI助手。\n\n【重要】翻译结果必须使用{LANGUAGE}。\n\n你的任务是帮助用户理解看到的外语内容：\n1. 识别画面中的文字\n2. 翻译成{LANGUAGE}\n3. 如果是菜单或标识，说明其用途\n4. 对于专业术语，提供简单解释\n\n翻译要准确、自然、地道。";
 
 // MARK: - RTMP 推流
@@ -344,6 +353,16 @@
 "rtmp.recommended" = "推荐";
 "rtmp.platform.custom" = "自定义";
 "rtmp.error.invalidurl" = "请输入有效的 RTMP 地址";
+"rtmp.error.missingkey" = "请输入推流密钥，或粘贴包含流名称的完整 RTMP 推流地址";
+"rtmp.error.novideo" = "还没有收到眼镜视频画面，请等待画面出现后再开始推流";
+"rtmp.codec.section" = "RTMP 编码模式";
+"rtmp.codec.h264" = "H.264 兼容模式";
+"rtmp.codec.h264.desc" = "兼容大多数平台，App 进入后台后视频容易暂停";
+"rtmp.codec.hevc" = "HEVC 后台实验模式";
+"rtmp.codec.hevc.desc" = "使用 Meta hvc1 原始视频流，适合测试支持 HEVC 的平台";
+"rtmp.codec.footer" = "切换编码模式会重启眼镜视频流。H.264 适合普通 RTMP 平台；HEVC 用于测试支持增强 RTMP/HEVC 的平台。";
+"rtmp.hevc.ready" = "HEVC 视频流已就绪";
+"rtmp.hevc.previewnote" = "HEVC 模式使用压缩视频帧，当前不显示本地预览；可以直接开始推流测试平台兼容性。";
 
 // MARK: - Live Translate 实时翻译
 "livetranslate.title" = "实时翻译";

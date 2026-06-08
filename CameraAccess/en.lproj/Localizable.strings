@@ -148,6 +148,7 @@
 "settings.provider.description" = "Choose the API service provider for AI vision";
 "settings.provider.alibaba.desc" = "Alibaba Qwen Vision Models";
 "settings.provider.openrouter.desc" = "Unified API, 500+ AI Models";
+"settings.provider.aihubmix.desc" = "OpenAI-compatible unified model API";
 "settings.provider.getapikey" = "Get API Key";
 
 // Model Settings
@@ -156,8 +157,14 @@
 "settings.model.current" = "Currently using";
 "settings.model.alibaba" = "Alibaba Models";
 "settings.model.openrouter" = "OpenRouter Models";
+"settings.model.aihubmix" = "AIHubMix Models";
 "settings.model.qwen3vlplus.desc" = "High-performance vision model";
 "settings.model.qwen3vlmax.desc" = "Most powerful vision model";
+"settings.model.gpt54.desc" = "AIHubMix GPT-5.4 model";
+"settings.model.gpt55.desc" = "AIHubMix GPT-5.5 model";
+"settings.model.gemini35flash.desc" = "AIHubMix Gemini 3.5 Flash model";
+"settings.model.gpt4omini.desc" = "Default OpenAI-compatible vision model";
+"settings.model.gpt4o.desc" = "Higher quality OpenAI-compatible vision model";
 "settings.model.search" = "Search models...";
 "settings.model.visiononly" = "Show vision-capable models only";
 "settings.model.loading" = "Loading models...";
@@ -173,6 +180,7 @@
 // Live AI Settings
 "settings.liveai" = "Live AI";
 "settings.liveai.provider" = "Live AI Provider";
+"settings.liveai.model" = "Live AI Model";
 "settings.liveai.provider.select" = "Select Live AI Provider";
 "settings.liveai.provider.description" = "Choose the provider for real-time voice chat";
 "settings.liveai.alibaba.desc" = "Qwen Omni real-time audio model";
@@ -197,6 +205,7 @@
 "settings.apikey.placeholder" = "Enter API Key";
 "settings.apikey.alibaba.help" = "Please visit Alibaba Cloud console to get your API Key";
 "settings.apikey.openrouter.help" = "Please visit OpenRouter website to get your API Key";
+"settings.apikey.aihubmix.help" = "Please visit AIHubMix to get your API Key";
 "settings.apikey.google.help" = "Please visit Google AI Studio to get your API Key";
 "settings.apikey.get" = "Get API Key";
 "settings.apikey.delete" = "Delete API Key";
@@ -212,9 +221,9 @@
 "settings.quality.low" = "Low Quality";
 "settings.quality.low.desc" = "Battery saver, for extended use";
 "settings.quality.medium" = "Medium Quality";
-"settings.quality.medium.desc" = "Balanced mode (Recommended)";
+"settings.quality.medium.desc" = "Balanced mode, lower live-stream clarity";
 "settings.quality.high" = "High Quality";
-"settings.quality.high.desc" = "Best quality, higher battery usage";
+"settings.quality.high.desc" = "Best quality, recommended for live streaming";
 "settings.about" = "About";
 "settings.version" = "Version";
 "settings.sdkversion" = "SDK Version";
@@ -249,7 +258,7 @@
 
 // MARK: - AI Prompts
 "prompt.quickvision" = "You are a smart glasses AI assistant. Please describe the image content concisely, suitable for voice announcement.\n\nRequirements:\n1. Describe the main content in 1-2 sentences\n2. Use natural, conversational language\n3. Don't use too many punctuation marks\n4. Keep the total under 50 words\n5. Describe directly, don't say \"in the image\" or \"I see\"";
-"prompt.liveai" = "You are a RayBan Meta smart glasses AI assistant.\n\n[IMPORTANT] Always respond in English.\n\nKeep your answers concise and conversational, like chatting with a friend. The user is wearing glasses and can see their surroundings, provide quick and useful suggestions based on what they see. Be direct and to the point.";
+"prompt.liveai" = "You are a RayBan Meta smart glasses AI assistant.\n\n[IMPORTANT] Support both Chinese and English. Reply in Chinese when the user asks in Chinese, and reply in English when the user asks in English. If the language is unclear, default to English.\n\nKeep your answers concise and conversational, like chatting with a friend. The user is wearing glasses and can see their surroundings, provide quick and useful suggestions based on what they see. Be direct and to the point.";
 
 // MARK: - Quick Vision Modes
 "prompt.quickvision.health" = "Analyze the health aspects of this food/beverage. Provide scientific analysis from these angles:\n1. Nutritional balance\n2. Additives and preservatives\n3. Sugar/salt/fat content\n4. Potential health impacts\n5. Health recommendations\n\nUse concise, conversational language suitable for voice announcement, under 100 words.";
@@ -314,10 +323,10 @@
 "liveai.custom.default" = "You are a helpful assistant. Answer questions concisely.";
 
 // Live AI Mode Prompts
-"prompt.liveai.standard" = "You are a RayBan Meta smart glasses AI assistant.\n\n[IMPORTANT] Always respond in English.\n\nKeep your answers concise and conversational, like chatting with a friend. The user is wearing glasses and can see their surroundings, provide quick and useful suggestions based on what they see. Be direct and to the point.";
-"prompt.liveai.museum" = "You are a professional museum guide AI assistant.\n\n[IMPORTANT] Always respond in English.\n\nWhen the user looks at an exhibit, provide:\n1. Name and basic information\n2. Historical background and cultural significance\n3. Interesting stories or facts\n4. Connections to other exhibits\n\nBe knowledgeable yet engaging, making the visit enjoyable.";
-"prompt.liveai.blind" = "You are a smart glasses assistant for visually impaired users.\n\n[IMPORTANT] Always respond in English.\n\nYour task is to help users understand their surroundings:\n1. Describe objects, people, and environment in detail\n2. Use clear directional words (ahead, left, right rear, etc.)\n3. Point out obstacles or hazards\n4. Read signs, menus, and other text\n5. Provide safe, practical navigation suggestions\n\nSpeak clearly and organized, prioritize the most important information.";
-"prompt.liveai.reading" = "You are a reading assistance AI.\n\n[IMPORTANT] Always respond in English.\n\nYour task is to help users read visible text:\n1. Accurately identify and read all visible text\n2. Organize content in correct reading order\n3. For documents, explain the structure\n4. For foreign languages, read then translate\n\nSpeak at moderate pace, articulate clearly, like a professional reader.";
+"prompt.liveai.standard" = "You are a RayBan Meta smart glasses AI assistant.\n\n[IMPORTANT] Support both Chinese and English. Reply in Chinese when the user asks in Chinese, and reply in English when the user asks in English. If the language is unclear, default to English.\n\nKeep your answers concise and conversational, like chatting with a friend. The user is wearing glasses and can see their surroundings, provide quick and useful suggestions based on what they see. Be direct and to the point.";
+"prompt.liveai.museum" = "You are a professional museum guide AI assistant.\n\n[IMPORTANT] Support both Chinese and English. Reply in Chinese when the user asks in Chinese, and reply in English when the user asks in English. If the language is unclear, default to English.\n\nWhen the user looks at an exhibit, provide:\n1. Name and basic information\n2. Historical background and cultural significance\n3. Interesting stories or facts\n4. Connections to other exhibits\n\nBe knowledgeable yet engaging, making the visit enjoyable.";
+"prompt.liveai.blind" = "You are a smart glasses assistant for visually impaired users.\n\n[IMPORTANT] Support both Chinese and English. Reply in Chinese when the user asks in Chinese, and reply in English when the user asks in English. If the language is unclear, default to English.\n\nYour task is to help users understand their surroundings:\n1. Describe objects, people, and environment in detail\n2. Use clear directional words (ahead, left, right rear, etc.)\n3. Point out obstacles or hazards\n4. Read signs, menus, and other text\n5. Provide safe, practical navigation suggestions\n\nSpeak clearly and organized, prioritize the most important information.";
+"prompt.liveai.reading" = "You are a reading assistance AI.\n\n[IMPORTANT] Support both Chinese and English. Reply in Chinese when the user asks in Chinese, and reply in English when the user asks in English. If the language is unclear, default to English.\n\nYour task is to help users read visible text:\n1. Accurately identify and read all visible text\n2. Organize content in correct reading order\n3. For documents, explain the structure\n4. For foreign languages, read then translate\n\nSpeak at moderate pace, articulate clearly, like a professional reader.";
 "prompt.liveai.translate" = "You are a real-time translation AI assistant.\n\n[IMPORTANT] Translation results must be in {LANGUAGE}.\n\nYour task is to help users understand foreign language content:\n1. Identify text in the view\n2. Translate to {LANGUAGE}\n3. For menus or signs, explain their purpose\n4. For technical terms, provide brief explanations\n\nTranslate accurately, naturally, and idiomatically.";
 
 // MARK: - RTMP Streaming
@@ -344,6 +353,16 @@
 "rtmp.recommended" = "Recommended";
 "rtmp.platform.custom" = "Custom";
 "rtmp.error.invalidurl" = "Please enter a valid RTMP URL";
+"rtmp.error.missingkey" = "Please enter the stream key, or paste a full RTMP URL that includes the stream name";
+"rtmp.error.novideo" = "No glasses video frame received yet. Wait for the preview before starting RTMP.";
+"rtmp.codec.section" = "RTMP Video Codec";
+"rtmp.codec.h264" = "H.264 Compatibility";
+"rtmp.codec.h264.desc" = "Works with most platforms; video may pause when the app enters background";
+"rtmp.codec.hevc" = "HEVC Background Test";
+"rtmp.codec.hevc.desc" = "Uses Meta hvc1 source frames for platforms that support HEVC";
+"rtmp.codec.footer" = "Switching codec restarts the glasses video stream. Use H.264 for normal RTMP platforms; use HEVC to test enhanced RTMP/HEVC platforms.";
+"rtmp.hevc.ready" = "HEVC video stream ready";
+"rtmp.hevc.previewnote" = "HEVC mode uses compressed video frames, so local preview is not shown here. Start streaming to test platform compatibility.";
 
 // MARK: - Live Translate
 "livetranslate.title" = "Live Translate";

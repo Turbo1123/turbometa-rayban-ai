@@ -1,7 +1,7 @@
 /*
  * Gemini Live WebSocket Service
  * Provides real-time audio chat with Google Gemini AI
- * Uses gemini-2.0-flash-exp model for real-time audio conversation
+ * Uses Gemini Live models for real-time audio conversation
  */
 
 import Foundation
@@ -54,10 +54,11 @@ class GeminiLiveService: NSObject {
     private var isRecording = false
     private var hasAudioBeenSent = false
     private var isSessionConfigured = false
+    private var isDisconnecting = false
 
     init(apiKey: String, model: String? = nil) {
         self.apiKey = apiKey
-        self.model = model ?? "gemini-2.0-flash-exp"
+        self.model = model ?? LiveAIProvider.google.defaultModel
         super.init()
         setupAudioEngine()
     }
@@ -88,7 +89,7 @@ class GeminiLiveService: NSObject {
     private func configureAudioSession() {
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth, .allowBluetoothA2DP, .defaultToSpeaker])
+            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP, .allowBluetoothA2DP, .defaultToSpeaker])
             try audioSession.setActive(true, options: [.notifyOthersOnDeactivation])
         } catch {
             print("⚠️ [Gemini] Audio session 配置失败: \(error)")
@@ -126,6 +127,7 @@ class GeminiLiveService: NSObject {
         let urlString = "\(baseURL)?key=\(apiKey)"
 
         print("🔌 [Gemini] 准备连接 WebSocket")
+        isDisconnecting = false
 
         guard let url = URL(string: urlString) else {
             print("❌ [Gemini] 无效的 URL")
@@ -145,6 +147,7 @@ class GeminiLiveService: NSObject {
 
     func disconnect() {
         print("🔌 [Gemini] 断开 WebSocket 连接")
+        isDisconnecting = true
         webSocket?.cancel(with: .goingAway, reason: nil)
         webSocket = nil
         urlSession?.invalidateAndCancel()
@@ -166,17 +169,19 @@ class GeminiLiveService: NSObject {
         let setupMessage: [String: Any] = [
             "setup": [
                 "model": "models/\(model)",
-                "generation_config": [
-                    "response_modalities": ["AUDIO"],
-                    "speech_config": [
-                        "voice_config": [
-                            "prebuilt_voice_config": [
-                                "voice_name": "Aoede"  // Gemini voice options: Aoede, Charon, Fenrir, Kore, Puck
+                "generationConfig": [
+                    "responseModalities": ["AUDIO"],
+                    "speechConfig": [
+                        "voiceConfig": [
+                            "prebuiltVoiceConfig": [
+                                "voiceName": "Aoede"
                             ]
                         ]
                     ]
                 ],
-                "system_instruction": [
+                "inputAudioTranscription": [:],
+                "outputAudioTranscription": [:],
+                "systemInstruction": [
                     "parts": [
                         ["text": instructions]
                     ]
@@ -196,10 +201,9 @@ class GeminiLiveService: NSObject {
         do {
             print("🎤 [Gemini] 开始录音")
 
-            let audioSession = AVAudioSession.sharedInstance()
-            switch audioSession.recordPermission {
+            switch AVAudioApplication.shared.recordPermission {
             case .undetermined:
-                audioSession.requestRecordPermission { [weak self] granted in
+                AVAudioApplication.requestRecordPermission { [weak self] granted in
                     DispatchQueue.main.async {
                         if granted {
                             self?.startRecording()
@@ -335,12 +339,10 @@ class GeminiLiveService: NSObject {
     private func sendRealtimeInput(audioData: String) {
         // Gemini Live realtime input format
         let message: [String: Any] = [
-            "realtime_input": [
-                "media_chunks": [
-                    [
-                        "mime_type": "audio/pcm;rate=16000",
-                        "data": audioData
-                    ]
+            "realtimeInput": [
+                "audio": [
+                    "mimeType": "audio/pcm;rate=16000",
+                    "data": audioData
                 ]
             ]
         ]
@@ -357,12 +359,10 @@ class GeminiLiveService: NSObject {
         print("📸 [Gemini] 发送图片: \(imageData.count) bytes")
 
         let message: [String: Any] = [
-            "realtime_input": [
-                "media_chunks": [
-                    [
-                        "mime_type": "image/jpeg",
-                        "data": base64Image
-                    ]
+            "realtimeInput": [
+                "video": [
+                    "mimeType": "image/jpeg",
+                    "data": base64Image
                 ]
             ]
         ]
@@ -380,7 +380,8 @@ class GeminiLiveService: NSObject {
 
             case .failure(let error):
                 print("❌ [Gemini] 接收消息失败: \(error.localizedDescription)")
-                self?.onError?("Receive error: \(error.localizedDescription)")
+                guard self?.isDisconnecting != true else { return }
+                self?.onError?("Gemini Live 连接失败：\(error.localizedDescription)")
             }
         }
     }
@@ -593,5 +594,9 @@ extension GeminiLiveService: URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         let reasonString = reason.flatMap { String(data: $0, encoding: .utf8) } ?? "unknown"
         print("🔌 [Gemini] WebSocket 已断开, closeCode: \(closeCode.rawValue), reason: \(reasonString)")
+        guard !isDisconnecting, !isSessionConfigured else { return }
+        DispatchQueue.main.async {
+            self.onError?("Gemini Live 未完成连接。请检查 Google API Key 是否启用 Gemini API、账号地区是否支持 Live API，以及模型是否可用。closeCode=\(closeCode.rawValue), reason=\(reasonString)")
+        }
     }
 }

@@ -26,6 +26,25 @@ enum RTMPStreamingState: Sendable {
     case error(String)
 }
 
+enum RTMPVideoEncodingMode: String, CaseIterable, Sendable {
+    case h264
+    case hevc
+
+    var displayName: String {
+        switch self {
+        case .h264: return "rtmp.codec.h264".localized
+        case .hevc: return "rtmp.codec.hevc".localized
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .h264: return "rtmp.codec.h264.desc".localized
+        case .hevc: return "rtmp.codec.hevc.desc".localized
+        }
+    }
+}
+
 // MARK: - Streaming Stats
 
 struct RTMPStreamingStats: Sendable {
@@ -41,7 +60,7 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
 
     // MARK: - Constants
 
-    private static let defaultBitrate: Int = 2_000_000 // 2 Mbps
+    private static let defaultBitrate: Int = 6_000_000 // 6 Mbps
     private static let defaultFPS: Int = 24
 
     // MARK: - Properties
@@ -50,12 +69,14 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
 
     private var rtmpConnection: RTMPConnection?
     private var rtmpStream: RTMPStream?
+    private var audioMixer: MediaMixer?
 
     private var rtmpUrl: String = ""
     private var streamKey: String = ""
     private var videoWidth: Int = 0
     private var videoHeight: Int = 0
     private var bitrate: Int = RTMPStreamingService.defaultBitrate
+    private var encodingMode: RTMPVideoEncodingMode = .h264
 
     // State
     private(set) var isStreaming = false
@@ -63,10 +84,6 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
 
     // Frame tracking
     private var totalFrames: Int64 = 0
-    private var frameIndex: Int64 = 0
-    private var baseTimestamp: Int64 = 0
-    private let targetFrameDuration: Int64 = 1_000_000 / Int64(RTMPStreamingService.defaultFPS)
-
     // Callbacks
     var onStateChanged: ((RTMPStreamingState) -> Void)?
     var onStatsUpdated: ((RTMPStreamingStats) -> Void)?
@@ -92,18 +109,25 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
     // MARK: - Public Methods
 
     /// Start RTMP streaming
-    func startStreaming(url: String, width: Int, height: Int, bitrate: Int = defaultBitrate) {
+    func startStreaming(
+        url: String,
+        width: Int,
+        height: Int,
+        bitrate: Int = defaultBitrate,
+        encodingMode: RTMPVideoEncodingMode = .h264
+    ) {
         guard !isStreaming else {
             logger.warning("Already streaming")
             return
         }
 
         logger.info("Starting RTMP streaming to: \(url)")
-        logger.info("Video: \(width)x\(height) @ \(bitrate) bps")
+        logger.info("Video: \(width)x\(height) @ \(bitrate) bps, codec: \(encodingMode.rawValue)")
 
         self.videoWidth = width
         self.videoHeight = height
         self.bitrate = bitrate
+        self.encodingMode = encodingMode
 
         // Parse URL to get server URL and stream key
         guard let urlComponents = parseRTMPUrl(url) else {
@@ -145,6 +169,7 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
         let connectionToClose = rtmpConnection
         rtmpStream = nil
         rtmpConnection = nil
+        stopAudioCapture()
 
         shutdownTask?.cancel()
         shutdownTask = Task.detached { [statusTaskToStop, streamStatusTaskToStop, streamToClose, connectionToClose] in
@@ -160,8 +185,6 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
 
         // Reset state
         totalFrames = 0
-        frameIndex = 0
-        baseTimestamp = 0
         startTime = nil
 
         onStateChanged?(.idle)
@@ -195,6 +218,24 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
         updateStats()
     }
 
+    func feedSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
+        lock.lock()
+        let streaming = isStreaming
+        let stream = rtmpStream
+        if streaming {
+            totalFrames += 1
+        }
+        lock.unlock()
+
+        guard streaming, let stream else { return }
+
+        Task {
+            await stream.append(sampleBuffer)
+        }
+
+        updateStats()
+    }
+
     // MARK: - Private Methods
 
     private func setupAndConnect() async {
@@ -221,8 +262,9 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
         } catch {
             logger.error("RTMP: Connection failed: \(error.localizedDescription)")
             await MainActor.run {
-                onStateChanged?(.error(error.localizedDescription))
-                onError?(error.localizedDescription)
+                let message = formatRTMPError(error, fallback: "Failed to connect to RTMP server")
+                onStateChanged?(.error(message))
+                onError?(message)
             }
         }
     }
@@ -237,13 +279,33 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
         videoSettings.videoSize = CGSize(width: videoWidth, height: videoHeight)
         videoSettings.bitRate = bitrate
         videoSettings.maxKeyFrameIntervalDuration = 1
-        videoSettings.profileLevel = kVTProfileLevel_H264_Main_AutoLevel as String
+        switch encodingMode {
+        case .h264:
+            videoSettings.profileLevel = kVTProfileLevel_H264_Main_AutoLevel as String
+        case .hevc:
+            videoSettings.profileLevel = kVTProfileLevel_HEVC_Main_AutoLevel as String
+        }
         try? await stream.setVideoSettings(videoSettings)
+
+        var audioSettings = AudioCodecSettings()
+        audioSettings.format = .aac
+        audioSettings.bitRate = 128_000
+        try? await stream.setAudioSettings(audioSettings)
 
         // Monitor stream status
         streamStatusTask = Task { [weak self] in
             for await status in await stream.status {
                 await self?.handleStreamStatus(status)
+            }
+        }
+
+        do {
+            try await startAudioCapture(for: stream)
+            try await Task.sleep(nanoseconds: 300_000_000)
+        } catch {
+            logger.error("RTMP: Audio capture failed before publish: \(error.localizedDescription)")
+            await MainActor.run {
+                onError?("RTMP audio failed: \(error.localizedDescription)")
             }
         }
 
@@ -260,12 +322,66 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
                 self?.onStateChanged?(.streaming)
             }
         } catch {
+            await stopAudioCapture()
             logger.error("RTMP: Publish failed: \(error.localizedDescription)")
             await MainActor.run {
-                onStateChanged?(.error(error.localizedDescription))
-                onError?(error.localizedDescription)
+                let message = formatRTMPError(error, fallback: "Failed to publish stream. Check the RTMP URL, stream key, and auth parameters.")
+                onStateChanged?(.error(message))
+                onError?(message)
             }
         }
+    }
+
+    private func startAudioCapture(for stream: RTMPStream) async throws {
+        await stopAudioCapture()
+
+        let audioSession = AVAudioSession.sharedInstance()
+        guard AVAudioApplication.shared.recordPermission == .granted else {
+            throw NSError(
+                domain: "RTMPStreamingAudio",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Microphone permission is required for RTMP audio"]
+            )
+        }
+
+        try audioSession.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetoothHFP, .defaultToSpeaker, .mixWithOthers])
+        try audioSession.setActive(true)
+
+        let mixer = MediaMixer(captureSessionMode: .single)
+        try await mixer.attachAudio(AVCaptureDevice.default(for: .audio))
+        await mixer.addOutput(stream)
+        await mixer.startRunning()
+        audioMixer = mixer
+
+        logger.info("RTMP: Audio capture started through HaishinKit MediaMixer")
+    }
+
+    private func stopAudioCapture() {
+        guard let mixer = audioMixer else { return }
+        audioMixer = nil
+
+        Task {
+            await mixer.stopRunning()
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+            logger.info("RTMP: Audio capture stopped")
+        }
+    }
+
+    private func stopAudioCapture() async {
+        guard let mixer = audioMixer else { return }
+        audioMixer = nil
+
+        await mixer.stopRunning()
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        logger.info("RTMP: Audio capture stopped")
+    }
+
+    private func formatRTMPError(_ error: Error, fallback: String) -> String {
+        let nsError = error as NSError
+        if nsError.domain.contains("RTMP") {
+            return fallback
+        }
+        return error.localizedDescription
     }
 
     @MainActor
@@ -312,19 +428,26 @@ class RTMPStreamingService: NSObject, @unchecked Sendable {
         guard let urlObj = URL(string: url) else { return nil }
 
         let pathComponents = urlObj.path.split(separator: "/")
+        let portPart = urlObj.port.map { ":\($0)" } ?? ""
         guard pathComponents.count >= 2 else {
             // If only one path component, use it as stream key with default app
-            let streamKey = pathComponents.first.map(String.init) ?? "stream"
-            let serverUrl = "\(urlObj.scheme ?? "rtmp")://\(urlObj.host ?? "localhost"):\(urlObj.port ?? 1935)/live"
+            var streamKey = pathComponents.first.map(String.init) ?? "stream"
+            if let query = urlObj.query, !query.isEmpty {
+                streamKey += "?\(query)"
+            }
+            let serverUrl = "\(urlObj.scheme ?? "rtmp")://\(urlObj.host ?? "localhost")\(portPart)/live"
             return (serverUrl, streamKey)
         }
 
         // Last component is stream key
-        let streamKey = String(pathComponents.last!)
+        var streamKey = String(pathComponents.last!)
+        if let query = urlObj.query, !query.isEmpty {
+            streamKey += "?\(query)"
+        }
 
         // Everything before is the server URL with app
         let appPath = pathComponents.dropLast().map(String.init).joined(separator: "/")
-        let serverUrl = "\(urlObj.scheme ?? "rtmp")://\(urlObj.host ?? "localhost"):\(urlObj.port ?? 1935)/\(appPath)"
+        let serverUrl = "\(urlObj.scheme ?? "rtmp")://\(urlObj.host ?? "localhost")\(portPart)/\(appPath)"
 
         return (serverUrl, streamKey)
     }
@@ -422,43 +545,4 @@ extension UIImage {
         return sampleBuffer
     }
 
-    func toPixelBuffer() -> CVPixelBuffer? {
-        let width = Int(size.width)
-        let height = Int(size.height)
-
-        var pixelBuffer: CVPixelBuffer?
-        let attrs: [String: Any] = [
-            kCVPixelBufferCGImageCompatibilityKey as String: true,
-            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true
-        ]
-
-        let status = CVPixelBufferCreate(
-            kCFAllocatorDefault,
-            width,
-            height,
-            kCVPixelFormatType_32BGRA,
-            attrs as CFDictionary,
-            &pixelBuffer
-        )
-
-        guard status == kCVReturnSuccess, let buffer = pixelBuffer else { return nil }
-
-        CVPixelBufferLockBaseAddress(buffer, [])
-        defer { CVPixelBufferUnlockBaseAddress(buffer, []) }
-
-        guard let context = CGContext(
-            data: CVPixelBufferGetBaseAddress(buffer),
-            width: width,
-            height: height,
-            bitsPerComponent: 8,
-            bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
-            space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
-        ) else { return nil }
-
-        guard let cgImage = cgImage else { return nil }
-        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-
-        return buffer
-    }
 }
