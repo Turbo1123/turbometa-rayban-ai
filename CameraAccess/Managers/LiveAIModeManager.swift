@@ -63,7 +63,7 @@ class LiveAIModeManager: ObservableObject {
         if let savedLanguage = userDefaults.string(forKey: translateTargetLanguageKey) {
             self.translateTargetLanguage = savedLanguage
         } else {
-            self.translateTargetLanguage = LanguageManager.staticApiLanguageCode
+            self.translateTargetLanguage = LanguageManager.staticIsChinese ? "zh-CN" : "en-US"
         }
     }
 
@@ -71,26 +71,30 @@ class LiveAIModeManager: ObservableObject {
 
     /// 获取当前模式的完整系统提示词
     func getSystemPrompt() -> String {
+        let prompt: String
         switch currentMode {
         case .custom:
-            return customPrompt
+            prompt = customPrompt
         case .translate:
-            return getTranslatePrompt()
+            prompt = getTranslatePrompt()
         default:
-            return currentMode.systemPrompt
+            prompt = currentMode.systemPrompt
         }
+        return promptWithBilingualPolicy(prompt)
     }
 
     /// 获取指定模式的系统提示词
     func getSystemPrompt(for mode: LiveAIMode) -> String {
+        let prompt: String
         switch mode {
         case .custom:
-            return customPrompt
+            prompt = customPrompt
         case .translate:
-            return getTranslatePrompt()
+            prompt = getTranslatePrompt()
         default:
-            return mode.systemPrompt
+            prompt = mode.systemPrompt
         }
+        return promptWithBilingualPolicy(prompt)
     }
 
     /// 获取翻译模式的提示词（包含目标语言）
@@ -98,6 +102,20 @@ class LiveAIModeManager: ObservableObject {
         let targetLanguageName = Self.supportedLanguages.first { $0.code == translateTargetLanguage }?.name ?? "中文"
         let basePrompt = "prompt.liveai.translate".localized
         return basePrompt.replacingOccurrences(of: "{LANGUAGE}", with: targetLanguageName)
+    }
+
+    private func promptWithBilingualPolicy(_ prompt: String) -> String {
+        let policy = """
+
+        Live AI language policy:
+        - Support both Chinese and English in the same conversation.
+        - Detect the user's spoken language every turn.
+        - If the user speaks Chinese, reply in Chinese.
+        - If the user speaks English, reply in English.
+        - If the user mixes Chinese and English, reply naturally with the same mixed-language style.
+        - Do not force Chinese or English unless the user explicitly asks for a specific language.
+        """
+        return prompt + policy
     }
 
     // MARK: - Mode Management

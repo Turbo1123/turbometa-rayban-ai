@@ -1,7 +1,7 @@
 /*
  * API Key Manager
  * Secure storage and retrieval of API keys using Keychain
- * Supports multiple API providers (Alibaba Dashscope, OpenRouter, Google)
+ * Supports multiple API providers (Alibaba Dashscope, OpenRouter, AIHubMix, Google)
  */
 
 import Foundation
@@ -16,6 +16,7 @@ class APIKeyManager {
     private let alibabaBeijingAccount = "alibaba-beijing-api-key"
     private let alibabaSingaporeAccount = "alibaba-singapore-api-key"
     private let openrouterAccount = "openrouter-api-key"
+    private let aihubmixAccount = "aihubmix-api-key"
     private let googleAccount = "google-api-key"
     private let legacyAccount = "qwen-api-key" // For backward compatibility (migrates to Beijing)
     private let legacyAlibabaAccount = "alibaba-api-key" // Old format (migrates to Beijing)
@@ -118,6 +119,8 @@ class APIKeyManager {
             }
         case .openrouter:
             return openrouterAccount
+        case .aihubmix:
+            return aihubmixAccount
         }
     }
 

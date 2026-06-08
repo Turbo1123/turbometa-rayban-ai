@@ -1,6 +1,6 @@
 /*
  * API Provider Manager
- * 管理不同的 API 提供商 (阿里云 Dashscope / OpenRouter)
+ * 管理不同的 API 提供商 (阿里云 Dashscope / OpenRouter / AIHubMix)
  */
 
 import Foundation
@@ -39,11 +39,13 @@ enum AlibabaEndpoint: String, CaseIterable, Codable {
 enum APIProvider: String, CaseIterable, Codable {
     case alibaba = "alibaba"
     case openrouter = "openrouter"
+    case aihubmix = "aihubmix"
 
     var displayName: String {
         switch self {
         case .alibaba: return "阿里云 Dashscope"
         case .openrouter: return "OpenRouter"
+        case .aihubmix: return "AIHubMix"
         }
     }
 
@@ -51,6 +53,7 @@ enum APIProvider: String, CaseIterable, Codable {
         switch self {
         case .alibaba: return endpoint.baseURL
         case .openrouter: return "https://openrouter.ai/api/v1"
+        case .aihubmix: return "https://aihubmix.com/v1"
         }
     }
 
@@ -62,6 +65,7 @@ enum APIProvider: String, CaseIterable, Codable {
         switch self {
         case .alibaba: return "qwen3-vl-plus"
         case .openrouter: return "google/gemini-3-flash-preview"
+        case .aihubmix: return "gpt-5.4"
         }
     }
 
@@ -69,6 +73,7 @@ enum APIProvider: String, CaseIterable, Codable {
         switch self {
         case .alibaba: return "https://help.aliyun.com/zh/model-studio/get-api-key"
         case .openrouter: return "https://openrouter.ai/keys"
+        case .aihubmix: return "https://aihubmix.com/token"
         }
     }
 
@@ -93,7 +98,21 @@ enum LiveAIProvider: String, CaseIterable, Codable {
     var defaultModel: String {
         switch self {
         case .alibaba: return "qwen3-omni-flash-realtime"
-        case .google: return "gemini-2.0-flash-exp"
+        case .google: return "gemini-3.1-flash-live-preview"
+        }
+    }
+
+    var availableModels: [(id: String, name: String)] {
+        switch self {
+        case .alibaba:
+            return [
+                ("qwen3-omni-flash-realtime", "qwen3-omni-flash-realtime")
+            ]
+        case .google:
+            return [
+                ("gemini-3.1-flash-live-preview", "Gemini 3.1 Flash Live Preview"),
+                ("gemini-2.5-flash-native-audio-preview-12-2025", "Gemini 2.5 Flash Native Audio Preview")
+            ]
         }
     }
 
@@ -252,7 +271,11 @@ class APIProviderManager: ObservableObject {
         self.liveAIProvider = liveProvider
 
         let savedLiveAIModel = UserDefaults.standard.string(forKey: liveAIModelKey)
-        self.liveAIModel = savedLiveAIModel ?? liveProvider.defaultModel
+        if liveProvider == .google, savedLiveAIModel == "gemini-2.0-flash-exp" {
+            self.liveAIModel = liveProvider.defaultModel
+        } else {
+            self.liveAIModel = savedLiveAIModel ?? liveProvider.defaultModel
+        }
     }
 
     // MARK: - Live AI Configuration
@@ -385,6 +408,14 @@ extension APIProviderManager {
         case .google:
             return APIKeyManager.shared.getGoogleAPIKey() ?? ""
         }
+    }
+
+    nonisolated static var staticLiveAIModel: String {
+        let savedModel = UserDefaults.standard.string(forKey: "liveai_model")
+        if staticLiveAIProvider == .google, savedModel == "gemini-2.0-flash-exp" {
+            return staticLiveAIProvider.defaultModel
+        }
+        return savedModel ?? staticLiveAIProvider.defaultModel
     }
 
     nonisolated static var staticCurrentModel: String {

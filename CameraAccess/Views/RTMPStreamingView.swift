@@ -8,6 +8,7 @@
  */
 
 import SwiftUI
+import CoreMedia
 
 struct RTMPStreamingView: View {
     @ObservedObject var streamViewModel: StreamSessionViewModel
@@ -16,6 +17,8 @@ struct RTMPStreamingView: View {
 
     @State private var showUI = true
     @State private var frameTimer: Timer?
+    @State private var lastH264Frame: UIImage?
+    @State private var lastHEVCPresentationTime: CMTime = .invalid
 
     var body: some View {
         ZStack {
@@ -32,6 +35,20 @@ struct RTMPStreamingView: View {
                         .clipped()
                 }
                 .ignoresSafeArea()
+            } else if rtmpViewModel.encodingMode == .hevc && streamViewModel.currentSampleBuffer != nil {
+                VStack(spacing: AppSpacing.md) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 42))
+                        .foregroundColor(.green)
+                    Text("rtmp.hevc.ready".localized)
+                        .font(AppTypography.body)
+                        .foregroundColor(.white)
+                    Text("rtmp.hevc.previewnote".localized)
+                        .font(AppTypography.caption)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white.opacity(0.7))
+                        .padding(.horizontal, AppSpacing.xl)
+                }
             } else {
                 VStack(spacing: AppSpacing.lg) {
                     ProgressView()
@@ -71,13 +88,16 @@ struct RTMPStreamingView: View {
         }
         .onAppear {
             startVideoStream()
-            rtmpViewModel.setStreamViewModel(streamViewModel)
+            UIApplication.shared.isIdleTimerDisabled = rtmpViewModel.isStreaming
         }
         .onDisappear {
             stopAll()
         }
+        .onChange(of: rtmpViewModel.isStreaming) { _, isStreaming in
+            UIApplication.shared.isIdleTimerDisabled = isStreaming
+        }
         .sheet(isPresented: $rtmpViewModel.showSettings) {
-            RTMPSettingsView(viewModel: rtmpViewModel)
+            RTMPSettingsView(viewModel: rtmpViewModel, streamViewModel: streamViewModel)
         }
         .alert("error".localized, isPresented: $rtmpViewModel.showError) {
             Button("ok".localized) {
@@ -151,13 +171,16 @@ struct RTMPStreamingView: View {
     // MARK: - Stats View
 
     private var statsView: some View {
-        HStack(spacing: AppSpacing.lg) {
-            StatItem(label: "FPS", value: String(format: "%.1f", rtmpViewModel.currentFps))
-            StatItem(label: "rtmp.frames".localized, value: "\(rtmpViewModel.framesSent)")
-            StatItem(label: "rtmp.time".localized, value: formatTime(rtmpViewModel.connectionTime))
-            StatItem(label: "rtmp.data".localized, value: formatBytes(rtmpViewModel.bytesSent))
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: AppSpacing.lg) {
+                StatItem(label: "FPS", value: String(format: "%.1f", rtmpViewModel.currentFps))
+                StatItem(label: "源", value: rtmpViewModel.sourceResolution)
+                StatItem(label: "推流", value: rtmpViewModel.outputResolution)
+                StatItem(label: "rtmp.frames".localized, value: "\(rtmpViewModel.framesSent)")
+                StatItem(label: "rtmp.time".localized, value: formatTime(rtmpViewModel.connectionTime))
+            }
+            .padding(AppSpacing.md)
         }
-        .padding(AppSpacing.md)
         .background(Color.black.opacity(0.6))
         .cornerRadius(AppCornerRadius.md)
         .padding(.horizontal, AppSpacing.lg)
@@ -221,7 +244,10 @@ struct RTMPStreamingView: View {
                 if rtmpViewModel.isStreaming {
                     rtmpViewModel.stopStreaming()
                 } else {
-                    rtmpViewModel.startStreaming()
+                    rtmpViewModel.startStreaming(
+                        videoFrame: streamViewModel.currentVideoFrame,
+                        sampleBuffer: streamViewModel.currentSampleBuffer
+                    )
                 }
             } label: {
                 HStack(spacing: AppSpacing.sm) {
@@ -240,7 +266,11 @@ struct RTMPStreamingView: View {
                 .foregroundColor(.white)
                 .cornerRadius(AppCornerRadius.md)
             }
-            .disabled(rtmpViewModel.isConnecting || (rtmpViewModel.rtmpUrl.isEmpty && !rtmpViewModel.isStreaming))
+            .disabled(
+                rtmpViewModel.isConnecting ||
+                (rtmpViewModel.rtmpUrl.isEmpty && !rtmpViewModel.isStreaming) ||
+                (!rtmpViewModel.isStreaming && !hasStartableVideo)
+            )
             .padding(.horizontal, AppSpacing.lg)
         }
         .padding(.vertical, AppSpacing.lg)
@@ -263,9 +293,21 @@ struct RTMPStreamingView: View {
         // Start feeding frames to RTMP when streaming
         frameTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 24.0, repeats: true) { _ in
             Task { @MainActor in
-                if let frame = streamViewModel.currentVideoFrame {
+                guard rtmpViewModel.isStreaming else { return }
+
+                switch rtmpViewModel.encodingMode {
+                case .h264:
+                    guard let frame = streamViewModel.currentVideoFrame else { return }
+                    if let lastH264Frame, lastH264Frame === frame { return }
+                    lastH264Frame = frame
                     let timestamp = Int64(Date().timeIntervalSince1970 * 1_000_000)
                     rtmpViewModel.feedFrame(frame, timestamp: timestamp)
+                case .hevc:
+                    guard let sampleBuffer = streamViewModel.currentSampleBuffer else { return }
+                    let presentationTime = sampleBuffer.presentationTimeStamp
+                    guard presentationTime != lastHEVCPresentationTime else { return }
+                    lastHEVCPresentationTime = presentationTime
+                    rtmpViewModel.feedSampleBuffer(sampleBuffer)
                 }
             }
         }
@@ -274,10 +316,14 @@ struct RTMPStreamingView: View {
     private func stopAll() {
         frameTimer?.invalidate()
         frameTimer = nil
+        lastH264Frame = nil
+        lastHEVCPresentationTime = .invalid
 
         if rtmpViewModel.isStreaming {
             rtmpViewModel.stopStreaming()
         }
+
+        UIApplication.shared.isIdleTimerDisabled = false
 
         Task {
             if streamViewModel.streamingStatus != .stopped {
@@ -298,12 +344,12 @@ struct RTMPStreamingView: View {
         }
     }
 
-    private func formatBytes(_ bytes: Int64) -> String {
-        let mb = Double(bytes) / (1024 * 1024)
-        if mb >= 1000 {
-            return String(format: "%.1f GB", mb / 1024)
-        } else {
-            return String(format: "%.1f MB", mb)
+    private var hasStartableVideo: Bool {
+        switch rtmpViewModel.encodingMode {
+        case .h264:
+            return streamViewModel.currentVideoFrame != nil
+        case .hevc:
+            return streamViewModel.currentSampleBuffer != nil
         }
     }
 }
@@ -367,18 +413,90 @@ struct BlinkingModifier: ViewModifier {
 
 struct RTMPSettingsView: View {
     @ObservedObject var viewModel: RTMPStreamingViewModel
+    @ObservedObject var streamViewModel: StreamSessionViewModel
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("video_quality") private var videoQuality = "high"
+    @AppStorage("rtmp_video_codec") private var rtmpVideoCodec = RTMPVideoEncodingMode.h264.rawValue
 
     let bitrateOptions = [
-        (1_000_000, "1 Mbps"),
-        (2_000_000, "2 Mbps (rtmp.recommended".localized + ")"),
-        (3_000_000, "3 Mbps"),
-        (4_000_000, "4 Mbps")
+        (4_000_000, "4 Mbps"),
+        (6_000_000, "6 Mbps (rtmp.recommended".localized + ")"),
+        (8_000_000, "8 Mbps"),
+        (10_000_000, "10 Mbps")
+    ]
+
+    let qualityOptions = [
+        ("low", "settings.quality.low".localized, "settings.quality.low.desc".localized),
+        ("medium", "settings.quality.medium".localized, "settings.quality.medium.desc".localized),
+        ("high", "settings.quality.high".localized, "settings.quality.high.desc".localized)
     ]
 
     var body: some View {
         NavigationView {
             List {
+                Section {
+                    ForEach(RTMPVideoEncodingMode.allCases, id: \.self) { mode in
+                        Button {
+                            rtmpVideoCodec = mode.rawValue
+                            viewModel.encodingMode = mode
+                            Task {
+                                await streamViewModel.applyRTMPEncodingMode(mode)
+                            }
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(mode.displayName)
+                                        .foregroundColor(.primary)
+                                    Text(mode.description)
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                if viewModel.encodingMode == mode {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                        .disabled(viewModel.isStreaming)
+                    }
+                } header: {
+                    Text("rtmp.codec.section".localized)
+                } footer: {
+                    Text("rtmp.codec.footer".localized)
+                }
+
+                Section {
+                    ForEach(qualityOptions, id: \.0) { quality in
+                        Button {
+                            videoQuality = quality.0
+                            Task {
+                                await streamViewModel.applyVideoQuality(quality.0)
+                            }
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(quality.1)
+                                        .foregroundColor(.primary)
+                                    Text(quality.2)
+                                        .font(AppTypography.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                if videoQuality == quality.0 {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                        }
+                        .disabled(viewModel.isStreaming)
+                    }
+                } header: {
+                    Text("眼镜采集画质")
+                } footer: {
+                    Text("高画质会请求 720x1280；中画质通常是 504x896。请停止 RTMP 推流后切换，切换后会重启眼镜视频流。")
+                }
+
                 Section {
                     ForEach(bitrateOptions, id: \.0) { option in
                         Button {

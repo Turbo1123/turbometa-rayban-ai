@@ -28,7 +28,7 @@ struct SettingsView: View {
     @ObservedObject var liveAIModeManager = LiveAIModeManager.shared
     @State private var selectedModel = "qwen3-omni-flash-realtime"
     @State private var selectedLanguage = "zh-CN" // 默认中文
-    @State private var selectedQuality = UserDefaults.standard.string(forKey: "video_quality") ?? "medium"
+    @State private var selectedQuality = UserDefaults.standard.string(forKey: "video_quality") ?? "high"
     @State private var hasAPIKey = false // 改为 State 变量
     @State private var hasGoogleAPIKey = false // Google API Key 状态
 
@@ -242,6 +242,12 @@ struct SettingsView: View {
                             Image(systemName: "chevron.right")
                                 .font(AppTypography.caption)
                                 .foregroundColor(AppColors.textTertiary)
+                        }
+                    }
+
+                    Picker("settings.liveai.model".localized, selection: $providerManager.liveAIModel) {
+                        ForEach(providerManager.liveAIProvider.availableModels, id: \.id) { model in
+                            Text(model.name).tag(model.id)
                         }
                     }
 
@@ -482,7 +488,7 @@ struct APIProviderSettingsView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(provider.displayName)
                                         .foregroundColor(.primary)
-                                    Text(provider == .alibaba ? "settings.provider.alibaba.desc".localized : "settings.provider.openrouter.desc".localized)
+                                    Text(providerDescription(provider))
                                         .font(AppTypography.caption)
                                         .foregroundColor(AppColors.textSecondary)
                                 }
@@ -578,6 +584,17 @@ struct APIProviderSettingsView: View {
             }
         }
     }
+
+    private func providerDescription(_ provider: APIProvider) -> String {
+        switch provider {
+        case .alibaba:
+            return "settings.provider.alibaba.desc".localized
+        case .openrouter:
+            return "settings.provider.openrouter.desc".localized
+        case .aihubmix:
+            return "settings.provider.aihubmix.desc".localized
+        }
+    }
 }
 
 // MARK: - API Key Settings
@@ -609,7 +626,7 @@ struct APIKeySettingsView: View {
                     Text("\(displayTitle) API Key")
                 } footer: {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(provider == .alibaba ? "settings.apikey.alibaba.help".localized : "settings.apikey.openrouter.help".localized)
+                        Text(apiKeyHelpText)
                         Link("settings.apikey.get".localized, destination: URL(string: provider.apiKeyHelpURL)!)
                             .font(.caption)
                     }
@@ -684,6 +701,17 @@ struct APIKeySettingsView: View {
             showError = true
         }
     }
+
+    private var apiKeyHelpText: String {
+        switch provider {
+        case .alibaba:
+            return "settings.apikey.alibaba.help".localized
+        case .openrouter:
+            return "settings.apikey.openrouter.help".localized
+        case .aihubmix:
+            return "settings.apikey.aihubmix.help".localized
+        }
+    }
 }
 
 // MARK: - Vision Model Settings
@@ -699,6 +727,8 @@ struct VisionModelSettingsView: View {
             Group {
                 if providerManager.currentProvider == .alibaba {
                     alibabaModelList
+                } else if providerManager.currentProvider == .aihubmix {
+                    aihubmixModelList
                 } else {
                     openRouterModelList
                 }
@@ -745,6 +775,45 @@ struct VisionModelSettingsView: View {
                 }
             } header: {
                 Text("settings.model.alibaba".localized)
+            } footer: {
+                Text("settings.model.current".localized + ": \(providerManager.selectedModel)")
+            }
+        }
+    }
+
+    private var aihubmixModelList: some View {
+        let models = [
+            ("gpt-5.4", "GPT-5.4", "settings.model.gpt54.desc".localized),
+            ("gpt-5.5", "GPT-5.5", "settings.model.gpt55.desc".localized),
+            ("gemini-3.5-flash", "Gemini 3.5 Flash", "settings.model.gemini35flash.desc".localized),
+            ("gpt-4o-mini", "GPT-4o mini", "settings.model.gpt4omini.desc".localized),
+            ("gpt-4o", "GPT-4o", "settings.model.gpt4o.desc".localized)
+        ]
+
+        return List {
+            Section {
+                ForEach(models, id: \.0) { model in
+                    Button {
+                        providerManager.selectedModel = model.0
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(model.1)
+                                    .foregroundColor(.primary)
+                                Text(model.2)
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(AppColors.textSecondary)
+                            }
+                            Spacer()
+                            if providerManager.selectedModel == model.0 {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                    }
+                }
+            } header: {
+                Text("settings.model.aihubmix".localized)
             } footer: {
                 Text("settings.model.current".localized + ": \(providerManager.selectedModel)")
             }
